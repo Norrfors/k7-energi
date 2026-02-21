@@ -35,45 +35,30 @@ foreach ($p in $resp.PSObject.Properties) { $devices += $p.Value }
 
 if ($devices.Count -eq 0) { Write-Host "Inga enheter hittades"; exit 0 }
 
-# Samla alla capabilities-nycklar
-$allCaps = New-Object System.Collections.Generic.HashSet[string]
-foreach ($d in $devices) {
-    if ($d.capabilities) {
-        foreach ($c in $d.capabilities) { [void]$allCaps.Add($c) }
-    }
-}
 
-$capList = $allCaps | Sort-Object
+# Hitta max antal capabilities för någon enhet
+$maxCaps = ($devices | ForEach-Object { $_.capabilities.Count }) | Measure-Object -Maximum | Select-Object -ExpandProperty Maximum
+
+# Bygg header: DeviceName;var1;var2;...
+$header = @('DeviceName')
+for ($i = 1; $i -le $maxCaps; $i++) { $header += "var$i" }
+$headerLine = ($header -join ';')
 
 # Skapa mapp för CSV om den inte finns
 $outDir = Split-Path -Path $OutCsv -Parent
 if (-not (Test-Path $outDir)) { New-Item -ItemType Directory -Path $outDir | Out-Null }
 
-function Escape-Value([string] $v) {
-    if ($null -eq $v) { return "" }
-    $s = [string]$v
-    $s = $s -replace '"', '""'
-    if ($s -match '[;"\n\r]') { return '"' + $s + '"' }
-    return $s
-}
-
-# Skriv header
-$header = @('DeviceName') + ($capList)
-$headerLine = ($header -join ';')
 Set-Content -Path $OutCsv -Value $headerLine -Encoding UTF8
 
-# Skriv rader
+# Skriv rader: DeviceName;cap1;cap2;...
 foreach ($d in $devices) {
     $row = @()
-    $row += Escape-Value($d.name)
-    foreach ($cap in $capList) {
-        $val = ""
-        if ($d.capabilitiesObj) {
-            $prop = $d.capabilitiesObj.PSObject.Properties | Where-Object { $_.Name -eq $cap } | Select-Object -First 1
-            if ($prop) { $val = $prop.Value.value }
-        }
-        $row += Escape-Value($val)
+    $row += $d.name
+    if ($d.capabilities) {
+        $row += $d.capabilities[0..($d.capabilities.Count-1)]
     }
+    # Fyll ut med tomma kolumner om färre capabilities än max
+    while ($row.Count -lt ($maxCaps+1)) { $row += "" }
     $line = ($row -join ';')
     Add-Content -Path $OutCsv -Value $line -Encoding UTF8
 }
