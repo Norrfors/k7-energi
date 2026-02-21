@@ -1,0 +1,46 @@
+// Prisma schema – beskriver dina databastabeller
+// Tänk det som en "CREATE TABLE" men deklarativt.
+// När du ändrar här och kör "npm run db:migrate" uppdateras databasen automatiskt.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Sparar temperaturavläsningar från Homey
+model TemperatureLog {
+  id          Int      @id @default(autoincrement())
+  deviceId    String
+  deviceName  String
+  zone        String   @default("")
+  temperature Float
+  createdAt   DateTime @default(now())
+
+  @@index([deviceId, createdAt])
+}
+
+// Sparar energiavläsningar från Homey
+model EnergyLog {
+  id         Int      @id @default(autoincrement())
+  deviceId   String
+  deviceName String
+  zone       String   @default("")
+  watts      Float
+  createdAt  DateTime @default(now())
+
+  @@index([deviceId, createdAt])
+}
+
+// Sparar data från externa API:er
+model ExternalData {
+  id        Int      @id @default(autoincrement())
+  source    String        // t.ex. "elpris", "vader"
+  data      Json          // Flexibelt JSON-fält
+  fetchedAt DateTime @default(now())
+
+  @@index([source, fetchedAt])
+}
