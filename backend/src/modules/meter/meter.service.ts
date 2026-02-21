@@ -103,11 +103,15 @@ export class MeterService {
       const consumptionSinceMidnight = (pulseData.meterPower as number) || 0;
       this.logger.info(`DEBUG consumptionSinceMidnight=${consumptionSinceMidnight}, meterPower=${pulseData.meterPower}`);
 
-      // Beräkna totalMeterValue
+      // Beräkna totalMeterValue och konsumtion sedan föregående
       const lastReading = await this.getLatestMeterReading();
       let totalMeterValue = consumptionSinceMidnight; // Default: första mätningen idag
+      let consumptionSincePreviousReading = 0; // Default: ingen tidigare
 
       if (lastReading) {
+        // Beräkna förbrukning sedan föregående avläsning
+        consumptionSincePreviousReading = Math.max(0, consumptionSinceMidnight - lastReading.consumptionSinceMidnight);
+        
         // Checka om det är en ny dag (jämför datum)
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -121,7 +125,7 @@ export class MeterService {
           totalMeterValue = lastReading.totalMeterValue + lastReading.consumptionSinceMidnight;
         } else {
           // Samma dag – addera skillnaden från igår
-          totalMeterValue = lastReading.totalMeterValue + (consumptionSinceMidnight - lastReading.consumptionSinceMidnight);
+          totalMeterValue = lastReading.totalMeterValue + consumptionSincePreviousReading;
         }
       }
 
@@ -131,6 +135,7 @@ export class MeterService {
           deviceId: PULSE_ID,
           deviceName: PULSE_NAME,
           consumptionSinceMidnight,
+          consumptionSincePreviousReading,
           totalMeterValue,
         },
       });
@@ -164,6 +169,7 @@ export class MeterService {
           deviceId: PULSE_ID,
           deviceName: PULSE_NAME,
           consumptionSinceMidnight,
+          consumptionSincePreviousReading: 0, // Manuell inställning, ingen delta
           totalMeterValue,
         },
       });

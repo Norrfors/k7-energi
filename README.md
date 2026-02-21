@@ -179,9 +179,9 @@ Hämtar senaste mätningspunkt från databasen.
 ```json
 {
   "consumptionSinceMidnight": 116.47,
+  "consumptionSincePreviousReading": 0.25,
   "totalMeterValue": 10003.45,
-  "lastUpdated": 1771703450000,
-  "time": "2026-02-21T20:45:30.000Z"
+  "lastUpdated": "2026-02-21T20:45:30.000Z"
 }
 ```
 
@@ -193,18 +193,21 @@ Hämtar alla mätpunkter från de senaste 24 timmarna.
 [
   {
     "consumptionSinceMidnight": 95.20,
+    "consumptionSincePreviousReading": 0.20,
     "totalMeterValue": 9989.30,
-    "createdAt": "2026-02-20T20:45:30.000Z"
+    "time": "2026-02-20T20:45:30.000Z"
   },
   {
     "consumptionSinceMidnight": 115.50,
+    "consumptionSincePreviousReading": 0.15,
     "totalMeterValue": 10002.80,
-    "createdAt": "2026-02-21T19:45:30.000Z"
+    "time": "2026-02-21T19:45:30.000Z"
   },
   {
     "consumptionSinceMidnight": 116.47,
+    "consumptionSincePreviousReading": 0.97,
     "totalMeterValue": 10003.45,
-    "createdAt": "2026-02-21T20:45:30.000Z"
+    "time": "2026-02-21T20:45:30.000Z"
   }
 ]
 ```
@@ -256,6 +259,7 @@ Uppdaterar mätarvärdet manuellt om det blivit felaktigt.
 | `deviceId` | String | Homey-enhetens unika ID | Default: "c2314e97-c95b-40d4-9393-dbc541d586d1" |
 | `deviceName` | String | "Pulse Krokgatan 7" | Default: "Pulse Krokgatan 7" |
 | `consumptionSinceMidnight` | Float | Förbrukning från midnatt (kWh) | Från Homey `meter_power` |
+| `consumptionSincePreviousReading` | Float | Förbrukning sedan föregående avläsning (kWh) | Beräknad delta |
 | `totalMeterValue` | Float | Total ackumulerad förbrukning (kWh) | Beräknad av scheduler |
 | `createdAt` | DateTime | Tidsstämpel | Auto-set |
 

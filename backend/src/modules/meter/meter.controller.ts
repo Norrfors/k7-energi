@@ -20,6 +20,7 @@ export async function meterRoutes(app: FastifyInstance) {
 
       return {
         consumptionSinceMidnight: reading.consumptionSinceMidnight,
+        consumptionSincePreviousReading: reading.consumptionSincePreviousReading,
         totalMeterValue: reading.totalMeterValue,
         lastUpdated: reading.createdAt,
       };
@@ -38,6 +39,7 @@ export async function meterRoutes(app: FastifyInstance) {
 
       return readings.map((r) => ({
         consumptionSinceMidnight: r.consumptionSinceMidnight,
+        consumptionSincePreviousReading: r.consumptionSincePreviousReading,
         totalMeterValue: r.totalMeterValue,
         time: r.createdAt,
       }));
@@ -56,6 +58,7 @@ export async function meterRoutes(app: FastifyInstance) {
 
       return readings.map((r) => ({
         consumptionSinceMidnight: r.consumptionSinceMidnight,
+        consumptionSincePreviousReading: r.consumptionSincePreviousReading,
         totalMeterValue: r.totalMeterValue,
         time: r.createdAt,
       }));

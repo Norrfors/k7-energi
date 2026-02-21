@@ -24,6 +24,7 @@ interface Health {
 
 interface MeterReading {
   consumptionSinceMidnight: number;
+  consumptionSincePreviousReading?: number;
   totalMeterValue: number;
   lastUpdated?: string;
   time?: string;
@@ -279,6 +280,7 @@ export default function Dashboard() {
                     <tr>
                       <th className="px-4 py-2 text-left">Tid</th>
                       <th className="px-4 py-2 text-left">Förbrukning sedan midnatt</th>
+                      <th className="px-4 py-2 text-left">Förbrukning sedan föregående</th>
                       <th className="px-4 py-2 text-left">Total mätarställning</th>
                     </tr>
                   </thead>
@@ -290,6 +292,9 @@ export default function Dashboard() {
                         </td>
                         <td className="px-4 py-2 text-sm">
                           {reading.consumptionSinceMidnight.toFixed(2)} kWh
+                        </td>
+                        <td className="px-4 py-2 text-sm">
+                          {(reading.consumptionSincePreviousReading || 0).toFixed(2)} kWh
                         </td>
                         <td className="px-4 py-2 text-sm">
                           {reading.totalMeterValue.toFixed(2)} kWh
