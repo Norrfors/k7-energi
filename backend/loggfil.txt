@@ -853,3 +853,864 @@
 2026-02-21T18:36:00.895Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5785 kWh, total=264945 kWh
 2026-02-21T18:36:09.154Z [MeterController] INFO: Hämtar senaste mätardata
 2026-02-21T18:36:09.157Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:36:51.979Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:36:52.027Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:36:52.029Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:36:52.091Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:37:00.141Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:37:00.141Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:37:00.302Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5816 kWh, total=264976 kWh
+2026-02-21T18:37:09.142Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:37:09.144Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:37:39.152Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:37:39.154Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:37:41.157Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:37:41.174Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:38:00.490Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:38:00.491Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:38:00.670Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5792 kWh, total=270792 kWh
+2026-02-21T18:38:32.159Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:38:32.164Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:39:00.814Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:39:00.817Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:39:01.019Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5512 kWh, total=276584 kWh
+2026-02-21T18:39:32.143Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:39:32.152Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:39:32.154Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:39:32.164Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:40:00.193Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:40:00.195Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:40:00.199Z [Scheduler] INFO: Loggar temperaturer...
+2026-02-21T18:40:00.436Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5518 kWh, total=276590 kWh
+2026-02-21T18:40:00.741Z [Scheduler] INFO: Loggar energi...
+2026-02-21T18:40:32.146Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:40:32.154Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:40:32.155Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:40:32.165Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:41:00.593Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:41:00.595Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:41:00.727Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5527 kWh, total=276599 kWh
+2026-02-21T18:41:32.142Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:41:32.187Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:41:32.217Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:41:32.219Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:42:00.011Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:42:00.017Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:42:00.203Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5512 kWh, total=282126 kWh
+2026-02-21T18:42:32.144Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:42:32.175Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:42:32.204Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:42:32.206Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:43:00.371Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:43:00.372Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:43:00.508Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5470 kWh, total=287638 kWh
+2026-02-21T18:43:32.137Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:43:32.145Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:43:32.146Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:43:32.158Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:44:00.724Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:44:00.726Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:44:00.896Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5515 kWh, total=287683 kWh
+2026-02-21T18:44:32.140Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:44:32.148Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:44:32.149Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:44:32.157Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:45:00.092Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:45:00.095Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:45:00.099Z [Scheduler] INFO: Loggar temperaturer...
+2026-02-21T18:45:00.255Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5479 kWh, total=293198 kWh
+2026-02-21T18:45:00.451Z [Scheduler] INFO: Loggar energi...
+2026-02-21T18:45:24.822Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:45:24.827Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:45:24.831Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:45:24.836Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:45:27.256Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:45:27.258Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:45:27.268Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:45:27.272Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:45:58.169Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:45:58.173Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:46:00.431Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:46:00.432Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:46:00.548Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5516 kWh, total=293235 kWh
+2026-02-21T18:46:27.281Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:46:27.282Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:46:29.055Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:46:29.066Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:46:57.259Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:46:57.260Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:47:00.753Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:47:00.755Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:47:00.908Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5507 kWh, total=298751 kWh
+2026-02-21T18:47:27.265Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:47:27.267Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:47:29.063Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:47:29.068Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:47:40.165Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T18:47:40.187Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T18:47:40.187Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T18:47:57.818Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:47:57.827Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:48:00.277Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:48:00.278Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:48:00.408Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5527 kWh, total=298771 kWh
+2026-02-21T18:48:27.272Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:48:27.274Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:48:29.059Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:48:29.078Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:48:59.334Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T18:48:59.603Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:48:59.614Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:49:00.338Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:49:00.340Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:49:00.465Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5479 kWh, total=298723 kWh
+2026-02-21T18:49:18.037Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:49:18.040Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:49:18.048Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:49:18.054Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:49:45.121Z [MeterController] INFO: Sätter manuell mätarställning: 1000
+2026-02-21T18:49:45.123Z [MeterService] INFO: Manuell mätarställning inställd: 1000 kWh
+2026-02-21T18:49:45.271Z [MeterService] INFO: Manuell mätarställning sparad: 1000 kWh
+2026-02-21T18:49:45.276Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:49:45.284Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:49:48.030Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:49:48.032Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:49:51.066Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:49:51.070Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:49:51.078Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:49:51.085Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:50:00.634Z [Scheduler] INFO: Loggar temperaturer...
+2026-02-21T18:50:00.639Z [Scheduler] INFO: Loggar energi...
+2026-02-21T18:50:00.643Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:50:00.644Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:50:00.945Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5472 kWh, total=1000 kWh
+2026-02-21T18:50:21.070Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:50:21.071Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:50:51.079Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:50:51.081Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:50:53.413Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:50:53.418Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:51:00.951Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:51:00.952Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:51:01.095Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5475 kWh, total=1003 kWh
+2026-02-21T18:51:21.070Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:51:21.071Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:51:51.091Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:51:51.095Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:51:53.417Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:51:53.423Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:52:00.323Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:52:00.326Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:52:00.496Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5468 kWh, total=996 kWh
+2026-02-21T18:52:21.070Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:52:21.071Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:52:51.066Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:52:51.067Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:52:53.413Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:52:53.419Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:53:00.634Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:53:00.636Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:53:00.869Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5480 kWh, total=1008 kWh
+2026-02-21T18:53:21.087Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:53:21.088Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:53:51.093Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:53:51.098Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:53:53.415Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:53:53.424Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:54:00.002Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:54:00.003Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:54:00.225Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5474 kWh, total=1002 kWh
+2026-02-21T18:54:21.147Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:54:21.148Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:54:51.165Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:54:51.173Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:54:54.148Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:54:54.154Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:55:00.398Z [Scheduler] INFO: Loggar temperaturer...
+2026-02-21T18:55:00.400Z [Scheduler] INFO: Loggar energi...
+2026-02-21T18:55:00.401Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:55:00.402Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:55:00.744Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5512 kWh, total=1040 kWh
+2026-02-21T18:55:22.776Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:55:32.156Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:55:32.159Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:55:52.420Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:55:54.138Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:55:54.154Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:56:00.748Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:56:00.749Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:56:00.952Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5694 kWh, total=1222 kWh
+2026-02-21T18:56:32.157Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:56:32.165Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:57:00.112Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:57:00.113Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:57:00.302Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5706 kWh, total=1234 kWh
+2026-02-21T18:57:00.648Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:57:32.145Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:57:32.156Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:57:32.158Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:57:32.168Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:57:51.081Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:57:51.084Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:57:53.414Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:57:53.419Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:58:00.474Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:58:00.475Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:58:00.673Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5689 kWh, total=1217 kWh
+2026-02-21T18:58:00.766Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:58:21.071Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:58:21.072Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:58:51.072Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:58:51.074Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:58:53.415Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:58:53.420Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:59:00.787Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:59:00.796Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T18:59:00.798Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T18:59:00.948Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=5697 kWh, total=1225 kWh
+2026-02-21T18:59:21.093Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T18:59:21.099Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T18:59:50.111Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T18:59:50.121Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T18:59:50.131Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T18:59:50.161Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T18:59:57.570Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:00:00.595Z [Scheduler] INFO: Loggar temperaturer...
+2026-02-21T19:00:00.634Z [Scheduler] INFO: Loggar energi...
+2026-02-21T19:00:00.637Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:00:00.638Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:00:00.958Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=111.33 kWh, total=-4360.67 kWh
+2026-02-21T19:00:21.625Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:00:21.639Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:00:51.067Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:00:51.069Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:00:53.406Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:00:53.411Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:00:56.527Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:01:00.974Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:01:00.977Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:01:01.216Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=111.43 kWh, total=-4360.57 kWh
+2026-02-21T19:01:11.919Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:01:11.924Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:01:11.929Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:01:11.937Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:01:17.590Z [MeterController] INFO: Sätter manuell mätarställning: 1000
+2026-02-21T19:01:17.593Z [MeterService] INFO: Manuell mätarställning inställd: 1000 kWh
+2026-02-21T19:01:17.746Z [MeterService] INFO: Manuell mätarställning sparad: 1000 kWh
+2026-02-21T19:01:17.749Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:01:17.756Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:01:41.936Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:01:41.938Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:01:56.624Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:02:00.292Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:02:00.293Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:02:00.555Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=111.53 kWh, total=-4603.47 kWh
+2026-02-21T19:02:11.956Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:02:11.963Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:02:19.212Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:02:19.237Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:02:41.941Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:02:41.943Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:02:56.705Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:03:00.695Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:03:00.698Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:03:00.884Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=111.62 kWh, total=-4603.38 kWh
+2026-02-21T19:03:11.946Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:03:11.949Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:03:19.212Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:03:19.229Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:03:41.934Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:03:41.938Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:03:56.747Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:04:00.074Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:04:00.076Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:04:00.277Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=111.72 kWh, total=-4603.28 kWh
+2026-02-21T19:04:11.936Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:04:11.939Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:04:19.206Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:04:19.216Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:04:42.155Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:04:42.158Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:04:56.771Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:05:00.373Z [Scheduler] INFO: Loggar temperaturer...
+2026-02-21T19:05:00.375Z [Scheduler] INFO: Loggar energi...
+2026-02-21T19:05:00.376Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:05:00.377Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:05:11.039Z [Scheduler] ERROR: Schemalagd temperaturloggning misslyckades | "fetch failed"
+2026-02-21T19:05:11.047Z [MeterService] ERROR: Fel vid uppdatering av mätardata | "fetch failed"
+2026-02-21T19:05:11.051Z [Scheduler] ERROR: Mätardata uppdatering misslyckades | "fetch failed"
+2026-02-21T19:05:11.056Z [Scheduler] ERROR: Schemalagd energiloggning misslyckades | "fetch failed"
+2026-02-21T19:05:12.168Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:05:12.173Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:05:22.203Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:05:22.465Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:05:22.538Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:05:30.466Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:06:10.609Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:06:10.703Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:06:10.706Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:06:10.762Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:06:10.881Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:06:16.044Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:06:20.449Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:06:20.491Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:06:46.442Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:06:53.387Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:07:00.431Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:07:00.432Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:07:00.693Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=111.91 kWh, total=-4603.09 kWh
+2026-02-21T19:07:20.445Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:07:20.455Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:07:23.203Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:07:23.214Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:07:25.724Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:07:25.726Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:07:25.734Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:07:25.742Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:07:35.025Z [MeterController] INFO: Sätter manuell mätarställning: 10000
+2026-02-21T19:07:35.026Z [MeterService] INFO: Manuell mätarställning inställd: 10000 kWh
+2026-02-21T19:07:35.183Z [MeterService] INFO: Manuell mätarställning sparad: 10000 kWh
+2026-02-21T19:07:35.187Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:07:35.194Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:07:55.723Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:07:55.725Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:08:00.829Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:08:00.830Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:08:01.017Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=111.91 kWh, total=4358.91 kWh
+2026-02-21T19:08:26.150Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:08:26.151Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:08:37.135Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:08:37.141Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:08:57.909Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:08:58.098Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:08:58.250Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:08:58.380Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:08:58.566Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:08:58.721Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:08:58.939Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:08:58.950Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:09:00.877Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:09:00.878Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:09:01.051Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=111.91 kWh, total=4358.91 kWh
+2026-02-21T19:09:02.818Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:09:26.160Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:09:26.164Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:09:37.129Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:09:37.135Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:09:51.008Z [MeterController] INFO: Sätter manuell mätarställning: 1000
+2026-02-21T19:09:51.009Z [MeterService] INFO: Manuell mätarställning inställd: 1000 kWh
+2026-02-21T19:09:51.177Z [MeterService] INFO: Manuell mätarställning sparad: 1000 kWh
+2026-02-21T19:09:51.192Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:09:51.207Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:09:55.714Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:09:55.715Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:10:00.208Z [Scheduler] INFO: Loggar temperaturer...
+2026-02-21T19:10:00.211Z [Scheduler] INFO: Loggar energi...
+2026-02-21T19:10:00.213Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:10:00.213Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:10:00.569Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=111.91 kWh, total=1000 kWh
+2026-02-21T19:10:25.731Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:10:25.732Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:10:52.226Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:10:52.237Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:10:55.739Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:10:55.741Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:11:00.554Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:11:00.557Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:11:00.753Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=111.91 kWh, total=1000 kWh
+2026-02-21T19:11:25.721Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:11:25.722Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:11:52.231Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:11:52.254Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:11:55.735Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:11:55.737Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:12:00.944Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:12:00.946Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:12:11.351Z [MeterService] ERROR: Fel vid uppdatering av mätardata | "fetch failed"
+2026-02-21T19:12:11.355Z [Scheduler] ERROR: Mätardata uppdatering misslyckades | "fetch failed"
+2026-02-21T19:12:29.114Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:12:30.453Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:12:30.861Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:12:30.964Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:12:30.964Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:12:30.995Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:12:31.013Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:12:34.488Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:12:52.556Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:12:52.596Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:12:58.166Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:13:00.178Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:13:00.179Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:13:00.363Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":5753,"meterPower":111.91,"lastUpdated":1771700752332}
+2026-02-21T19:13:00.363Z [MeterService] INFO: DEBUG consumptionSinceMidnight=111.91, meterPower=111.91
+2026-02-21T19:13:00.406Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=111.91 kWh, total=1000 kWh
+2026-02-21T19:13:26.032Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:13:26.034Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:13:52.225Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:13:52.247Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:13:55.739Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:13:55.742Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:14:00.574Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:14:00.575Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:14:00.706Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":5753,"meterPower":111.91,"lastUpdated":1771700752332}
+2026-02-21T19:14:00.707Z [MeterService] INFO: DEBUG consumptionSinceMidnight=111.91, meterPower=111.91
+2026-02-21T19:14:00.720Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=111.91 kWh, total=1000 kWh
+2026-02-21T19:14:25.722Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:14:25.723Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:14:52.225Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:14:52.231Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:14:55.739Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:14:55.743Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:15:00.974Z [Scheduler] INFO: Loggar temperaturer...
+2026-02-21T19:15:00.977Z [Scheduler] INFO: Loggar energi...
+2026-02-21T19:15:00.979Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:15:00.979Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:15:01.272Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":5753,"meterPower":111.91,"lastUpdated":1771700752332}
+2026-02-21T19:15:01.274Z [MeterService] INFO: DEBUG consumptionSinceMidnight=111.91, meterPower=111.91
+2026-02-21T19:15:01.301Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=111.91 kWh, total=1000 kWh
+2026-02-21T19:15:25.753Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:15:25.756Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:15:52.226Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:15:52.237Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:15:55.736Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:15:55.739Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:16:00.343Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:16:00.345Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:16:00.479Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":5753,"meterPower":111.91,"lastUpdated":1771700752332}
+2026-02-21T19:16:00.480Z [MeterService] INFO: DEBUG consumptionSinceMidnight=111.91, meterPower=111.91
+2026-02-21T19:16:00.494Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=111.91 kWh, total=1000 kWh
+2026-02-21T19:16:25.727Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:16:25.728Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:16:34.267Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:16:52.539Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:16:52.577Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:16:55.930Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:16:55.935Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:17:00.400Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:17:00.417Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:17:00.575Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":5550,"meterPower":112.92,"lastUpdated":1771701412397}
+2026-02-21T19:17:00.577Z [MeterService] INFO: DEBUG consumptionSinceMidnight=112.92, meterPower=112.92
+2026-02-21T19:17:00.611Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=112.92 kWh, total=1001.01 kWh
+2026-02-21T19:17:54.845Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:17:54.847Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:17:54.855Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:17:54.865Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:18:00.848Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:18:00.848Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:18:01.019Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":5586,"meterPower":113.02,"lastUpdated":1771701472515}
+2026-02-21T19:18:01.020Z [MeterService] INFO: DEBUG consumptionSinceMidnight=113.02, meterPower=113.02
+2026-02-21T19:18:01.034Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=113.02 kWh, total=1001.11 kWh
+2026-02-21T19:18:24.746Z [MeterController] INFO: Sätter manuell mätarställning: 10000
+2026-02-21T19:18:24.747Z [MeterService] INFO: Manuell mätarställning inställd: 10000 kWh
+2026-02-21T19:18:24.834Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:18:24.835Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:18:24.901Z [MeterService] INFO: Manuell mätarställning sparad: 10000 kWh
+2026-02-21T19:18:24.905Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:18:24.912Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:18:54.832Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:18:54.834Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:19:00.176Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:19:00.178Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:19:00.359Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":5579,"meterPower":113.11,"lastUpdated":1771701512193}
+2026-02-21T19:19:00.359Z [MeterService] INFO: DEBUG consumptionSinceMidnight=113.11, meterPower=113.11
+2026-02-21T19:19:00.365Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=113.11 kWh, total=10000.09 kWh
+2026-02-21T19:19:24.837Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:19:24.839Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:19:48.020Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:19:48.032Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:19:54.847Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:19:54.849Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:20:00.363Z [Scheduler] INFO: Loggar temperaturer...
+2026-02-21T19:20:00.463Z [Scheduler] INFO: Loggar energi...
+2026-02-21T19:20:00.483Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:20:00.483Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:20:00.701Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":5561,"meterPower":113.2,"lastUpdated":1771701572632}
+2026-02-21T19:20:00.702Z [MeterService] INFO: DEBUG consumptionSinceMidnight=113.2, meterPower=113.2
+2026-02-21T19:20:00.708Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=113.2 kWh, total=10000.18 kWh
+2026-02-21T19:20:24.842Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:20:24.844Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:20:48.022Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:20:48.043Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:20:54.850Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:20:54.855Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:21:00.815Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:21:00.817Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:21:07.964Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":5583,"meterPower":113.29,"lastUpdated":1771701652169}
+2026-02-21T19:21:07.964Z [MeterService] INFO: DEBUG consumptionSinceMidnight=113.29, meterPower=113.29
+2026-02-21T19:21:07.970Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=113.29 kWh, total=10000.27 kWh
+2026-02-21T19:21:24.831Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:21:24.832Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:21:48.015Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:21:48.021Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:21:54.842Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:21:54.844Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:22:00.170Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:22:00.172Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:22:14.555Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":5583,"meterPower":113.39,"lastUpdated":1771701652169}
+2026-02-21T19:22:14.556Z [MeterService] INFO: DEBUG consumptionSinceMidnight=113.39, meterPower=113.39
+2026-02-21T19:22:14.565Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=113.39 kWh, total=10000.37 kWh
+2026-02-21T19:22:25.153Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:22:25.155Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:22:48.136Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:22:48.141Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:22:54.864Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:22:54.870Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:22:57.924Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:22:57.926Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:22:57.929Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:22:57.936Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:23:00.564Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:23:00.565Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:23:10.978Z [MeterService] ERROR: Fel vid uppdatering av mätardata | "fetch failed"
+2026-02-21T19:23:10.989Z [Scheduler] ERROR: Mätardata uppdatering misslyckades | "fetch failed"
+2026-02-21T19:23:27.621Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:23:27.623Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:23:57.660Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:23:57.666Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:24:00.955Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:24:00.956Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:24:01.097Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":7506,"meterPower":113.48,"lastUpdated":1771701830015}
+2026-02-21T19:24:01.098Z [MeterService] INFO: DEBUG consumptionSinceMidnight=113.48, meterPower=113.48
+2026-02-21T19:24:01.110Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=113.48 kWh, total=10000.460000000001 kWh
+2026-02-21T19:24:14.896Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:24:14.903Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:24:27.637Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:24:27.638Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:24:57.622Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:24:57.623Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:25:00.016Z [Scheduler] INFO: Loggar temperaturer...
+2026-02-21T19:25:00.279Z [Scheduler] INFO: Loggar energi...
+2026-02-21T19:25:00.293Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:25:00.294Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:25:09.226Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:25:09.228Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:25:09.234Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:25:09.246Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:25:10.206Z [Scheduler] ERROR: Schemalagd temperaturloggning misslyckades | "fetch failed"
+2026-02-21T19:25:10.713Z [Scheduler] ERROR: Schemalagd energiloggning misslyckades | "fetch failed"
+2026-02-21T19:25:10.715Z [MeterService] ERROR: Fel vid uppdatering av mätardata | "fetch failed"
+2026-02-21T19:25:10.718Z [Scheduler] ERROR: Mätardata uppdatering misslyckades | "fetch failed"
+2026-02-21T19:25:38.928Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:25:38.930Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:26:00.634Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:26:00.634Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:26:08.928Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:26:08.929Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:26:11.207Z [MeterService] ERROR: Fel vid uppdatering av mätardata | "fetch failed"
+2026-02-21T19:26:11.211Z [Scheduler] ERROR: Mätardata uppdatering misslyckades | "fetch failed"
+2026-02-21T19:26:13.956Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:26:13.964Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:26:38.915Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:26:38.917Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:27:00.049Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:27:00.050Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:27:00.188Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":7780,"meterPower":113.86,"lastUpdated":1771701986835}
+2026-02-21T19:27:00.189Z [MeterService] INFO: DEBUG consumptionSinceMidnight=113.86, meterPower=113.86
+2026-02-21T19:27:00.212Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=113.86 kWh, total=10000.839999999998 kWh
+2026-02-21T19:27:08.922Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:27:08.925Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:27:13.434Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:27:14.294Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:27:14.334Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:27:23.968Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:27:39.470Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:27:39.480Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:28:02.718Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:28:09.514Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:28:09.525Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:28:13.952Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:28:13.958Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:28:38.922Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:28:38.924Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:29:00.052Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:29:00.054Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:29:00.207Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":7797,"meterPower":114.25,"lastUpdated":1771702103190}
+2026-02-21T19:29:00.208Z [MeterService] INFO: DEBUG consumptionSinceMidnight=114.25, meterPower=114.25
+2026-02-21T19:29:00.225Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=114.25 kWh, total=10001.23 kWh
+2026-02-21T19:29:08.920Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:29:08.922Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:29:13.957Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:29:13.962Z [MeterController] INFO: Hämtar mätardata för idag
+2026-02-21T19:29:37.925Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:29:37.937Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:29:37.947Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:29:37.949Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:30:00.404Z [Scheduler] INFO: Loggar temperaturer...
+2026-02-21T19:30:00.408Z [Scheduler] INFO: Loggar energi...
+2026-02-21T19:30:00.410Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:30:00.410Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:30:00.699Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":7810,"meterPower":114.38,"lastUpdated":1771702172477}
+2026-02-21T19:30:00.702Z [MeterService] INFO: DEBUG consumptionSinceMidnight=114.38, meterPower=114.38
+2026-02-21T19:30:00.792Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=114.38 kWh, total=10001.359999999999 kWh
+2026-02-21T19:30:07.923Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:30:07.925Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:30:37.949Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:30:37.951Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:30:39.551Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:30:39.557Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:31:00.859Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:31:00.862Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:31:01.040Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":7816,"meterPower":114.51,"lastUpdated":1771702242522}
+2026-02-21T19:31:01.040Z [MeterService] INFO: DEBUG consumptionSinceMidnight=114.51, meterPower=114.51
+2026-02-21T19:31:01.055Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=114.51 kWh, total=10001.49 kWh
+2026-02-21T19:31:07.925Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:31:07.926Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:31:37.922Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:31:37.923Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:31:39.555Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:31:39.561Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:32:00.204Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:32:00.205Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:32:00.346Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":7782,"meterPower":114.64,"lastUpdated":1771702283095}
+2026-02-21T19:32:00.347Z [MeterService] INFO: DEBUG consumptionSinceMidnight=114.64, meterPower=114.64
+2026-02-21T19:32:00.365Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=114.64 kWh, total=10001.619999999999 kWh
+2026-02-21T19:32:08.153Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:32:08.157Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:32:38.153Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:32:38.155Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:32:40.135Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:32:40.140Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:33:00.546Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:33:00.548Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:33:00.681Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":7797,"meterPower":114.77,"lastUpdated":1771702352877}
+2026-02-21T19:33:00.682Z [MeterService] INFO: DEBUG consumptionSinceMidnight=114.77, meterPower=114.77
+2026-02-21T19:33:00.694Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=114.77 kWh, total=10001.75 kWh
+2026-02-21T19:33:07.940Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:33:07.945Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:33:37.945Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:33:37.947Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:33:39.551Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:33:39.558Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:34:00.927Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:34:00.928Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:34:01.061Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":7789,"meterPower":114.89,"lastUpdated":1771702422355}
+2026-02-21T19:34:01.062Z [MeterService] INFO: DEBUG consumptionSinceMidnight=114.89, meterPower=114.89
+2026-02-21T19:34:01.095Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=114.89 kWh, total=10001.87 kWh
+2026-02-21T19:34:07.921Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:34:07.922Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:34:37.941Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:34:37.944Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:34:39.551Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:34:39.560Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:34:48.969Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:34:48.979Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:34:48.984Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:34:48.991Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:35:00.254Z [Scheduler] INFO: Loggar temperaturer...
+2026-02-21T19:35:00.256Z [Scheduler] INFO: Loggar energi...
+2026-02-21T19:35:00.257Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:35:00.258Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:35:00.567Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":7567,"meterPower":115.03,"lastUpdated":1771702492589}
+2026-02-21T19:35:00.567Z [MeterService] INFO: DEBUG consumptionSinceMidnight=115.03, meterPower=115.03
+2026-02-21T19:35:00.580Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=115.03 kWh, total=10002.01 kWh
+2026-02-21T19:35:18.970Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:35:18.972Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:35:48.980Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:35:48.982Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:35:50.732Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:35:50.739Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:36:00.628Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:36:00.629Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:36:00.769Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":7578,"meterPower":115.15,"lastUpdated":1771702532232}
+2026-02-21T19:36:00.769Z [MeterService] INFO: DEBUG consumptionSinceMidnight=115.15, meterPower=115.15
+2026-02-21T19:36:00.775Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=115.15 kWh, total=10002.130000000001 kWh
+2026-02-21T19:36:19.157Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:36:19.159Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:36:49.142Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:36:49.144Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:36:51.141Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:36:51.147Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:37:00.965Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:37:00.967Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:37:01.108Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":7618,"meterPower":115.28,"lastUpdated":1771702602322}
+2026-02-21T19:37:01.109Z [MeterService] INFO: DEBUG consumptionSinceMidnight=115.28, meterPower=115.28
+2026-02-21T19:37:01.115Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=115.28 kWh, total=10002.259999999998 kWh
+2026-02-21T19:37:16.001Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:37:16.006Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:37:16.014Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:37:16.021Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:37:46.148Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:37:46.150Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:38:00.336Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:38:00.339Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:38:00.471Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":7584,"meterPower":115.4,"lastUpdated":1771702662732}
+2026-02-21T19:38:00.472Z [MeterService] INFO: DEBUG consumptionSinceMidnight=115.4, meterPower=115.4
+2026-02-21T19:38:00.478Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=115.4 kWh, total=10002.380000000001 kWh
+2026-02-21T19:38:16.152Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:38:16.154Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:38:18.136Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:38:18.142Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:38:46.181Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:38:46.182Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:39:00.727Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:39:00.729Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:39:00.877Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":7591,"meterPower":115.53,"lastUpdated":1771702732507}
+2026-02-21T19:39:00.878Z [MeterService] INFO: DEBUG consumptionSinceMidnight=115.53, meterPower=115.53
+2026-02-21T19:39:00.905Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=115.53 kWh, total=10002.509999999998 kWh
+2026-02-21T19:39:16.163Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:39:16.167Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:39:18.152Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:39:18.162Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:39:46.150Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:39:46.151Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:40:00.105Z [Scheduler] INFO: Loggar temperaturer...
+2026-02-21T19:40:00.106Z [Scheduler] INFO: Loggar energi...
+2026-02-21T19:40:00.108Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:40:00.108Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:40:00.419Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":7593,"meterPower":115.66,"lastUpdated":1771702774903}
+2026-02-21T19:40:00.420Z [MeterService] INFO: DEBUG consumptionSinceMidnight=115.66, meterPower=115.66
+2026-02-21T19:40:00.425Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=115.66 kWh, total=10002.64 kWh
+2026-02-21T19:40:17.065Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:40:17.070Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:40:20.055Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:40:20.061Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:41:00.526Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:41:00.528Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:41:00.719Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":7683,"meterPower":115.78,"lastUpdated":1771702852411}
+2026-02-21T19:41:00.755Z [MeterService] INFO: DEBUG consumptionSinceMidnight=115.78, meterPower=115.78
+2026-02-21T19:41:00.821Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=115.78 kWh, total=10002.76 kWh
+2026-02-21T19:41:00.952Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:41:00.960Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:41:16.005Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:41:16.006Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:41:17.673Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:41:17.690Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:41:46.031Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:41:46.035Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:41:55.302Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:42:00.328Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:42:00.332Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:42:00.539Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":7674,"meterPower":115.91,"lastUpdated":1771702882492}
+2026-02-21T19:42:00.540Z [MeterService] INFO: DEBUG consumptionSinceMidnight=115.91, meterPower=115.91
+2026-02-21T19:42:00.572Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=115.91 kWh, total=10002.89 kWh
+2026-02-21T19:42:16.556Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:42:16.562Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:42:17.677Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:42:17.686Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:42:46.031Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:42:46.035Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:43:00.776Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:43:00.777Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:43:00.952Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":7653,"meterPower":116.04,"lastUpdated":1771702952661}
+2026-02-21T19:43:00.953Z [MeterService] INFO: DEBUG consumptionSinceMidnight=116.04, meterPower=116.04
+2026-02-21T19:43:00.960Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=116.04 kWh, total=10003.019999999999 kWh
+2026-02-21T19:43:16.023Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:43:16.026Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:43:17.683Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:43:17.688Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:43:46.005Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:43:46.006Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:44:00.155Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:44:00.157Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:44:00.304Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":5765,"meterPower":116.17,"lastUpdated":1771703022526}
+2026-02-21T19:44:00.306Z [MeterService] INFO: DEBUG consumptionSinceMidnight=116.17, meterPower=116.17
+2026-02-21T19:44:00.312Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=116.17 kWh, total=10003.15 kWh
+2026-02-21T19:44:16.024Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:44:16.028Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:44:17.671Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:44:17.688Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:44:46.144Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:44:46.145Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:45:00.525Z [Scheduler] INFO: Loggar temperaturer...
+2026-02-21T19:45:00.531Z [Scheduler] INFO: Loggar energi...
+2026-02-21T19:45:00.538Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:45:00.540Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:45:00.877Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":5752,"meterPower":116.28,"lastUpdated":1771703062336}
+2026-02-21T19:45:00.878Z [MeterService] INFO: DEBUG consumptionSinceMidnight=116.28, meterPower=116.28
+2026-02-21T19:45:00.887Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=116.28 kWh, total=10003.26 kWh
+2026-02-21T19:45:16.152Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:45:16.153Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:45:18.141Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:45:18.158Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:45:59.506Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:46:00.517Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:46:00.519Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:46:00.785Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":5783,"meterPower":116.38,"lastUpdated":1771703142650}
+2026-02-21T19:46:00.786Z [MeterService] INFO: DEBUG consumptionSinceMidnight=116.38, meterPower=116.38
+2026-02-21T19:46:00.797Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=116.38 kWh, total=10003.36 kWh
+2026-02-21T19:46:32.447Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:46:32.608Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:46:32.618Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:46:32.641Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:47:00.006Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:47:00.008Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:47:00.176Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":5775,"meterPower":116.47,"lastUpdated":1771703182416}
+2026-02-21T19:47:00.176Z [MeterService] INFO: DEBUG consumptionSinceMidnight=116.47, meterPower=116.47
+2026-02-21T19:47:00.182Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=116.47 kWh, total=10003.45 kWh
+2026-02-21T19:47:32.136Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:47:32.146Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:47:32.153Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:47:32.165Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:48:00.385Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:48:00.386Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:48:00.522Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":5756,"meterPower":116.57,"lastUpdated":1771703252524}
+2026-02-21T19:48:00.523Z [MeterService] INFO: DEBUG consumptionSinceMidnight=116.57, meterPower=116.57
+2026-02-21T19:48:00.535Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=116.57 kWh, total=10003.550000000001 kWh
+2026-02-21T19:48:32.156Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:48:32.190Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:48:32.223Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:48:32.226Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:48:36.961Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:49:00.100Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:49:00.101Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:49:00.286Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":5796,"meterPower":116.66,"lastUpdated":1771703327361}
+2026-02-21T19:49:00.287Z [MeterService] INFO: DEBUG consumptionSinceMidnight=116.66, meterPower=116.66
+2026-02-21T19:49:00.301Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=116.66 kWh, total=10003.64 kWh
+2026-02-21T19:49:15.967Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:49:26.253Z [Scheduler] INFO: Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut
+2026-02-21T19:49:29.376Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:49:29.381Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:49:32.153Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:49:32.156Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:49:32.465Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:49:32.666Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:49:32.675Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:49:32.702Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:49:35.356Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:49:35.358Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:49:55.468Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:49:55.471Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:49:59.279Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:49:59.281Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:50:00.442Z [Scheduler] INFO: Loggar temperaturer...
+2026-02-21T19:50:00.444Z [Scheduler] INFO: Loggar energi...
+2026-02-21T19:50:00.445Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:50:00.446Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:50:00.824Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":5798,"meterPower":116.76,"lastUpdated":1771703362813}
+2026-02-21T19:50:00.825Z [MeterService] INFO: DEBUG consumptionSinceMidnight=116.76, meterPower=116.76
+2026-02-21T19:50:00.832Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=116.76 kWh, total=10003.74 kWh
+2026-02-21T19:50:05.347Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:50:05.349Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:50:07.933Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:50:07.936Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:50:07.944Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:50:07.951Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:50:19.191Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:50:19.195Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:50:19.201Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:50:19.211Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:50:32.149Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:50:32.160Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:50:32.167Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:50:32.173Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:50:32.182Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:50:32.192Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:50:36.145Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:50:36.147Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:50:37.932Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:50:37.934Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:50:49.222Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:50:49.225Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:51:00.775Z [Scheduler] INFO: Uppdaterar mätardata för Pulse Krokgatan 7...
+2026-02-21T19:51:00.776Z [MeterService] INFO: Uppdaterar mätardata for Pulse Krokgatan 7...
+2026-02-21T19:51:00.943Z [MeterService] INFO: DEBUG pulseData: {"deviceId":"c2314e97-c95b-40d4-9393-dbc541d586d1","deviceName":"Pulse Krokgatan 7","zone":"Okänd","watts":7738,"meterPower":116.86,"lastUpdated":1771703433325}
+2026-02-21T19:51:00.943Z [MeterService] INFO: DEBUG consumptionSinceMidnight=116.86, meterPower=116.86
+2026-02-21T19:51:00.958Z [MeterService] INFO: Mätardata uppdaterad: förbrukning=116.86 kWh, total=10003.84 kWh
+2026-02-21T19:51:06.145Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:51:06.147Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:51:07.933Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:51:07.935Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:51:10.007Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:51:10.013Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar
+2026-02-21T19:51:19.218Z [MeterController] INFO: Hämtar senaste mätardata
+2026-02-21T19:51:19.221Z [MeterController] INFO: Hämtar mätardata för senaste 24 timmar

@@ -48,6 +48,24 @@ export async function meterRoutes(app: FastifyInstance) {
     }
   });
 
+  // GET /api/meter/last24h – hämta mätardata senaste 24 timmar
+  app.get("/api/meter/last24h", async (request, reply) => {
+    try {
+      logger.info("Hämtar mätardata för senaste 24 timmar");
+      const readings = await meterService.getMeterReadingsLast24Hours();
+
+      return readings.map((r) => ({
+        consumptionSinceMidnight: r.consumptionSinceMidnight,
+        totalMeterValue: r.totalMeterValue,
+        time: r.createdAt,
+      }));
+    } catch (error) {
+      logger.error("Fel vid hämtning av 24h mätardata", error);
+      reply.status(503);
+      return { error: "Kunde inte hämta 24h mätardata" };
+    }
+  });
+
   // POST /api/meter/set-manual – sätt mätarställning manuellt
   app.post<{
     Body: { totalMeterValue: number };

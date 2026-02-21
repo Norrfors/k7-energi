@@ -24,7 +24,7 @@ async function start() {
   // CORS – tillåter frontend (port 3000) att anropa backend (port 3001)
   // Utan detta blockerar webbläsaren anropen av säkerhetsskäl
   await app.register(cors, {
-    origin: "http://localhost:3000",
+    origin: true, // Tillåter alla origins under utveckling
   });
 
   // Registrera routes (endpoints)

@@ -76,6 +76,7 @@ export class HomeyService {
         deviceName: d.name,
         zone: d.zoneName || "Okänd",
         watts: d.capabilitiesObj?.measure_power?.value as number | null,
+        meterPower: d.capabilitiesObj?.meter_power?.value as number | null,
         lastUpdated: d.capabilitiesObj?.measure_power?.lastUpdated || "",
       }));
   }

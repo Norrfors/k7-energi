@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getHealth, getTemperatures, getEnergy, getMeterLatest, getMeterToday, setManualMeterValue } from "@/lib/api";
+import { getHealth, getTemperatures, getEnergy, getMeterLatest, getMeterToday, getMeterLast24Hours, setManualMeterValue } from "@/lib/api";
 import { StatusCard } from "@/components/StatusCard";
 
 interface Temperature {
@@ -64,7 +64,7 @@ export default function Dashboard() {
           getTemperatures(),
           getEnergy(),
           getMeterLatest(),
-          getMeterToday(),
+          getMeterLast24Hours(),
         ]);
         setTemperatures(tempData);
         setEnergy(energyData);
@@ -99,7 +99,7 @@ export default function Dashboard() {
       try {
         log("Uppdaterar mätardata (meter-tab)...");
         const meterData = await getMeterLatest();
-        const meterHistoryData = await getMeterToday();
+        const meterHistoryData = await getMeterLast24Hours();
         setMeter(meterData);
         setMeterHistory(meterHistoryData);
       } catch (err) {

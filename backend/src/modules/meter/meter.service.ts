@@ -55,6 +55,29 @@ export class MeterService {
   }
 
   /**
+   * Hämta mätardata för senaste 24 timmar
+   */
+  async getMeterReadingsLast24Hours() {
+    try {
+      const last24h = new Date();
+      last24h.setHours(last24h.getHours() - 24); // 24 timmar tillbaka
+
+      const readings = await prisma.meterReading.findMany({
+        where: {
+          deviceId: PULSE_ID,
+          createdAt: { gte: last24h },
+        },
+        orderBy: { createdAt: "asc" },
+      });
+
+      return readings;
+    } catch (error) {
+      this.logger.error("Fel vid hämtning av 24h mätardata", error);
+      throw error;
+    }
+  }
+
+  /**
    * Uppdatera mätardata
    * - Hämta meter_power från Homey (förbrukning sedan midnatt)
    * - Lägg till tidigare total mätarställning
@@ -73,21 +96,31 @@ export class MeterService {
         return null;
       }
 
-      const consumptionSinceMidnight = (pulseData.watts as number) || 0;
+      // DEBUG: Loggning för att se vad vi får från Homey
+      this.logger.info(`DEBUG pulseData: ${JSON.stringify(pulseData)}`);
 
-      // Hämta senaste mätarställning från DB
+      // consumptionSinceMidnight = raw meter_power från Homey (spara som-är)
+      const consumptionSinceMidnight = (pulseData.meterPower as number) || 0;
+      this.logger.info(`DEBUG consumptionSinceMidnight=${consumptionSinceMidnight}, meterPower=${pulseData.meterPower}`);
+
+      // Beräkna totalMeterValue
       const lastReading = await this.getLatestMeterReading();
-      let totalMeterValue = consumptionSinceMidnight;
+      let totalMeterValue = consumptionSinceMidnight; // Default: första mätningen idag
 
       if (lastReading) {
-        // Beräkna ny total mätarställning
-        // Om förbrukningen sedan midnatt är mindre än senaste värde
-        // betyder det att klockan har passerat midnatt
-        if (consumptionSinceMidnight < lastReading.consumptionSinceMidnight) {
-          // Ny dag – addera förra dagens förbrukning
+        // Checka om det är en ny dag (jämför datum)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const lastReadingDate = new Date(lastReading.createdAt);
+        lastReadingDate.setHours(0, 0, 0, 0);
+        
+        const isNewDay = today.getTime() !== lastReadingDate.getTime();
+
+        if (isNewDay) {
+          // Ny dag – addera igårs fulla förbrukning
           totalMeterValue = lastReading.totalMeterValue + lastReading.consumptionSinceMidnight;
         } else {
-          // Samma dag – använd samma total + skillnaden
+          // Samma dag – addera skillnaden från igår
           totalMeterValue = lastReading.totalMeterValue + (consumptionSinceMidnight - lastReading.consumptionSinceMidnight);
         }
       }
@@ -115,15 +148,16 @@ export class MeterService {
 
   /**
    * Spara mätarställning manuellt (från frontend-settings)
+   * OBS: consumptionSinceMidnight ändras INTE – den hämtas från Homey
    */
   async setManualMeterValue(totalMeterValue: number) {
     try {
       this.logger.info(`Manuell mätarställning inställd: ${totalMeterValue} kWh`);
 
-      // Hämta aktuell förbrukning från Homey
+      // Hämta aktuell förbrukning från Homey (meter_power = raw data)
       const energyData = await homeyService.getEnergy();
       const pulseData = energyData.find((e) => e.deviceId === PULSE_ID);
-      const consumptionSinceMidnight = (pulseData?.watts as number) || 0;
+      const consumptionSinceMidnight = (pulseData?.meterPower as number) || 0;
 
       const newReading = await prisma.meterReading.create({
         data: {

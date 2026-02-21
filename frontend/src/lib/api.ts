@@ -1,7 +1,16 @@
 // API-klient – centraliserar alla anrop till backend.
-// Om du ändrar backend-URL:en behöver du bara ändra här.
+// Användar samma värd som frontend (localhost eller IP från annat nätverk)
 
-const API_BASE = "http://localhost:3001";
+const getApiBase = () => {
+  if (typeof window === "undefined") {
+    return "http://localhost:3001"; // SSR fallback
+  }
+  const protocol = window.location.protocol;
+  const hostname = window.location.hostname;
+  return `${protocol}//${hostname}:3001`;
+};
+
+const API_BASE = getApiBase();
 
 export async function apiFetch<T>(
   endpoint: string,
@@ -89,6 +98,16 @@ export function getMeterToday() {
       time: string;
     }>
   >("/api/meter/today");
+}
+
+export function getMeterLast24Hours() {
+  return apiFetch<
+    Array<{
+      consumptionSinceMidnight: number;
+      totalMeterValue: number;
+      time: string;
+    }>
+  >("/api/meter/last24h");
 }
 
 export function setManualMeterValue(totalMeterValue: number) {
