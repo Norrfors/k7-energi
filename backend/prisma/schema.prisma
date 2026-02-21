@@ -44,3 +44,16 @@ model ExternalData {
 
   @@index([source, fetchedAt])
 }
+
+// Mätardata för Pulse Krokgatan 7 (energimätare)
+// Lagrar förbrukning sedan midnatt och total mätarställning
+model MeterReading {
+  id                    Int      @id @default(autoincrement())
+  deviceId              String   @default("c2314e97-c95b-40d4-9393-dbc541d586d1") // Pulse Krokgatan 7
+  deviceName            String   @default("Pulse Krokgatan 7")
+  consumptionSinceMidnight Float  // Förbrukning sedan midnatt (kWh)
+  totalMeterValue       Float  // Total mätarställning (kWh)
+  createdAt             DateTime @default(now())
+
+  @@index([deviceId, createdAt])
+}

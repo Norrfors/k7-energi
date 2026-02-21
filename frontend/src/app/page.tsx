@@ -1,13 +1,9 @@
 "use client";
 
-// "use client" krävs för sidor som använder React hooks (useState, useEffect).
-// Utan den renderas sidan på servern och kan inte ha interaktivitet.
-
 import { useEffect, useState } from "react";
-import { getHealth, getTemperatures, getEnergy, discoverHomey } from "@/lib/api";
+import { getHealth, getTemperatures, getEnergy, getMeterLatest, getMeterToday, setManualMeterValue } from "@/lib/api";
 import { StatusCard } from "@/components/StatusCard";
 
-// Typer för datan vi hämtar
 interface Temperature {
   deviceName: string;
   temperature: number | null;
@@ -26,75 +22,121 @@ interface Health {
   database: string;
 }
 
+interface MeterReading {
+  consumptionSinceMidnight: number;
+  totalMeterValue: number;
+  lastUpdated?: string;
+  time?: string;
+}
+
+type TabType = "dashboard" | "meter" | "settings";
+
 export default function Dashboard() {
-  // State – variabler som triggar omrendering när de ändras.
-  // Tänk det som databinding i WPF/WinForms, fast med funktionsanrop.
+  const [activeTab, setActiveTab] = useState<TabType>("dashboard");
   const [health, setHealth] = useState<Health | null>(null);
   const [temperatures, setTemperatures] = useState<Temperature[]>([]);
   const [energy, setEnergy] = useState<Energy[]>([]);
+  const [meter, setMeter] = useState<MeterReading | null>(null);
+  const [meterHistory, setMeterHistory] = useState<MeterReading[]>([]);
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [homeyConnected, setHomeyConnected] = useState(false);
-  const [discovering, setDiscovering] = useState(false);
-  const [discoverResult, setDiscoverResult] = useState<{
-    found: boolean;
-    devices: Array<{ name: string; host: string; addresses: string[]; port: number }>;
-    localIPs: string[];
-    message: string;
-  } | null>(null);
+  
+  // Settings state
+  const [manualMeterValue, setManualMeterValueInput] = useState<string>("");
+  const [settingsMeterValue, setSettingsMeterValue] = useState(false);
+  const [settingsSuccess, setSettingsSuccess] = useState<string>("");
+  const [settingsError, setSettingsError] = useState<string>("");
 
-  // useEffect körs en gång när sidan laddas (tack vare [] i slutet).
-  // Här hämtar vi data från backend.
-  useEffect(() => {
-    async function loadData() {
+  // Logga till console
+  const log = (message: string, data?: unknown) => {
+    console.log(`[Dashboard] ${message}`, data || "");
+  };
+
+  async function loadData() {
+    try {
+      log("Laddar data...");
+      const healthData = await getHealth();
+      setHealth(healthData);
+
       try {
-        // Hämta backend-status
-        const healthData = await getHealth();
-        setHealth(healthData);
-
-        // Försök hämta Homey-data
-        try {
-          const [tempData, energyData] = await Promise.all([
-            getTemperatures(),
-            getEnergy(),
-          ]);
-          setTemperatures(tempData);
-          setEnergy(energyData);
-          setHomeyConnected(true);
-        } catch {
-          // Homey kanske inte är konfigurerad än – det är ok
-          setHomeyConnected(false);
-        }
-      } catch (err) {
-        setError("Kunde inte ansluta till backend. Kör den på port 3001?");
-      } finally {
-        setLoading(false);
+        const [tempData, energyData, meterData, meterHistoryData] = await Promise.all([
+          getTemperatures(),
+          getEnergy(),
+          getMeterLatest(),
+          getMeterToday(),
+        ]);
+        setTemperatures(tempData);
+        setEnergy(energyData);
+        setMeter(meterData);
+        setMeterHistory(meterHistoryData);
+        setHomeyConnected(true);
+        log("Data loadad framgångsrikt");
+      } catch {
+        setHomeyConnected(false);
+        log("Homey-data inte tillgänglig");
       }
+    } catch (err) {
+      setError("Kunde inte ansluta till backend. Kör den på port 3001?");
+      log("Anslutningsfel", err);
+    } finally {
+      setLoading(false);
     }
+  }
 
+  // Ladda data vid mount
+  useEffect(() => {
     loadData();
-
-    // Uppdatera var 30:e sekund
     const interval = setInterval(loadData, 30000);
-    return () => clearInterval(interval); // Städa upp vid avmontering
+    return () => clearInterval(interval);
   }, []);
 
-  // Sök Homey Pro på LAN via mDNS (tar ~8 sekunder)
-  async function handleDiscover() {
-    setDiscovering(true);
-    setDiscoverResult(null);
+  // Auto-refresh meter varje minut om meter-tab är aktiv
+  useEffect(() => {
+    if (activeTab !== "meter") return;
+
+    const interval = setInterval(async () => {
+      try {
+        log("Uppdaterar mätardata (meter-tab)...");
+        const meterData = await getMeterLatest();
+        const meterHistoryData = await getMeterToday();
+        setMeter(meterData);
+        setMeterHistory(meterHistoryData);
+      } catch (err) {
+        log("Fel vid uppdatering av mätardata", err);
+      }
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [activeTab]);
+
+  async function handleSetManualMeter() {
     try {
-      const result = await discoverHomey();
-      setDiscoverResult(result);
-    } catch {
-      setDiscoverResult({
-        found: false,
-        devices: [],
-        localIPs: [],
-        message: "Kunde inte kontakta backend. Är den igång?",
-      });
+      setSettingsMeterValue(true);
+      setSettingsError("");
+      setSettingsSuccess("");
+
+      const value = parseFloat(manualMeterValue);
+      if (isNaN(value) || value < 0) {
+        setSettingsError("Ogiltigt värde");
+        return;
+      }
+
+      log(`Ställer in manuell mätarställning: ${value}`);
+      await setManualMeterValue(value);
+      
+      setSettingsSuccess(`Mätarställning inställd på ${value} kWh`);
+      setManualMeterValueInput("");
+      
+      const meterData = await getMeterLatest();
+      const meterHistoryData = await getMeterToday();
+      setMeter(meterData);
+      setMeterHistory(meterHistoryData);
+    } catch (err) {
+      setSettingsError("Kunde inte spara mätarställning");
+      log("Fel vid inställning av mätarställning", err);
     } finally {
-      setDiscovering(false);
+      setSettingsMeterValue(false);
     }
   }
 
@@ -107,138 +149,201 @@ export default function Dashboard() {
       <div className="bg-red-50 border border-red-200 rounded-lg p-6">
         <h2 className="text-lg font-semibold text-red-800">Anslutningsfel</h2>
         <p className="text-red-700 mt-2">{error}</p>
-        <p className="text-sm text-red-600 mt-4">
-          Se till att backend kör: <code>cd backend && npm run dev</code>
-        </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      {/* Backend-status */}
-      <section>
-        <h2 className="text-lg font-semibold mb-3">System</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <StatusCard
-            title="Backend"
-            value={health?.status === "ok" ? "Online" : "Offline"}
-            color={health?.status === "ok" ? "green" : "red"}
-          />
-          <StatusCard
-            title="Databas"
-            value={health?.database || "Okänd"}
-            color={health?.database === "ansluten" ? "green" : "red"}
-          />
-          <StatusCard
-            title="Homey Pro"
-            value={homeyConnected ? "Ansluten" : "Ej ansluten"}
-            subtitle={!homeyConnected ? "Konfigurera i .env" : ""}
-            color={homeyConnected ? "green" : "gray"}
-          />
-        </div>
-      </section>
-
-      {/* Temperaturer */}
-      {temperatures.length > 0 && (
-        <section>
-          <h2 className="text-lg font-semibold mb-3">Temperaturer</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {temperatures.map((t) => (
-              <StatusCard
-                key={t.deviceName}
-                title={t.deviceName}
-                value={t.temperature !== null ? `${t.temperature}°C` : "–"}
-                subtitle={t.zone}
-                color="blue"
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Energi */}
-      {energy.length > 0 && (
-        <section>
-          <h2 className="text-lg font-semibold mb-3">Energiförbrukning</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {energy.map((e) => (
-              <StatusCard
-                key={e.deviceName}
-                title={e.deviceName}
-                value={e.watts !== null ? `${e.watts} W` : "–"}
-                subtitle={e.zone}
-                color="orange"
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Sök Homey på LAN */}
-      <section className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-        <h2 className="text-lg font-semibold mb-1">Sök Homey Pro på nätverket</h2>
-        <p className="text-sm text-gray-500 mb-4">
-          Söker via mDNS (Bonjour/Zeroconf) — tar upp till 8 sekunder.
-        </p>
+    <div className="space-y-6">
+      {/* Tabs */}
+      <div className="flex items-center gap-2 border-b border-gray-300">
         <button
-          onClick={handleDiscover}
-          disabled={discovering}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+          onClick={() => setActiveTab("dashboard")}
+          className={`px-4 py-2 font-semibold transition ${
+            activeTab === "dashboard"
+              ? "border-b-2 border-blue-600 text-blue-600"
+              : "text-gray-600 hover:text-gray-900"
+          }`}
         >
-          {discovering ? "Söker…" : "Sök Homey Pro"}
+          Dashboard
         </button>
+        <button
+          onClick={() => setActiveTab("meter")}
+          className={`px-4 py-2 font-semibold transition ${
+            activeTab === "meter"
+              ? "border-b-2 border-blue-600 text-blue-600"
+              : "text-gray-600 hover:text-gray-900"
+          }`}
+        >
+          Mätardata
+        </button>
+        <button
+          onClick={() => setActiveTab("settings")}
+          className={`px-4 py-2 font-semibold transition ml-auto flex items-center gap-2 ${
+            activeTab === "settings"
+              ? "border-b-2 border-blue-600 text-blue-600"
+              : "text-gray-600 hover:text-gray-900"
+          }`}
+        >
+          ⚙️ Inställningar
+        </button>
+      </div>
 
-        {discoverResult && (
-          <div className={`mt-4 rounded-lg p-4 ${discoverResult.found ? "bg-green-50 border border-green-200" : "bg-yellow-50 border border-yellow-200"}`}>
-            <p className={`font-medium text-sm ${discoverResult.found ? "text-green-800" : "text-yellow-800"}`}>
-              {discoverResult.message}
-            </p>
+      {/* Dashboard Tab */}
+      {activeTab === "dashboard" && (
+        <div className="space-y-8">
+          <section>
+            <h2 className="text-lg font-semibold mb-3">System</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <StatusCard
+                title="Backend"
+                value={health?.status === "ok" ? "Online" : "Offline"}
+                color={health?.status === "ok" ? "green" : "red"}
+              />
+              <StatusCard
+                title="Databas"
+                value={health?.database || "Okänd"}
+                color={health?.database === "ansluten" ? "green" : "red"}
+              />
+              <StatusCard
+                title="Homey Pro"
+                value={homeyConnected ? "Ansluten" : "Ej ansluten"}
+                color={homeyConnected ? "green" : "gray"}
+              />
+            </div>
+          </section>
 
-            {discoverResult.devices.length > 0 && (
-              <ul className="mt-3 space-y-2">
-                {discoverResult.devices.map((d, i) => (
-                  <li key={i} className="bg-white rounded border border-green-200 p-3 text-sm">
-                    <p className="font-semibold text-gray-800">{d.name}</p>
-                    <p className="text-gray-600">Host: <code className="bg-gray-100 px-1 rounded">{d.host}</code></p>
-                    {d.addresses.length > 0 && (
-                      <p className="text-gray-600">
-                        IP:{" "}
-                        {d.addresses.map((a, j) => (
-                          <code key={j} className="bg-green-100 px-1 rounded mr-1">{a}</code>
-                        ))}
-                      </p>
-                    )}
-                    <p className="text-gray-500 mt-1">
-                      Lägg till i .env: <code className="bg-gray-100 px-1 rounded">HOMEY_ADDRESS=http://{d.addresses[0] || d.host}</code>
-                    </p>
-                  </li>
+          {temperatures.length > 0 && (
+            <section>
+              <h2 className="text-lg font-semibold mb-3">Temperaturer</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {temperatures.map((t) => (
+                  <StatusCard
+                    key={t.deviceName}
+                    title={t.deviceName}
+                    value={t.temperature !== null ? `${t.temperature}°C` : "N/A"}
+                    color="blue"
+                  />
                 ))}
-              </ul>
-            )}
+              </div>
+            </section>
+          )}
 
-            {discoverResult.localIPs.length > 0 && (
-              <p className="mt-3 text-xs text-gray-500">
-                Datorns IP-adresser: {discoverResult.localIPs.join(", ")}
+          {energy.length > 0 && (
+            <section>
+              <h2 className="text-lg font-semibold mb-3">Energi</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {energy.map((e) => (
+                  <StatusCard
+                    key={e.deviceName}
+                    title={e.deviceName}
+                    value={e.watts !== null ? `${e.watts.toFixed(0)}W` : "N/A"}
+                    color="yellow"
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+      )}
+
+      {/* Meter Tab */}
+      {activeTab === "meter" && (
+        <div className="space-y-8">
+          <section>
+            <h2 className="text-lg font-semibold mb-3">Mätardata</h2>
+            {meter ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <StatusCard
+                  title="Förbrukning sedan midnatt"
+                  value={`${meter.consumptionSinceMidnight.toFixed(2)} kWh`}
+                  color="orange"
+                />
+                <StatusCard
+                  title="Total mätarställning"
+                  value={`${meter.totalMeterValue.toFixed(2)} kWh`}
+                  color="green"
+                />
+              </div>
+            ) : (
+              <p className="text-gray-500">Ingen mätardata tillgänglig</p>
+            )}
+          </section>
+
+          {meterHistory.length > 0 && (
+            <section>
+              <h2 className="text-lg font-semibold mb-3">Historik (idag)</h2>
+              <div className="overflow-x-auto">
+                <table className="min-w-full border border-gray-300 rounded-lg">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="px-4 py-2 text-left">Tid</th>
+                      <th className="px-4 py-2 text-left">Förbrukning sedan midnatt</th>
+                      <th className="px-4 py-2 text-left">Total mätarställning</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {meterHistory.slice(-10).map((reading, idx) => (
+                      <tr key={idx} className="border-t border-gray-200 hover:bg-gray-50">
+                        <td className="px-4 py-2 text-sm">
+                          {new Date(reading.time || "").toLocaleTimeString("sv-SE")}
+                        </td>
+                        <td className="px-4 py-2 text-sm">
+                          {reading.consumptionSinceMidnight.toFixed(2)} kWh
+                        </td>
+                        <td className="px-4 py-2 text-sm">
+                          {reading.totalMeterValue.toFixed(2)} kWh
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
+        </div>
+      )}
+
+      {/* Settings Tab */}
+      {activeTab === "settings" && (
+        <div className="space-y-6">
+          <section>
+            <h2 className="text-lg font-semibold mb-4">Inställningar</h2>
+            <div className="bg-gray-50 border border-gray-300 rounded-lg p-6 max-w-md">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Manuell mätarställning (kWh)
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  value={manualMeterValue}
+                  onChange={(e) => setManualMeterValueInput(e.target.value)}
+                  placeholder="T.ex. 64161.21"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={settingsMeterValue}
+                />
+                <button
+                  onClick={handleSetManualMeter}
+                  disabled={settingsMeterValue || !manualMeterValue}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition"
+                >
+                  {settingsMeterValue ? "Sparar..." : "Spara"}
+                </button>
+              </div>
+
+              {settingsError && (
+                <p className="text-red-600 text-sm mt-2">{settingsError}</p>
+              )}
+              {settingsSuccess && (
+                <p className="text-green-600 text-sm mt-2">{settingsSuccess}</p>
+              )}
+
+              <p className="text-xs text-gray-500 mt-4">
+                Ställ in den totala mätarställningen för energimätaren.
               </p>
-            )}
-          </div>
-        )}
-      </section>
-
-      {/* Hjälptext om Homey inte är konfigurerad */}
-      {!homeyConnected && (
-        <section className="bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h2 className="text-lg font-semibold text-blue-800">
-            Kom igång med Homey
-          </h2>
-          <ol className="mt-3 space-y-2 text-blue-700 text-sm">
-            <li>1. Skapa en API-nyckel i Homey Web App → Settings → API Keys</li>
-            <li>2. Kopiera .env.example till .env</li>
-            <li>3. Fyll i HOMEY_ADDRESS (Homeys IP) och HOMEY_TOKEN (API-nyckeln)</li>
-            <li>4. Starta om backend</li>
-          </ol>
-        </section>
+            </div>
+          </section>
+        </div>
       )}
     </div>
   );

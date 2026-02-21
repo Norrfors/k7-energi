@@ -3,8 +3,11 @@
 
 const API_BASE = "http://localhost:3001";
 
-export async function apiFetch<T>(endpoint: string): Promise<T> {
-  const response = await fetch(`${API_BASE}${endpoint}`);
+export async function apiFetch<T>(
+  endpoint: string,
+  options?: RequestInit
+): Promise<T> {
+  const response = await fetch(`${API_BASE}${endpoint}`, options);
 
   if (!response.ok) {
     throw new Error(`API-fel: ${response.status} ${response.statusText}`);
@@ -66,4 +69,35 @@ export function discoverHomey() {
     localIPs: string[];
     message: string;
   }>("/api/homey/discover");
+}
+
+// Mätardata endpoints
+
+export function getMeterLatest() {
+  return apiFetch<{
+    consumptionSinceMidnight: number;
+    totalMeterValue: number;
+    lastUpdated: string;
+  }>("/api/meter/latest");
+}
+
+export function getMeterToday() {
+  return apiFetch<
+    Array<{
+      consumptionSinceMidnight: number;
+      totalMeterValue: number;
+      time: string;
+    }>
+  >("/api/meter/today");
+}
+
+export function setManualMeterValue(totalMeterValue: number) {
+  return apiFetch<{ success: boolean; reading: unknown }>(
+    "/api/meter/set-manual",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ totalMeterValue }),
+    }
+  );
 }

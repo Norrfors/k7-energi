@@ -48,3 +48,10 @@ export interface DiscoverResponse {
   localIPs: string[];
   message: string;
 }
+
+export interface MeterReading {
+  consumptionSinceMidnight: number; // Förbrukning sedan midnatt (kWh)
+  totalMeterValue: number; // Total mätarställning (kWh)
+  lastUpdated?: string;
+  time?: string;
+}

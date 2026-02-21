@@ -4,6 +4,7 @@ import cors from "@fastify/cors";
 import prisma from "./shared/db";
 import { homeyRoutes } from "./modules/homey/homey.controller";
 import { historyRoutes } from "./modules/history/history.controller";
+import { meterRoutes } from "./modules/meter/meter.controller";
 import { startScheduler } from "./shared/scheduler";
 
 // Debug: Visa Homey-konfiguration som laddades
@@ -29,6 +30,7 @@ async function start() {
   // Registrera routes (endpoints)
   await app.register(homeyRoutes);
   await app.register(historyRoutes);
+  await app.register(meterRoutes);
 
   // Health check – enkel endpoint för att testa att allt kör
   app.get("/api/health", async () => {
@@ -47,9 +49,8 @@ async function start() {
     };
   });
 
-  // Starta schemaläggaren (loggar data var 5:e minut)
-  // Kommentera bort denna rad om du inte har Homey konfigurerad ännu
-  // startScheduler();
+  // Starta schemaläggaren (uppdaterar mätardata varje minut, loggar temp/energi var 5:e minut)
+  startScheduler();
 
   // Starta servern
   const port = parseInt(process.env.PORT || "3001");
