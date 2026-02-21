@@ -58,3 +58,16 @@ model MeterReading {
 
   @@index([deviceId, createdAt])
 }
+
+// Backupinställningar
+// Lagrar användarens backupkonfiguration
+model BackupSettings {
+  id                 Int      @id @default(autoincrement())
+  backupFolderPath   String   @default("./backups") // Sökväg där backups sparas
+  enableAutoBackup   Boolean  @default(false) // Aktiverad automatisk backup
+  backupDay          String   @default("Monday") // Dag för automatisk backup (Monday-Sunday)
+  backupTime         String   @default("02:00") // Tid för automatisk backup (HH:MM)
+  lastBackupAt       DateTime? // Senaste backupen
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}

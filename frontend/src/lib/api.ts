@@ -120,3 +120,42 @@ export function setManualMeterValue(totalMeterValue: number) {
     }
   );
 }
+// Backup endpoints
+
+export interface BackupSettings {
+  id: number;
+  backupFolderPath: string;
+  enableAutoBackup: boolean;
+  backupDay: string;
+  backupTime: string;
+  lastBackupAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export function getBackupSettings() {
+  return apiFetch<BackupSettings>("/api/backup/settings");
+}
+
+export function saveBackupSettings(settings: {
+  backupFolderPath?: string;
+  enableAutoBackup?: boolean;
+  backupDay?: string;
+  backupTime?: string;
+}) {
+  return apiFetch<BackupSettings>("/api/backup/settings", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(settings),
+  });
+}
+
+export function performManualBackup() {
+  return apiFetch<{ success: boolean; filename: string; message: string }>(
+    "/api/backup/manual",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+}

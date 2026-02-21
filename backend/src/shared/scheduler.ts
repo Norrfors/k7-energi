@@ -1,7 +1,10 @@
 import cron from "node-cron";
 import { homeyService } from "../modules/homey/homey.service";
 import { meterService } from "../modules/meter/meter.service";
+import { BackupService } from "../modules/backup/backup.service";
 import { Logger } from "./logger";
+
+const backupService = new BackupService();
 
 const logger = new Logger("Scheduler");
 
@@ -18,6 +21,7 @@ const logger = new Logger("Scheduler");
 // * * * * *
 
 export function startScheduler() {
+  const logger = new Logger("Scheduler");
   // Logga temperaturer var 5:e minut
   cron.schedule("*/5 * * * *", async () => {
     try {
@@ -48,5 +52,23 @@ export function startScheduler() {
     }
   });
 
-  logger.info("Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut");
+  // Kontrollera och kör automatisk backup varje 5:e minut
+  cron.schedule("*/5 * * * *", async () => {
+    try {
+      const shouldRun = await backupService.shouldRunAutoBackup();
+      if (shouldRun) {
+        logger.info("Kör schemalagd backup...");
+        const result = await backupService.performBackup();
+        if (result.success) {
+          logger.info(`Backup slutförd: ${result.filename}`);
+        } else {
+          logger.error(`Backup misslyckades: ${result.message}`);
+        }
+      }
+    } catch (error) {
+      logger.error("Schemalagd backup kontroll misslyckades", error);
+    }
+  });
+
+  logger.info("Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut, backup konfigurerad");
 }
