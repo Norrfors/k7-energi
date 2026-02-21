@@ -70,9 +70,10 @@ När användaren skriver **bumpa** ska följande göras automatiskt:
 
 1. Läs senaste git-tag med `git tag --sort=-v:refname | head -1`
 2. Incrementera med 0.01 (t.ex. `v0.01` → `v0.02`, `v0.09` → `v0.10`)
-3. Skapa ny annoterad tag: `git tag -a vX.XX -m "Release vX.XX"`
-4. Pusha taggen: `git push origin vX.XX`
-5. Bekräfta för användaren
+3. gör commit med kommentar om allt du gjort nyligen
+4. Skapa ny annoterad tag: `git tag -a vX.XX -m "Release vX.XX"`
+5. Pusha taggen: `git push origin vX.XX`
+6. Bekräfta för användaren
 
 ---
 

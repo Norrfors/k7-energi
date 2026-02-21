@@ -30,6 +30,7 @@ export class HomeyService {
   constructor() {
     this.address = process.env.HOMEY_ADDRESS || "http://192.168.1.100";
     this.token = process.env.HOMEY_TOKEN || "";
+    console.log(`[HomeyService] Initialiserad med address: ${this.address}`);
   }
 
   // Hämta alla enheter direkt via HTTP (utan homey-api biblioteket)

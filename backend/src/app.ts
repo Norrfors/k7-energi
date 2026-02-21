@@ -6,6 +6,11 @@ import { homeyRoutes } from "./modules/homey/homey.controller";
 import { historyRoutes } from "./modules/history/history.controller";
 import { startScheduler } from "./shared/scheduler";
 
+// Debug: Visa Homey-konfiguration som laddades
+console.log(`[App] HOMEY_ADDRESS från env: ${process.env.HOMEY_ADDRESS}`);
+console.log(`[App] HOMEY_TOKEN exist: ${!!process.env.HOMEY_TOKEN}`);
+console.log(`[App] DATABASE_URL exist: ${!!process.env.DATABASE_URL}`);
+
 // ============================================
 // Huvudfilen – här startar allt
 // ============================================
