@@ -124,8 +124,8 @@ if ($Action -eq "start") {
     Write-Host "  status      - Visar status" -ForegroundColor White
     Write-Host ""
     Write-Host "Exempel:" -ForegroundColor Cyan
-    Write-Host "  .\scripts\deploy.ps1 start" -ForegroundColor White
-    Write-Host "  .\scripts\deploy.ps1 stop" -ForegroundColor White
-    Write-Host "  .\scripts\deploy.ps1 logs" -ForegroundColor White
+    Write-Host '  .\scripts\deploy.ps1 start' -ForegroundColor White
+    Write-Host '  .\scripts\deploy.ps1 stop' -ForegroundColor White
+    Write-Host '  .\scripts\deploy.ps1 logs' -ForegroundColor White
     Write-Host ""
 }

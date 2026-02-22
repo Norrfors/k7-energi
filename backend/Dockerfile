@@ -5,16 +5,13 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Installera dependencies
+# Installera dependencies (inkl. devDependencies för TypeScript-build)
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci
 
 # Kopiera TypeScript-filer
 COPY src ./src
 COPY tsconfig.json ./
-
-# Installera typescript globalt för ts-node
-RUN npm install -g typescript
 
 # Hälsocheck
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \

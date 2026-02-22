@@ -37,7 +37,7 @@ export async function meterRoutes(app: FastifyInstance) {
       logger.info("Hämtar mätardata för idag");
       const readings = await meterService.getMeterReadingsSinceToday();
 
-      return readings.map((r) => ({
+      return readings.map((r: any) => ({
         consumptionSinceMidnight: r.consumptionSinceMidnight,
         consumptionSincePreviousReading: r.consumptionSincePreviousReading,
         totalMeterValue: r.totalMeterValue,
@@ -56,7 +56,7 @@ export async function meterRoutes(app: FastifyInstance) {
       logger.info("Hämtar mätardata för senaste 24 timmar");
       const readings = await meterService.getMeterReadingsLast24Hours();
 
-      return readings.map((r) => ({
+      return readings.map((r: any) => ({
         consumptionSinceMidnight: r.consumptionSinceMidnight,
         consumptionSincePreviousReading: r.consumptionSincePreviousReading,
         totalMeterValue: r.totalMeterValue,
