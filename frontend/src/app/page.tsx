@@ -71,22 +71,36 @@ export default function Dashboard() {
       const healthData = await getHealth();
       setHealth(healthData);
 
+      // Ladd temperaturer och energi (kan faila utan att blockera mätardata)
       try {
-        const [tempData, energyData, meterData, meterHistoryData] = await Promise.all([
+        const [tempData, energyData] = await Promise.all([
           getTemperatures(),
           getEnergy(),
-          getMeterLatest(),
-          getMeterLast24Hours(),
         ]);
         setTemperatures(tempData);
         setEnergy(energyData);
+        setHomeyConnected(true);
+        log("Homey-data loadad framgångsrikt");
+      } catch {
+        setTemperatures([]);
+        setEnergy([]);
+        setHomeyConnected(false);
+        log("Homey-data inte tillgänglig (timeout?)");
+      }
+
+      // Ladd mätardata separat (ska alltid fungera om DB är ansluten)
+      try {
+        const [meterData, meterHistoryData] = await Promise.all([
+          getMeterLatest(),
+          getMeterLast24Hours(),
+        ]);
         setMeter(meterData);
         setMeterHistory(meterHistoryData);
-        setHomeyConnected(true);
-        log("Data loadad framgångsrikt");
-      } catch {
-        setHomeyConnected(false);
-        log("Homey-data inte tillgänglig");
+        log("Mätardata loadad framgångsrikt");
+      } catch (err) {
+        log("Fel vid hämtning av mätardata", err);
+        setMeter(null);
+        setMeterHistory([]);
       }
     } catch (err) {
       setError("Kunde inte ansluta till backend. Kör den på port 3001?");

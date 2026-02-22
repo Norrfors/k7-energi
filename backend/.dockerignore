@@ -1,0 +1,16 @@
+node_modules
+npm-debug.log
+dist
+.env
+.env.local
+.next
+.git
+.gitignore
+README.md
+*.test.ts
+*.spec.ts
+src
+tsconfig.json
+loggfil.txt
+loggfil.*.bak
+backend.log

@@ -1,16 +1,76 @@
-version: "3.8"
+version: '3.8'
 
 services:
+  # ============================================
+  # PostgreSQL Database
+  # ============================================
   db:
-    image: postgres:16
+    image: postgres:16-alpine
+    container_name: homey_db
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_USER: dev
-      POSTGRES_PASSWORD: dev123
-      POSTGRES_DB: mittproject
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: homey_db
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - homey_network
+
+  # ============================================
+  # Backend API (Node.js + Fastify)
+  # ============================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: homey_backend
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/homey_db
+      HOMEY_ADDRESS: ${HOMEY_ADDRESS:-http://192.168.1.122}
+      HOMEY_TOKEN: ${HOMEY_TOKEN}
+      PORT: 3001
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend/loggfil.txt:/app/loggfil.txt
+      - ./backend/backups:/app/backups
+    networks:
+      - homey_network
+    restart: unless-stopped
+
+  # ============================================
+  # Frontend (Next.js React)
+  # ============================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: homey_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: http://backend:3001
+    depends_on:
+      - backend
+    networks:
+      - homey_network
+    restart: unless-stopped
+
+networks:
+  homey_network:
+    driver: bridge
 
 volumes:
   pgdata:
