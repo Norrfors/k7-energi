@@ -751,6 +751,97 @@ code .env
 
 ---
 
+## � Backup & Dataöverlevnad
+
+### Backup-princip
+
+Systemet använder **automatiserad backup via Windows Task Scheduler** för att skydda kritisk data.
+
+#### PostgreSQL-databas (Automatiserad)
+
+**Vad backas upp?**
+- All tabelldal (TemperatureLog, EnergyLog, MeterReading)
+- Databasschema
+- Användaruppgifter
+
+**Backupprocedur:**
+```
+Windows Task Scheduler (runs powerShell)
+    ↓
+backup-database.ps1 (via Docker exec)
+    ↓
+pg_dump → PostgreSQL-dumpfil (SQL)
+    ↓
+C:\Users\jan\OneDrive\Dokument\Backup\mittproject_YYYY-MM-DD_HHMM.sql
+```
+
+**Schemaläggning:**
+- **Kl 11:00** – Task: `K7-Energi-Backup-1100`
+- **Kl 23:00** – Task: `K7-Energi-Backup-2300`
+
+**Retention:**
+- Behålls de 14 senaste backups (gamla raderas automatiskt)
+- Historik tydlig genom tidstämpel i filnamn
+
+**Installation av backup-tidsschema:**
+```powershell
+# Högerklicka som Admin på:
+C:\Users\jan\OneDrive\Dokument\GitHub\k7-energi\scripts\install-backup-scheduler.bat
+
+# Verifiering av Tasks:
+schtasks /query | findstr "K7-Energi-Backup"
+```
+
+**Manuell backup (testsyfte):**
+```powershell
+powershell -ExecutionPolicy Bypass -File "C:\Users\jan\OneDrive\Dokument\GitHub\k7-energi\scripts\backup-database.ps1"
+```
+
+#### Lokala filer (Manuell backup rekommenderas)
+
+Dessa filer bör **INTE** commitas till GitHub och måste backas upp separat:
+
+| Fil/Mapp | Syfte | Lagring | Notering |
+|----------|-------|---------|----------|
+| `.env` | Databaskredentialer, Homey API-keys | `C:\Users\jan\OneDrive\Dokument\` | **KRITISK** – innehåller secrets |
+| `backend/loggfil.txt` | Systemloggar med svenska timestamps | `C:\Users\jan\OneDrive\Dokument\Backup\` | Växer över tid, görs inte automatiskt |
+| `docker-compose.yml` | Docker-konfiguration | GitHub (tracked) | Redan versionshanterad |
+| `backend/prisma/schema.prisma` | Databasschema | GitHub (tracked) | Redan versionshanterad |
+
+**Rekommenderat backup-schema för lokala filer:**
+```powershell
+# Manuell veckovis backup av känsliga filer
+$backupDir = "C:\Users\jan\OneDrive\Dokument\Backup"
+$date = Get-Date -Format "yyyy-MM-dd"
+
+# Backa upp .env
+copy ".env" "$backupDir\env_$date.bak"
+
+# Backa upp loggfil
+copy "backend/loggfil.txt" "$backupDir\loggfil_$date.txt"
+```
+
+#### Återställning från backup
+
+**Från PostgreSQL-backup:**
+```powershell
+# Med Docker igång:
+docker exec k7-energi-db psql -U dev -d mittproject < C:\Users\jan\OneDrive\Dokument\Backup\mittproject_2026-02-22_1100.sql
+
+# Eller återställ databasen helt:
+docker compose down
+docker volume rm k7-energi_pgdata
+docker compose up -d db
+```
+
+**Från .env-backup:**
+```powershell
+copy "$backupDir\env_2026-02-22.bak" ".env"
+code .env  # Verifiera innehållet
+```
+
+---
+
 ## 📈 Framtida Features
 
 - [ ] Grafer för trendanalys (over tid)
@@ -760,6 +851,8 @@ code .env
 - [ ] Molndistributerad deployment
 - [ ] Mobilapp
 - [ ] Styra enheter från dashboard (inte bara läsa)
+- [ ] Webbaserat backup-gränssnitt (UI för att trigga backups manuellt)
+- [ ] Loggfil-rotation (auto-cleanup av gamla loggfiler)
 
 ---
 
