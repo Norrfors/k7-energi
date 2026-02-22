@@ -495,6 +495,27 @@ RUN npm ci --only=production  # Exkluderar @types/*
 New-Item -ItemType Directory -Force -Path frontend/public
 ```
 
+### Fel: "Error loading shared library libssl.so.1.1: No such file or directory"
+
+**Orsak:** Prisma kräver OpenSSL i Alpine Linux, men det inte är installerat i Docker-imagen.
+
+**Lösning:** Backend Dockerfile måste installera OpenSSL före npm ci:
+
+```dockerfile
+# ✅ KORREKT:
+FROM node:18-alpine
+
+# Installera OpenSSL för Prisma
+RUN apk add --no-cache openssl
+
+COPY package*.json ./
+RUN npm ci
+```
+
+**Symptom:** Backend container startar om utan att krascha synligt (exit code 1 i logs).
+
+---
+
 ### Fel: "Prisma Client did not initialize yet"
 
 **Orsak:** `prisma generate` kördes aldrig i Docker, Prisma client finns inte.
@@ -606,6 +627,6 @@ Get-Content backend/loggfil.txt -Wait
 
 ---
 
-**Sista uppdatering:** 2026-02-22 (08:42)  
-**Version:** v0.03  
-**Ändringar:** Prisma generate i Dockerfile, Docker deployment kärnpunkter dokumenterade
+**Sista uppdatering:** 2026-02-22 (08:59)  
+**Version:** v0.04  
+**Ändringar:** OpenSSL-fix för Prisma, Docker troubleshooting guide uppdaterad
