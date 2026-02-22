@@ -1,0 +1,145 @@
+Enhets-ID,Namn,Zon,Klassificering,Capabilities,Verktyg
+02824e25-13a4-45ab-ae41-e2f28582a759,Klot-31,Okänd,light,"onoff, dim",homey:app:com.ikea.tradfri
+049cdb79-1069-4246-9c46-38eb8d614c76,LMDT-609,Okänd,sensor,alarm_motion,homey:app:se.nexa
+0574aa59-ec5b-4d29-a2bb-8ac556328947,Matsal vä,Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+0865a88c-80a2-4518-81e2-ee5851bb610c,k7 — ÖV Huvudsovrum,Okänd,thermostat,"measure_temperature, target_temperature, measure_battery, alarm_contact.window, netatmo_thermostat_mode",homey:app:com.netatmo
+0aac0600-996a-47f5-b408-b45a8f3bde6a,Spot-tak-01 (GU10),Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+0b0e3af0-da59-4848-b0b6-ecbc0cbf7793,Klot-23,Okänd,light,"onoff, dim",homey:app:com.ikea.tradfri
+0c9b33df-1cb6-4bd0-ad7a-c3cc2aee48ed,VU-Effektmät,Okänd,socket,"onoff, measure_voltage, measure_current, measure_power, meter_power",homey:app:com.ikea.tradfri
+0fa7f60e-7934-4268-8af1-e39c3664daa0,Klot-12,Okänd,light,"onoff, dim",homey:app:com.ikea.tradfri
+11f32d19-dffe-4e11-8a64-b873f7ecdc79,BV Hall Hö,Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+12605755-e152-492c-8f2e-7b2fab2976b4,VU-3 (312538),Okänd,socket,onoff,homey:app:se.telldus
+131777fc-2bd3-4ff9-840d-3cf3c6ee76e9,k7 — ÖV Sovrum Norr,Okänd,thermostat,"measure_temperature, target_temperature, measure_battery, alarm_contact.window, netatmo_thermostat_mode",homey:app:com.netatmo
+139fe129-4e1b-4f04-be32-576f1fecbea6,Altherma Hotwatertank,Okänd,boiler,"meter_power, target_temperature, measure_temperature, onoff, thermostat_mode, fan_mode.powerful",homey:app:climate.onecta.daikin
+15b96a44-082c-4283-8620-bfd352c535b6,k7 BV  — Vardagsrum,Okänd,thermostat,"measure_temperature, target_temperature, measure_battery, alarm_contact.window, netatmo_thermostat_mode",homey:app:com.netatmo
+17726655-5548-47c1-96b5-fec3254f3591,Outdoor Occupancy Sensor GARAGE,Okänd,sensor,"alarm_motion, measure_temperature, measure_luminance, measure_battery, alarm_battery",homey:app:com.philips.hue.zigbee
+1959c79e-46fc-4796-935f-43d83611f24a,Hall Generic Remote/Button,Okänd,remote,Ingen,homey:app:se.nexa
+1ee07997-b173-4157-b918-77b67f247c85,Källarentre-Spot-13,Okänd,light,"onoff, dim",homey:app:com.ikea.tradfri
+244bd924-8e0a-41a4-8099-7b9d1575296f,AltanSpot-04-RGBW,Okänd,light,"onoff, dim, light_mode, light_hue, light_saturation, light_temperature",homey:app:com.ikea.tradfri
+254eb040-de08-4851-a5d7-3af5f549c886,Huvudsovrum,Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+269285e9-d8bb-4369-94cb-e15f459804a3,Spot-tak-05 (GU10),Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+287d7c9c-09cf-4c88-beea-828445c364e7,T01,Okänd,sensor,"measure_temperature, measure_humidity",homey:app:com.weather-sensors
+29ffede3-b6c9-45cc-908f-2eb619a483e2,Spakvridare Smart Valve Controller LZ3,Okänd,other,onoff,homey:app:net.franceweb.nous
+2a7e8428-61ef-4e76-9d8c-4b9bca523157,Sonos Move,Okänd,speaker,"speaker_album, speaker_artist, speaker_duration, speaker_next, speaker_playing, speaker_position, speaker_prev, speaker_repeat, volume_set, volume_mute, speaker_shuffle, speaker_track, sonos_group, sonos_audio_clip, measure_battery, alarm_charging",homey:app:com.sonos
+2d6cf145-b2fd-4b19-a5c1-4b44904f6e3c,Namron Multisensor 4512734,Okänd,sensor,"measure_temperature, measure_humidity, measure_luminance, alarm_motion, measure_battery",homey:app:net.filllip-namron
+2d76aad1-f6c1-405e-8bf0-0ee115b0dcec,01-Remote Control,Okänd,remote,alarm_battery,homey:app:com.ikea.tradfri
+2edcde17-c7a2-4861-8cb6-a4721eb8b82c,Rörelse-Vallhorn-01,Okänd,sensor,"alarm_motion, measure_luminance, measure_battery",homey:app:com.ikea.tradfri
+3084512c-1447-49b2-9f0d-10a816c5fd57,VUZ02 Switch,Okänd,socket,onoff,homey:app:com.telldus
+30e1eaed-aa52-4d12-bd28-2794807df3cb,Oregon Regn PCR800,Okänd,sensor,"measure_rain, meter_rain, alarm_battery",homey:app:com.weather-sensors
+30f2cfb2-9429-4c75-8a64-e7cb9013c46d,Sonos Roam,Okänd,speaker,"speaker_album, speaker_artist, speaker_duration, speaker_next, speaker_playing, speaker_position, speaker_prev, speaker_repeat, volume_set, volume_mute, speaker_shuffle, speaker_track, sonos_group, sonos_audio_clip, measure_battery",homey:app:com.sonos
+31652f56-6942-42a3-8303-a152afa12a3a,Sonos Vardagsrum,Okänd,speaker,"speaker_album, speaker_artist, speaker_duration, speaker_next, speaker_playing, speaker_position, speaker_prev, speaker_repeat, volume_set, volume_mute, speaker_shuffle, speaker_track, sonos_group, sonos_audio_clip, sonos_ht_playback",homey:app:com.sonos
+344590dc-cc35-4217-b7d6-d7907a5a817e,VU-A6Z-Nous,Okänd,socket,"onoff, measure_power, meter_power, measure_current, measure_voltage, button.reset_meter",homey:app:net.franceweb.nous
+3487c09c-f725-4601-8cd8-c2cd2b38a94d,k7 (K7-INNE) — K7-INNE,Okänd,sensor,"measure_temperature, measure_humidity, measure_co2, measure_noise, measure_pressure",homey:app:com.netatmo
+34d7ca28-7334-4c79-81ad-7711bef6d1fc,k7 — ÖV Sovrum Syd,Okänd,thermostat,"measure_temperature, target_temperature, measure_battery, alarm_contact.window, netatmo_thermostat_mode",homey:app:com.netatmo
+3569b2b3-f460-40e3-a0a7-27e8f23168f7,k7 vind (K7-INNE) — K7-VIND,Okänd,sensor,"measure_wind_angle, measure_wind_strength, measure_gust_angle, measure_gust_strength, measure_battery",homey:app:com.netatmo
+35ae3475-ad39-41b3-af84-6b9372a8c110,VS-AltanSpot Styrbar,Okänd,remote,measure_battery,homey:app:com.ikea.tradfri
+37b67139-5bf1-48ba-82ab-68856fcb6d8e,WH2 kanske skyddsrum eller garage,Okänd,sensor,"measure_temperature, measure_humidity",homey:app:com.weather-sensors
+3a4e51c8-509c-4543-83a4-fa8e5925404b,Matsal Hö,Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+3d78bc2a-a0af-4a6a-910f-cf8724fa91bf,VS-Trapp-ÖV-Styrbar,Okänd,remote,alarm_battery,homey:app:com.ikea.tradfri
+3de53697-dada-45e6-824e-5099c9e0e9f2,Klot-33,Okänd,light,"onoff, dim",homey:app:com.ikea.tradfri
+41e85cbc-3dbb-4dfa-9d45-089cabc7a86d,spisfläkt Dimbart Transformator,Okänd,light,"onoff, dim",homey:app:com.ikea.tradfri
+449ec9a0-f0aa-4ba9-a2b9-56bb8e1b95b8,V-Rum Hö,Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+46174c80-cc02-45b2-aac4-7f5c2ce8a810,WH2 Inne Gatuplan,Okänd,sensor,"measure_temperature, measure_humidity",homey:app:com.weather-sensors
+48369fcf-5c34-4eee-81b6-d275b5b2560a,Kristall-01,Okänd,light,"onoff, dim",homey:app:com.ikea.tradfri
+48534830-cad4-4347-9ae1-9f9cd7992a08,Källarentre-Spot-11,Okänd,light,"onoff, dim",homey:app:com.ikea.tradfri
+49ad9cc8-fcb0-437f-a2af-d37d3aaf3240,jan.norrfors@gaxor.se,Okänd,other,Ingen,homey:app:com.google.sheets
+4b5d4c4e-c4f8-4627-b539-51ce7686b48f,Spot-tak-04 (GU10),Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+4ef6355b-569d-47d9-9ab9-67748e02042d,Sovrum Syd Dimmable Bulb (E27),Okänd,light,"onoff, dim",homey:app:com.ikea.tradfri
+5480aa90-667b-4b2e-a217-9efa5aae805d,VS-Trapp-BV-Styrbar,Okänd,remote,measure_battery,homey:app:com.ikea.tradfri
+56173f3e-924e-4d14-818b-7cab9793036e,Säng-HO (E14),Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+5714755f-a828-4381-b68c-cbb25d43e7a0,Källarentre-Spot-09,Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+59306f71-b2b8-4a41-a762-e2813ec78cae,Rörelse BV PA-88R,Okänd,sensor,alarm_motion,homey:app:se.telldus
+59b17f0e-e148-4a03-825a-bcb236a590e8,Rörelse-Vallhorn-05,Okänd,sensor,"alarm_motion, measure_luminance, measure_battery",homey:app:com.ikea.tradfri
+5bca7ea7-ea74-4cf8-b672-628065f4021b,VS-Sång Styrbar,Okänd,remote,measure_battery,homey:app:com.ikea.tradfri
+5bed0a54-5408-470e-b2a8-9e95ff7f413e,Oregon Vind WGR800,Okänd,sensor,"measure_wind_angle, measure_gust_strength, measure_wind_strength, alarm_battery",homey:app:com.weather-sensors
+5f5ac92c-2717-4379-9624-721d8d574212,VS-Hall-ÖV-Styrbar ,Okänd,remote,measure_battery,homey:app:com.ikea.tradfri
+642923d4-fe73-4ca7-87a6-06cd2d15536f,Huvudingång Doprman,Okänd,lock,locked,homey:app:com.verisure.yale.doorman
+676989c1-aa2d-4482-868c-06f5942cdc3e,Rörelse-Vallhorn-02,Okänd,sensor,"alarm_motion, measure_luminance, measure_battery",homey:app:com.ikea.tradfri
+6ab632a3-937d-49cd-b731-82e30d7d6132,Garage-t01 Outlet,Okänd,socket,onoff,homey:app:com.ikea.tradfri
+6b2997f5-ae40-4208-8fe5-40b0bfeba372,k7 — BV Hall,Okänd,thermostat,"measure_temperature, target_temperature, measure_battery, alarm_contact.window, netatmo_thermostat_mode",homey:app:com.netatmo
+6c9e7efc-528a-485b-9535-d49ed7777d6c,YTTERtrapp-ORMANÄS,Okänd,light,"onoff, dim, light_mode, light_hue, light_saturation, light_temperature",homey:app:com.ikea.tradfri
+6efa6c00-1855-4ccc-a6a6-5f4d753625e4,Spot-tak-03 (GU10),Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+7523d012-68a7-4e50-a2eb-9be6d2dbb89b,Huvudentre,Okänd,light,"onoff, dim",homey:app:com.ikea.tradfri
+75306cba-0b1d-4524-bb2f-38963ba3768e,Outdoor Occupancy Sensor HUVUDENTRE,Okänd,sensor,"alarm_motion, measure_temperature, measure_luminance, measure_battery, alarm_battery",homey:app:com.philips.hue.zigbee
+7cbd599f-ff04-499d-8e2d-972df466166f,Sonos Kök Play3,Okänd,speaker,"speaker_album, speaker_artist, speaker_duration, speaker_next, speaker_playing, speaker_position, speaker_prev, speaker_repeat, volume_set, volume_mute, speaker_shuffle, speaker_track, sonos_group, sonos_audio_clip",homey:app:com.sonos
+7eabbc39-defc-4c0e-b520-53834a35503e,HUGO,Okänd,other,"mower_activity_capability, mower_mode_capability, mower_state_capability, mower_errorcode_capability, mower_battery_capability, mower_nextstart_capability, mower_inactivereason_capability, mower_lastposition_capability",homey:app:com.husqvarna.automower
+7fae4d7c-0ded-4602-91b9-8510c8134d32,WH2 UTE Norr Inglas ,Okänd,sensor,measure_temperature,homey:app:com.weather-sensors
+812e60e0-4c1d-4775-a09f-0c2f72baace5,BILRESA scroll wheel,Okänd,button,"measure_battery, button.identify",homey:app:com.ikea.tradfri
+83dc1140-3931-4410-93ee-f6cd62946de8,AltanSpot-06-RGBW,Okänd,light,"onoff, dim, light_mode, light_hue, light_saturation, light_temperature",homey:app:com.ikea.tradfri
+85642830-251a-472d-9ffd-be8a88a7723b,Rörelse  Badrum IKEA,Okänd,sensor,"alarm_motion, alarm_battery",homey:app:com.ikea.tradfri
+8957331d-7768-4197-b479-ef6aa419ce67,VU-1 (312538),Okänd,socket,onoff,homey:app:se.telldus
+8c82ffcd-5465-48ce-9e6d-6ebc81e3c3c2,k7 — ÖV Hall,Okänd,thermostat,"measure_temperature, target_temperature, measure_battery, alarm_contact.window, netatmo_thermostat_mode",homey:app:com.netatmo
+8df0949a-4110-4fe8-8ba4-268df022b8e8,Adventsstjärna E14,Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+8e2abe5a-2b52-4a3f-9262-013d1e386c39,VUz-01Plug-in Switch Mini,Okänd,socket,"onoff, meter_power, measure_power, button.reset_meter, measure_current",homey:app:com.telldus
+8e2f9ba9-1d67-417b-9866-fbe9ddf90cc1,VS-BV-Hall-Styrbar,Okänd,remote,alarm_battery,homey:app:com.ikea.tradfri
+8f16c681-9f11-408f-b7b5-0f4f69fc9a4b,Tak Vrum,Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+8f244f99-7157-4721-b496-dc42e7e587d5,Sonos Roam2,Okänd,speaker,"speaker_album, speaker_artist, speaker_duration, speaker_next, speaker_playing, speaker_position, speaker_prev, speaker_repeat, volume_set, volume_mute, speaker_shuffle, speaker_track, sonos_group, sonos_audio_clip, measure_battery, alarm_charging",homey:app:com.sonos
+8f62dc77-50f4-483e-a62a-bdb10910297c,IKEA Symfonisk,Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+91d045c7-7546-4499-b664-7553571b6595,Bardisk Gen Plug-in On/Off,Okänd,socket,onoff,homey:app:se.nexa
+91f0254d-3a01-47c0-bd50-6682eb527b06,Klot-21,Okänd,light,"onoff, dim",homey:app:com.ikea.tradfri
+921c63f3-a29d-492c-bf41-74f714a04829,Klot-22,Okänd,light,"onoff, dim",homey:app:com.ikea.tradfri
+92fa313c-f1cc-4bce-8ad6-37249449fc0a,Jordglob Tunable White Bulb (E14),Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+9604069c-eafe-434c-826c-8199a3c89967,Bevattning VUZ03 Switch,Okänd,socket,onoff,homey:app:com.telldus
+97724d41-dea8-4a2b-901c-b00489ca492a,Oregon INNE,Okänd,sensor,"measure_temperature, measure_humidity, alarm_battery",homey:app:com.weather-sensors
+9bd6f7d3-cd37-4ec6-9472-39fa59793dc3,Spot-trapp-07 (GU10),Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+9cc3b5f3-3fb0-4694-9b3c-bb3772480302,WH2 ÖV  xx IN,Okänd,sensor,"measure_temperature, measure_humidity",homey:app:com.weather-sensors
+9fc935d1-9fd0-41b1-bb46-6568d11666ee,VU-2 (312538),Okänd,socket,onoff,homey:app:se.telldus
+a1bf0972-f8b0-4b02-ad42-cf545402b39a,AltanSpot-03,Okänd,light,"onoff, dim, light_mode, light_hue, light_saturation, light_temperature",homey:app:com.ikea.tradfri
+a4d0022f-d189-41f2-9a15-db7741f01cdd,VS BV Matbord Styrbar Remote Control,Okänd,remote,measure_battery,homey:app:com.ikea.tradfri
+a5836508-2c92-4ec4-9909-b14bfe7ed2a3,Justerbar Vit Lampa (E14),Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+a724082c-3788-483d-b306-3d878edb1f30,Smart ljusremsa L900 TAPO,Okänd,light,"onoff, dim, light_hue, light_saturation, meter_power_today",homey:app:com.tapo
+a7dd7207-bfe0-4b8f-90b3-8a60f2c928b9,Garage Höger,Okänd,socket,"onoff, dim",homey:manager:vdevice
+a9150bb8-da7d-4ebe-86cd-e4235ae88454,Oregon Temp THGN800,Okänd,sensor,"measure_temperature, measure_humidity, alarm_battery",homey:app:com.weather-sensors
+a98143f5-bfa6-4d7b-839f-b9ece0e2933f,Element-Klimat,Okänd,heatpump,"meter_power, onoff, thermostat_mode, measure_temperature.outdoorTemperature, measure_temperature.leavingWaterTemperature, hot_water_mode.offset",homey:app:climate.onecta.daikin
+aba02e26-e609-446a-b381-b08b5d6348c8,Sonos-Symfonisk,Okänd,speaker,"speaker_album, speaker_artist, speaker_duration, speaker_next, speaker_playing, speaker_position, speaker_prev, speaker_repeat, volume_set, volume_mute, speaker_shuffle, speaker_track, sonos_group, sonos_audio_clip",homey:app:com.sonos
+b00c7258-92b5-4d4e-91dc-7b15796df112,AltanSpot-07-RGBW,Okänd,light,"onoff, dim, light_mode, light_hue, light_saturation, light_temperature",homey:app:com.ikea.tradfri
+b0dbbd7e-31ae-4a44-800a-ab9d07a0e72c,Rörelse 02 Smart PIR Motion Sensor,Okänd,sensor,"alarm_motion, alarm_battery",homey:app:com.tuya.zigbee
+b3b22b0c-2caa-4bc3-8247-057064332569,V-Rum Vä,Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+b43a84ab-2937-4c42-b846-fe117d3b7e1b,Källarentre-Spot-12,Okänd,light,"onoff, dim",homey:app:com.ikea.tradfri
+b4f99d78-3ec2-4c8b-91fe-4ed78e6d0870,Tibber Pris relativ,Okänd,other,"measure_price_total, measure_price_info_level, measure_price_lowest, measure_price_highest, price_level, measure_price_level",homey:app:com.tibber
+b6e10c4c-25e5-4792-82aa-ea6cf0b94185,AltanSpot-01,Okänd,light,"onoff, dim, light_mode, light_hue, light_saturation, light_temperature",homey:app:com.ikea.tradfri
+b7fb10c0-236d-42d0-9e69-b6399828c56c,k7 — BV Matsal,Okänd,thermostat,"measure_temperature, target_temperature, measure_battery, alarm_contact.window, netatmo_thermostat_mode",homey:app:com.netatmo
+b8c50a9a-48e1-48c3-af84-751a661ceac8,Matbord led driver,Okänd,light,"onoff, dim",homey:app:name.medin.sunricher
+bcada943-7365-4135-84c8-5dc209250b0c,Skydsrum  ,Okänd,socket,"onoff, dim",homey:manager:vdevice
+bf25372c-562a-4733-87bf-91d0bf23396e,Generic Remote/Button,Okänd,remote,Ingen,homey:app:se.nexa
+c2314e97-c95b-40d4-9393-dbc541d586d1,Pulse Krokgatan 7,Okänd,other,"measure_power, meter_power, accumulatedCost, measure_current.L1, measure_current.L2, measure_current.L3, meter_power.imported, meter_power.exported",homey:app:com.tibber
+c27bf834-d54b-4feb-969b-3762994a8829,Spot-08 (GU10),Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+c290da27-6c19-4f96-aaf8-01dc10e6f330,Spot-trapp-06 (GU10),Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+c52596c5-a06c-45cc-9e79-997082825629,k7 (K7-INNE) — K7-UTE,Okänd,sensor,"measure_temperature, measure_humidity, measure_battery",homey:app:com.netatmo
+cc564a3a-4733-4688-ac1d-74700fa9b2c0,Källarentre-Spot-10,Okänd,light,"onoff, dim",homey:app:com.ikea.tradfri
+cc71ac4f-f444-4444-b176-9fbcc42ce6b7,WH2 x OUT,Okänd,sensor,measure_temperature,homey:app:com.weather-sensors
+cd6b48ec-95b7-41be-9b2a-65eecb5f9489,AltanSpot-05-RGBW,Okänd,light,"onoff, dim, light_mode, light_hue, light_saturation, light_temperature",homey:app:com.ikea.tradfri
+cdd7ace9-2e13-43e9-98e9-e8859287cd5e,Klot-11,Okänd,light,"onoff, dim",homey:app:com.ikea.tradfri
+cff48f8e-95a6-444c-b165-94b0567ea074,V-Rum Hörn,Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+d2784fd7-d368-4d43-9f54-f84d6ea68616,WH2 ny  UTE Telldus ,Okänd,sensor,measure_temperature,homey:app:com.weather-sensors
+d3b191a8-1238-4606-bec8-de6965c96b29,Tak Hall,Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+d42b13ff-34db-4cf6-9602-2823e363f299,Rörelse Källarentre dörr MYGGSPRAY wrlss mtn sensor,Okänd,sensor,"measure_battery, button.identify, measure_luminance, alarm_motion",homey:manager:vdevice
+d55bdd50-ce13-44b4-914e-27d423707e30,Källarentre-Spot-14,Okänd,light,"onoff, dim",homey:app:com.ikea.tradfri
+d6d46916-e9d7-450a-b596-91c0631db8b1,VS-BV-Kök Spisfläkt Rodret,Okänd,remote,measure_battery,homey:app:com.ikea.tradfri
+d7615c6e-cb74-4f67-9c0c-29138502bb57,Garage Vänster,Okänd,socket,"onoff, dim",homey:manager:vdevice
+d8e98da4-f2d8-4fb2-9125-522614add2a3,FK3 Generic Remote/Button,Okänd,remote,Ingen,homey:app:se.nexa
+d91706c6-caba-407b-a560-574a65f2e0ea,02-Remote Control,Okänd,remote,alarm_battery,homey:app:com.ikea.tradfri
+db83fd7e-89bd-42de-92fd-5fb8d87c2e5c,Rörelse-Vallhorn-04,Okänd,sensor,"alarm_motion, measure_luminance, measure_battery",homey:app:com.ikea.tradfri
+dc018790-a765-4ee1-8d89-c7f718b02d31,WH2 ÖV UTE ,Okänd,sensor,"measure_temperature, measure_humidity",homey:app:com.weather-sensors
+dcc4948c-ea89-416a-a030-b67e842b13d3,Huvudentre-RING,Okänd,doorbell,Ingen,homey:app:com.ring
+e24d3a90-091a-4448-b1a6-4fdd078d3bfb,EWT0006,Okänd,remote,Ingen,homey:app:se.telldus
+e62ecd48-e97e-4b77-a333-32c54e4d9317,Automower-GRIND,Okänd,socket,onoff,homey:app:se.nexa
+e8d2636f-f095-4357-9ad8-1a5c2bfd8137,Rörelse-Vallhorn-03,Okänd,sensor,"alarm_motion, measure_luminance, measure_battery",homey:app:com.ikea.tradfri
+e8e8f03c-5d6b-403b-a57f-b5e0016e196b,Spot-trapp-02 (GU10),Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+ea940587-18b6-4bb1-b921-67f90a942bb9,Inglasning Spotl On/Off,Okänd,socket,onoff,homey:app:se.nexa
+ed1818cc-cd67-4fa3-8240-5388c71a306f,BV Hall Vä,Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+ef45fe56-4b00-4a99-b60f-e7c5dee12072,VS-AltanKlot Styrbar ,Okänd,remote,measure_battery,homey:app:com.ikea.tradfri
+efb62cca-9740-4e3d-869e-8e4ed4418fb4,Rörelse 03 Smart PIR Motion Sensor,Okänd,sensor,"alarm_motion, alarm_battery",homey:app:com.tuya.zigbee
+f04a901e-0c1f-484b-bfa8-cdee5875b806,ÖV Badrum termostat  4512744/45,Okänd,thermostat,"onoff, measure_power, meter_power, measure_temperature, target_temperature, my_4512744_thermostat_mode, my_ZV9092A_temperature_control_reference, my_ZV9092A_home_sensor, my_ZV9092A_floor_sensor",homey:app:net.filllip-namron
+f1ddfe14-5117-4ece-9c5d-6e3846e16d7a,AltanSpot-02,Okänd,light,"onoff, dim, light_mode, light_hue, light_saturation, light_temperature",homey:app:com.ikea.tradfri
+f1f9d2f3-cebe-4d25-80e6-05880c147687,Säng-VÄ (E14),Okänd,light,"onoff, dim, light_temperature",homey:app:com.ikea.tradfri
+f2e30e2b-b1ca-4fb8-8163-4e50d4039ae9,k7 — ÖV Kontor,Okänd,thermostat,"measure_temperature, target_temperature, measure_battery, alarm_contact.window, netatmo_thermostat_mode",homey:app:com.netatmo
+f3ab284d-e627-4db1-a64c-f7930822bfbe,Rörelse Ozzi PA-88R,Okänd,sensor,alarm_motion,homey:app:se.telldus
+f817cf23-33b5-436b-b8d1-3ab431cf31bc,WH2 -- kanske garage el skyddsrum,Okänd,sensor,measure_temperature,homey:app:com.weather-sensors
+f81885f5-b6cb-4dd6-afe2-551f94cc30db,Rörelse Garage LMDT-609,Okänd,sensor,alarm_motion,homey:app:se.nexa
+f8b8b8c6-bff1-4d29-8cc0-cdfad126deaa,Klot-32,Okänd,light,"onoff, dim",homey:app:com.ikea.tradfri
+f8fc5582-6601-4b71-9208-0ad9e3d5dff8,Arbplats Generic Remote/Button,Okänd,remote,Ingen,homey:app:se.nexa
+fdb27df2-3b4c-4588-9672-f986b17aea63,Rörelse Källarentre trappa MYGGSPRAY wrlss mtn sensor,Okänd,sensor,"measure_battery, button.identify, measure_luminance, alarm_motion",homey:manager:vdevice
+fe638526-37c0-49d1-944f-c2751f87d67a,Klot-13,Okänd,light,"onoff, dim",homey:app:com.ikea.tradfri
+ff9a4adf-c5d7-4825-a477-a9b8cba168d5,k7 regn (K7-INNE) — K7-regn,Okänd,sensor,"measure_rain, measure_rain.1h, measure_rain.24h, measure_battery",homey:app:com.netatmo
+9436c9e1-7a35-44ca-bb03-42a91f7702b0,MYGGBETT door/window sensor,Okänd,sensor,"measure_battery, button.identify, alarm_contact",homey:app:com.ikea.tradfri

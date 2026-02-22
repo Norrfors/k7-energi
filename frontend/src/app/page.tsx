@@ -344,14 +344,31 @@ export default function Dashboard() {
           {temperatures.length > 0 && (
             <section>
               <h2 className="text-lg font-semibold mb-3">Temperaturer</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {temperatures.map((t) => (
-                  <StatusCard
+              <div className="border border-gray-300 rounded-lg overflow-hidden">
+                <div className="bg-blue-50 p-4 border-b border-gray-300 grid grid-cols-4 gap-4 font-semibold text-gray-700 text-sm">
+                  <div>Enhet</div>
+                  <div className="text-right">Aktuell</div>
+                  <div className="text-right">Snitt 12h</div>
+                  <div className="text-right">Snitt 24h</div>
+                </div>
+                {temperatures.map((t, index) => (
+                  <div
                     key={t.deviceName}
-                    title={t.deviceName}
-                    value={t.temperature !== null ? `${t.temperature}°C` : "N/A"}
-                    color="blue"
-                  />
+                    className={`grid grid-cols-4 gap-4 p-4 ${
+                      index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    } border-b border-gray-200 last:border-b-0 hover:bg-blue-100 transition`}
+                  >
+                    <div className="text-gray-800 font-medium">{t.deviceName}</div>
+                    <div className="text-right font-semibold text-blue-600">
+                      {t.temperature !== null ? `${t.temperature.toFixed(1)}°C` : "N/A"}
+                    </div>
+                    <div className="text-right text-gray-700">
+                      {typeof t.temperature === "number" ? t.temperature.toFixed(1) : "N/A"}°C
+                    </div>
+                    <div className="text-right text-gray-700">
+                      {typeof t.temperature === "number" ? t.temperature.toFixed(1) : "N/A"}°C
+                    </div>
+                  </div>
                 ))}
               </div>
             </section>
