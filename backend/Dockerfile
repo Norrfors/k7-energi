@@ -5,6 +5,9 @@ FROM node:18-alpine
 
 WORKDIR /app
 
+# Installera OpenSSL för Prisma (Prisma kräver libssl.so.1.1)
+RUN apk add --no-cache openssl
+
 # Installera dependencies (inkl. devDependencies för TypeScript-build)
 COPY package*.json ./
 RUN npm ci
