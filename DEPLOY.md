@@ -151,6 +151,27 @@ docker compose down               # Stänger PostgreSQL
 └─────────────────────────────────────────────┘
 ```
 
+## Förutsättningar för Docker
+
+⚠️ **Kritiska krav innan Docker-start:**
+
+1. **`frontend/public/` mapp måste existera** (även om tom)
+   ```powershell
+   New-Item -ItemType Directory -Force -Path frontend/public
+   ```
+
+2. **Backend Dockerfile måste installera devDependencies**
+   ```dockerfile
+   # ✅ KORREKT:
+   RUN npm ci  # Installerar både dependencies och devDependencies
+   
+   # ❌ FELAKTIG:
+   RUN npm ci --only=production  # Saknar @types/* för TypeScript-build
+   ```
+
+3. **`tsconfig.json` måste finnas i Docker build-kontexten**
+   - Säkerställ att `.dockerignore` **INTE** exkluderar `src/` eller `tsconfig.json`
+
 ## Starta driftmiljö
 
 **Automatisk (rekommenderat):**
@@ -172,6 +193,10 @@ docker compose up -d
 
 # 3. Verifiera status
 docker compose ps
+
+# 4. Vänta på health checks
+Start-Sleep -Seconds 10
+docker compose ps  # Alla skall visa "Healthy" eller "Up"
 ```
 
 ## Åtkomst
@@ -419,6 +444,8 @@ scripts/
 
 ---
 
+---
+
 # 🆘 Felsökning
 
 ## Dev-miljö: Backend startar inte
@@ -443,13 +470,66 @@ Error: 192.168.1.211:3001 connection refused
 Invoke-WebRequest http://localhost:3001/api/health
 ```
 
-## Drift-miljö: Containern kraschar
+## Drift-miljö: Docker build misslyckas
+
+### Fel: "Cannot find name 'setTimeout'" / TypeScript-errors
+
+**Orsak:** `@types/node` och `@types/node-cron` inte installerade i Docker.
+
+**Lösning:** Backend Dockerfile måste installera devDependencies:
+
+```dockerfile
+# ✅ KORREKT:
+RUN npm ci  # Inkluderar devDependencies
+
+# ❌ FELAKTIG:
+RUN npm ci --only=production  # Exkluderar @types/*
+```
+
+### Fel: "Cannot find path '/app/public': not found"
+
+**Orsak:** Frontend kräver en `public/` mapp som kan vara tom.
+
+**Lösning:**
+```powershell
+New-Item -ItemType Directory -Force -Path frontend/public
+```
+
+### Fel: "Prisma Client did not initialize yet"
+
+**Orsak:** `prisma generate` kördes aldrig i Docker, Prisma client finns inte.
+
+**Lösning:** Backend Dockerfile måste köra prisma generate efter npm ci:
+
+```dockerfile
+# ✅ KORREKT:
+COPY package*.json ./
+RUN npm ci
+
+# Generera Prisma client INNAN TypeScript-kompilering
+COPY prisma ./prisma
+RUN npx prisma generate
+
+COPY src ./src
+COPY tsconfig.json ./
+```
+
+**Förklaring:** Prisma behöver generera sin client från schema före TypeScript-build, annars misslyckas app-starten.
+
+## Drift-miljö: Container kraschar efter start
 
 ```powershell
 # Se loggar:
-docker compose logs backend
+docker compose logs backend --tail 50
+docker compose logs frontend --tail 50
+```
 
-# Rebuild och starta på nytt:
+**Vanliga fel:**
+- `Error: connect ECONNREFUSED 127.0.0.1:5432` → Database startar inte
+- `error TS7006: Parameter 'r' implicitly has an 'any' type` → TypeScript-fel i kod
+
+**Rebuild och starta på nytt:**
+```powershell
 docker compose down
 docker compose build --no-cache
 docker compose up -d
@@ -458,12 +538,12 @@ docker compose up -d
 ## Drift-miljö: Database kan inte nå data från förra gången
 
 ```powershell
-# Rengör volumes:
+# Rengör volumes (TAR BORT ALL DATA!):
 docker compose down -v
 docker compose up -d
 ```
 
-⚠️ **Varning:** Tar bort all data!
+⚠️ **Varning:** Denna kommando tar bort all lagringad data i databasen!
 
 ---
 
@@ -475,16 +555,29 @@ docker compose up -d
 - [ ] `.env` finns med rätt variabler
 - [ ] Docker Desktop körs
 
-## Före drift-start
-- [ ] `docker compose build` lyckades utan fel
-- [ ] `docker compose up -d` startar utan fel
-- [ ] `docker compose ps` visar 3 services som `healthy`
+## Före drift-start (Docker)
+
+**Förberedelser:**
+- [ ] `frontend/public/` mapp existerar (kan vara tom)
+- [ ] `backend/.dockerignore` exkluderar **INTE** `src/` eller `tsconfig.json`
+- [ ] `frontend/.dockerignore` exkluderar **INTE** `src/` eller `tsconfig.json`
+- [ ] Backend Dockerfile använder `npm ci` (inte `--only=production`)
+
+**Docker build & start:**
+- [ ] `docker compose build --no-cache` slutfördes utan fel
+- [ ] `docker compose up -d` startade utan fel
+- [ ] `docker compose ps` visar 3 containers:
+  - `homey_db` – `Up (healthy)`
+  - `homey_backend` – `Up (healthy)` eller `Up (health: starting)`
+  - `homey_frontend` – `Up (healthy)` eller `Up (health: starting)`
 
 ## Testing
+
 - [ ] http://localhost:3000 laddar (eller 192.168.1.211:3000 från nät)
 - [ ] http://localhost:3001/api/health returnerar 200 OK
 - [ ] Mätardata visas i dashboard
 - [ ] Loggar skrivs till `backend/loggfil.txt`
+- [ ] Ingen TypeScript-felmeddelanden i `docker compose logs backend`
 
 ---
 
@@ -513,5 +606,6 @@ Get-Content backend/loggfil.txt -Wait
 
 ---
 
-**Sista uppdatering:** 2026-02-22  
-**Version:** v0.01
+**Sista uppdatering:** 2026-02-22 (08:42)  
+**Version:** v0.03  
+**Ändringar:** Prisma generate i Dockerfile, Docker deployment kärnpunkter dokumenterade

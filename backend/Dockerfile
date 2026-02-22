@@ -9,6 +9,10 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
+# Kopiera Prisma-schema och generera client
+COPY prisma ./prisma
+RUN npx prisma generate
+
 # Kopiera TypeScript-filer
 COPY src ./src
 COPY tsconfig.json ./
