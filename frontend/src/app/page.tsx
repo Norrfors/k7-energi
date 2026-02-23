@@ -155,25 +155,17 @@ export default function Dashboard() {
   const selectAllInne = () => {
     // First, ensure sensors are classified
     const updated = new Map(sensorLocations);
-    let classified = false;
     temperatures.forEach(temp => {
       if (!updated.has(temp.deviceName) && temp.temperature !== null) {
-        if (temp.temperature < 10) {
-          updated.set(temp.deviceName, "UTE");
-        } else {
-          updated.set(temp.deviceName, "INNE");
-        }
-        classified = true;
+        updated.set(temp.deviceName, temp.temperature < 10 ? "UTE" : "INNE");
       }
     });
-    if (classified) {
-      setSensorLocations(updated);
-      saveSensorLocations(updated);
-    }
+    setSensorLocations(updated);
+    saveSensorLocations(updated);
     
-    // Now filter INNE sensors
+    // Filter INNE sensors using the updated classifications
     const inneNames = temperatures
-      .filter(t => getEffectiveLocation(t.deviceName) === "INNE")
+      .filter(t => updated.get(t.deviceName) === "INNE")
       .map(t => t.deviceName);
     setVisibleTemperatures(new Set(inneNames));
     saveVisibleSensors(new Set(inneNames));
@@ -183,25 +175,17 @@ export default function Dashboard() {
   const selectAllUte = () => {
     // First, ensure sensors are classified
     const updated = new Map(sensorLocations);
-    let classified = false;
     temperatures.forEach(temp => {
       if (!updated.has(temp.deviceName) && temp.temperature !== null) {
-        if (temp.temperature < 10) {
-          updated.set(temp.deviceName, "UTE");
-        } else {
-          updated.set(temp.deviceName, "INNE");
-        }
-        classified = true;
+        updated.set(temp.deviceName, temp.temperature < 10 ? "UTE" : "INNE");
       }
     });
-    if (classified) {
-      setSensorLocations(updated);
-      saveSensorLocations(updated);
-    }
+    setSensorLocations(updated);
+    saveSensorLocations(updated);
     
-    // Now filter UTE sensors
+    // Filter UTE sensors using the updated classifications
     const uteNames = temperatures
-      .filter(t => getEffectiveLocation(t.deviceName) === "UTE")
+      .filter(t => updated.get(t.deviceName) === "UTE")
       .map(t => t.deviceName);
     setVisibleTemperatures(new Set(uteNames));
     saveVisibleSensors(new Set(uteNames));
@@ -555,7 +539,7 @@ export default function Dashboard() {
         </div>
         <div className="text-right">
           <p className="text-xs font-semibold text-gray-400">Version</p>
-          <p className="text-lg font-bold text-blue-600">v0.18</p>
+          <p className="text-lg font-bold text-blue-600">v0.19</p>
         </div>
       </div>
 
