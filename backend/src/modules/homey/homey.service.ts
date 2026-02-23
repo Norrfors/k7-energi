@@ -55,14 +55,23 @@ export class HomeyService {
     const devices = await this.fetchDevices();
 
     return devices
-      .filter((d) => d.capabilities.includes("measure_temperature"))
-      .map((d) => ({
-        deviceId: d.id,
-        deviceName: d.name,
-        zone: d.zoneName || "Okänd",
-        temperature: d.capabilitiesObj?.measure_temperature?.value as number | null,
-        lastUpdated: d.capabilitiesObj?.measure_temperature?.lastUpdated || "",
-      }));
+      .filter((d) => d.capabilities.includes("measure_temperature") || d.capabilities.includes("outdoorTemperature"))
+      .map((d) => {
+        const hasOutdoorTemp = d.capabilities.includes("outdoorTemperature");
+        const tempValue = hasOutdoorTemp 
+          ? d.capabilitiesObj?.outdoorTemperature?.value as number | null
+          : d.capabilitiesObj?.measure_temperature?.value as number | null;
+        const lastUpdated = hasOutdoorTemp
+          ? d.capabilitiesObj?.outdoorTemperature?.lastUpdated || ""
+          : d.capabilitiesObj?.measure_temperature?.lastUpdated || "";
+
+        return {
+          deviceId: d.id,
+          deviceName: d.name,
+          temperature: tempValue,
+          lastUpdated,
+        };
+      });
   }
 
   // Hämta all energiförbrukning just nu
@@ -74,7 +83,6 @@ export class HomeyService {
       .map((d) => ({
         deviceId: d.id,
         deviceName: d.name,
-        zone: d.zoneName || "Okänd",
         watts: d.capabilitiesObj?.measure_power?.value as number | null,
         meterPower: d.capabilitiesObj?.meter_power?.value as number | null,
         lastUpdated: d.capabilitiesObj?.measure_power?.lastUpdated || "",
@@ -91,7 +99,7 @@ export class HomeyService {
           data: {
             deviceId: reading.deviceId,
             deviceName: reading.deviceName,
-            zone: reading.zone,
+            zone: "Okänd",
             temperature: reading.temperature,
           },
         });
@@ -111,7 +119,7 @@ export class HomeyService {
           data: {
             deviceId: reading.deviceId,
             deviceName: reading.deviceName,
-            zone: reading.zone,
+            zone: "Okänd",
             watts: reading.watts,
           },
         });
