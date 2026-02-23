@@ -530,7 +530,7 @@ export default function Dashboard() {
         </div>
         <div className="text-right">
           <p className="text-xs font-semibold text-gray-400">Version</p>
-          <p className="text-lg font-bold text-blue-600">v0.21</p>
+          <p className="text-lg font-bold text-blue-600">v0.22</p>
         </div>
       </div>
 
@@ -934,7 +934,7 @@ export default function Dashboard() {
                     onClick={selectAllSensors}
                     className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
                   >
-                    Markera alla
+                    Visa alla
                   </button>
                   <button
                     onClick={selectAllInne}
