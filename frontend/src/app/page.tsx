@@ -46,6 +46,8 @@ export default function Dashboard() {
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [homeyConnected, setHomeyConnected] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+  const [isRetrying, setIsRetrying] = useState(false);
   
   // Sensor visibility state (localStorage-based)
   const [temperatureSensors, setTemperatureSensors] = useState<SensorInfo[]>([]);
@@ -53,6 +55,7 @@ export default function Dashboard() {
   const [sensorsLoading, setSensorsLoading] = useState(false);
   const [visibleTemperatures, setVisibleTemperatures] = useState<Set<string>>(new Set());
   const [visibleEnergy, setVisibleEnergy] = useState<Set<string>>(new Set());
+  const [sensorLocations, setSensorLocations] = useState<Map<string, "INNE" | "UTE">>(new Map());
   
   // Settings state
   const [manualMeterValue, setManualMeterValueInput] = useState<string>("");
@@ -87,7 +90,7 @@ export default function Dashboard() {
     return "📍 MÄTARE";
   };
 
-  // localStorage helpers
+  // localStorage helpers for sensor visibility
   const loadVisibleSensors = (): Set<string> => {
     if (typeof window === "undefined") return new Set();
     const stored = localStorage.getItem("visibleTemperatures");
@@ -97,6 +100,29 @@ export default function Dashboard() {
   const saveVisibleSensors = (visible: Set<string>) => {
     if (typeof window === "undefined") return;
     localStorage.setItem("visibleTemperatures", JSON.stringify(Array.from(visible)));
+  };
+
+  // localStorage helpers for sensor locations (INNE/UTE)
+  const loadSensorLocations = (): Map<string, "INNE" | "UTE"> => {
+    if (typeof window === "undefined") return new Map();
+    const stored = localStorage.getItem("sensorLocations");
+    return stored ? new Map(JSON.parse(stored)) : new Map();
+  };
+
+  const saveSensorLocations = (locations: Map<string, "INNE" | "UTE">) => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem("sensorLocations", JSON.stringify(Array.from(locations.entries())));
+  };
+
+  const setSensorLocation = (deviceName: string, location: "INNE" | "UTE") => {
+    const updated = new Map(sensorLocations);
+    updated.set(deviceName, location);
+    setSensorLocations(updated);
+    saveSensorLocations(updated);
+  };
+
+  const getSensorLocation = (deviceName: string): "INNE" | "UTE" | null => {
+    return sensorLocations.get(deviceName) || null;
   };
 
   // Toggle temperature sensor visibility
@@ -116,7 +142,7 @@ export default function Dashboard() {
   // Select all INNE sensors
   const selectAllInne = () => {
     const inneNames = temperatures
-      .filter(t => getLocationLabel(t.deviceName).includes("INNE"))
+      .filter(t => getSensorLocation(t.deviceName) === "INNE")
       .map(t => t.deviceName);
     setVisibleTemperatures(new Set(inneNames));
     saveVisibleSensors(new Set(inneNames));
@@ -125,7 +151,7 @@ export default function Dashboard() {
   // Select all UTE sensors
   const selectAllUte = () => {
     const uteNames = temperatures
-      .filter(t => getLocationLabel(t.deviceName).includes("UTE"))
+      .filter(t => getSensorLocation(t.deviceName) === "UTE")
       .map(t => t.deviceName);
     setVisibleTemperatures(new Set(uteNames));
     saveVisibleSensors(new Set(uteNames));
@@ -151,10 +177,12 @@ export default function Dashboard() {
     return sum / readings.length;
   };
 
-  // Ladda synliga sensorer från localStorage vid start
+  // Ladda synliga sensorer och sensorplatsmarkeringar från localStorage vid start
   useEffect(() => {
     const visible = loadVisibleSensors();
     setVisibleTemperatures(visible);
+    const locations = loadSensorLocations();
+    setSensorLocations(locations);
   }, []);
 
   async function loadData() {
@@ -227,9 +255,98 @@ export default function Dashboard() {
     }
   }
 
+  // Retry with exponential backoff
+  const retryLoadData = async () => {
+    const MAX_RETRIES = 10;
+    const RETRY_DELAY = 2000;
+    
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      try {
+        if (attempt > 0) {
+          setIsRetrying(true);
+          setRetryCount(attempt);
+          setError("");
+          log(`Försöker ansluta... (försök ${attempt}/${MAX_RETRIES})`);
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+        }
+        
+        const healthData = await getHealth();
+        setHealth(healthData);
+        
+        // Ladda temperaturer, energi och historia
+        try {
+          const [currentTemps, energyData, historyData] = await Promise.all([
+            getTemperatures(),
+            getEnergy(),
+            getTemperatureHistory(24),
+          ]);
+          
+          const tempsWithAverages = currentTemps.map(t => ({
+            ...t,
+            avg12h: calculateAverages(historyData, t.deviceName, 12),
+            avg24h: calculateAverages(historyData, t.deviceName, 24),
+          }));
+          
+          setTemperatures(tempsWithAverages);
+          setEnergy(energyData);
+          setHomeyConnected(true);
+        } catch (err) {
+          setTemperatures([]);
+          setEnergy([]);
+          setHomeyConnected(false);
+        }
+        
+        // Ladda sensorer
+        try {
+          const [tempSensors, engySensors] = await Promise.all([
+            getTemperatureSensors(),
+            getEnergySensors(),
+          ]);
+          setTemperatureSensors(tempSensors);
+          setEnergySensors(engySensors);
+        } catch (err) {
+          log("Sensor-inställningar kunde inte hämtas", err);
+        }
+        
+        // Ladda mätardata
+        try {
+          const [meterData, meterHistoryData] = await Promise.all([
+            getMeterLatest(),
+            getMeterLast24Hours(),
+          ]);
+          setMeter(meterData);
+          setMeterHistory(meterHistoryData);
+        } catch (err) {
+          setMeter(null);
+          setMeterHistory([]);
+        }
+        
+        setIsRetrying(false);
+        setRetryCount(0);
+        setLoading(false);
+        return; // Lyckat
+      } catch (err) {
+        log(`Försök ${attempt + 1} misslyckades`, err);
+      }
+    }
+    
+    // Alla försök misslyckades
+    setError("Backend svarar inte. Kontrollera att servern körs på port 3001.");
+    setIsRetrying(false);
+    setLoading(false);
+  }
+  
+  // Manuell retry-knapp
+  const handleRetry = () => {
+    setLoading(true);
+    setError("");
+    setRetryCount(0);
+    retryLoadData();
+  }
+
   // Ladda data vid mount
   useEffect(() => {
-    loadData();
+    retryLoadData();
     const interval = setInterval(loadData, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -401,15 +518,36 @@ export default function Dashboard() {
     }
   }
 
-  if (loading) {
-    return <p className="text-gray-500">Laddar...</p>;
+  if (loading && !isRetrying) {
+    return <p className="text-gray-500 text-center py-8">Laddar...</p>;
+  }
+
+  if (isRetrying) {
+    return (
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-md mx-auto mt-8">
+        <div className="text-center">
+          <div className="inline-block mb-4">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+          </div>
+          <h2 className="text-lg font-semibold text-blue-800">Ansluter till backend...</h2>
+          <p className="text-blue-700 mt-2">Försök {retryCount} av 10</p>
+          <p className="text-blue-600 text-sm mt-4">Väntar på att servern ska svara</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+      <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto mt-8">
         <h2 className="text-lg font-semibold text-red-800">Anslutningsfel</h2>
         <p className="text-red-700 mt-2">{error}</p>
+        <button
+          onClick={handleRetry}
+          className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition font-medium"
+        >
+          Försök igen
+        </button>
       </div>
     );
   }
@@ -851,7 +989,7 @@ export default function Dashboard() {
                     .sort((a, b) => a.deviceName.localeCompare(b.deviceName))
                     .map((temp) => {
                     const isVisible = visibleTemperatures.size === 0 || visibleTemperatures.has(temp.deviceName);
-                    const location = getLocationLabel(temp.deviceName);
+                    const location = getSensorLocation(temp.deviceName);
                     return (
                       <div
                         key={temp.deviceName}
@@ -872,9 +1010,31 @@ export default function Dashboard() {
                             >
                               {temp.deviceName}
                             </label>
-                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                              {location}
-                            </span>
+                          </div>
+                          <div className="flex items-center gap-3 mt-2 ml-6">
+                            <span className="text-xs text-gray-600">Typ:</span>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => setSensorLocation(temp.deviceName, "INNE")}
+                                className={`px-2 py-1 text-xs rounded transition ${
+                                  location === "INNE"
+                                    ? "bg-green-200 text-green-900 font-semibold"
+                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                }`}
+                              >
+                                🏠 INNE
+                              </button>
+                              <button
+                                onClick={() => setSensorLocation(temp.deviceName, "UTE")}
+                                className={`px-2 py-1 text-xs rounded transition ${
+                                  location === "UTE"
+                                    ? "bg-orange-200 text-orange-900 font-semibold"
+                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                }`}
+                              >
+                                🌤️ UTE
+                              </button>
+                            </div>
                           </div>
                           <p className="text-xs text-gray-500 mt-1">{temp.zone}</p>
                         </div>
