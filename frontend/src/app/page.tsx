@@ -473,7 +473,7 @@ export default function Dashboard() {
         </div>
         <div className="text-right">
           <p className="text-xs font-semibold text-gray-400">Version</p>
-          <p className="text-lg font-bold text-blue-600">v0.12</p>
+          <p className="text-lg font-bold text-blue-600">v0.13</p>
         </div>
       </div>
 
