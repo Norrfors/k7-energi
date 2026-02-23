@@ -65,7 +65,7 @@ Start-Sleep -Seconds 3
 
 Write-Host ""
 Write-Host "=== All Services Running ===" -ForegroundColor Green
-Write-Host "Frontend:  http://localhost:3002" -ForegroundColor Cyan
+Write-Host "Frontend:  http://localhost:3000" -ForegroundColor Cyan
 Write-Host "Backend:   http://localhost:3001" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "To stop: taskkill /f /im node.exe" -ForegroundColor Gray
