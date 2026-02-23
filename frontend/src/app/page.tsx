@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getHealth, getTemperatures, getEnergy, getMeterLatest, getMeterToday, getMeterLast24Hours, setManualMeterValue, getBackupSettings, saveBackupSettings, performManualBackup, BackupSettings } from "@/lib/api";
+import { getHealth, getTemperatures, getEnergy, getMeterLatest, getMeterToday, getMeterLast24Hours, setManualMeterValue, getBackupSettings, saveBackupSettings, performManualBackup, BackupSettings, getTemperatureHistory } from "@/lib/api";
 import { StatusCard } from "@/components/StatusCard";
 
 interface Temperature {
   deviceName: string;
   temperature: number | null;
   zone: string;
+  avg12h?: number | null;
+  avg24h?: number | null;
 }
 
 interface Energy {
@@ -65,27 +67,49 @@ export default function Dashboard() {
     console.log(`[Dashboard] ${message}`, data || "");
   };
 
+  // Beräkna medelvärder från temperaturhistorik
+  const calculateAverages = (history: Array<{id: number; deviceName: string; temperature: number; createdAt: string}>, deviceName: string, hoursBack: number): number | null => {
+    const now = Date.now();
+    const timeLimit = now - hoursBack * 60 * 60 * 1000;
+    const readings = history.filter(h => 
+      h.deviceName === deviceName && 
+      new Date(h.createdAt).getTime() >= timeLimit
+    );
+    if (readings.length === 0) return null;
+    const sum = readings.reduce((acc, r) => acc + r.temperature, 0);
+    return sum / readings.length;
+  };
+
   async function loadData() {
     try {
       log("Laddar data...");
       const healthData = await getHealth();
       setHealth(healthData);
 
-      // Ladd temperaturer och energi (kan faila utan att blockera mätardata)
+      // Ladd temperaturer, energi och historia
       try {
-        const [tempData, energyData] = await Promise.all([
+        const [currentTemps, energyData, historyData] = await Promise.all([
           getTemperatures(),
           getEnergy(),
+          getTemperatureHistory(24),
         ]);
-        setTemperatures(tempData);
+        
+        // Beräkna medelvärden för varje enhet från historiken
+        const tempsWithAverages = currentTemps.map(t => ({
+          ...t,
+          avg12h: calculateAverages(historyData, t.deviceName, 12),
+          avg24h: calculateAverages(historyData, t.deviceName, 24),
+        }));
+        
+        setTemperatures(tempsWithAverages);
         setEnergy(energyData);
         setHomeyConnected(true);
-        log("Homey-data loadad framgångsrikt");
-      } catch {
+        log("Temperatur- och energi-data loadad framgångsrikt", currentTemps.length + " enheter");
+      } catch (err) {
         setTemperatures([]);
         setEnergy([]);
         setHomeyConnected(false);
-        log("Homey-data inte tillgänglig (timeout?)");
+        log("Temperatur-data inte tillgänglig", err);
       }
 
       // Ladd mätardata separat (ska alltid fungera om DB är ansluten)
@@ -363,10 +387,10 @@ export default function Dashboard() {
                       {t.temperature !== null ? `${t.temperature.toFixed(1)}°C` : "N/A"}
                     </div>
                     <div className="text-right text-gray-700">
-                      {typeof t.temperature === "number" ? t.temperature.toFixed(1) : "N/A"}°C
+                      {t.avg12h !== null && t.avg12h !== undefined ? `${t.avg12h.toFixed(1)}°C` : "N/A"}
                     </div>
                     <div className="text-right text-gray-700">
-                      {typeof t.temperature === "number" ? t.temperature.toFixed(1) : "N/A"}°C
+                      {t.avg24h !== null && t.avg24h !== undefined ? `${t.avg24h.toFixed(1)}°C` : "N/A"}
                     </div>
                   </div>
                 ))}

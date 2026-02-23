@@ -44,17 +44,6 @@ export function getTemperatures() {
   >("/api/homey/temperatures");
 }
 
-export function getEnergy() {
-  return apiFetch<
-    Array<{
-      deviceName: string;
-      watts: number | null;
-      zone: string;
-      lastUpdated: string;
-    }>
-  >("/api/homey/energy");
-}
-
 export function getTemperatureHistory(hours: number = 24) {
   return apiFetch<
     Array<{
@@ -64,6 +53,17 @@ export function getTemperatureHistory(hours: number = 24) {
       createdAt: string;
     }>
   >(`/api/history/temperatures?hours=${hours}`);
+}
+
+export function getEnergy() {
+  return apiFetch<
+    Array<{
+      deviceName: string;
+      watts: number | null;
+      zone: string;
+      lastUpdated: string;
+    }>
+  >("/api/homey/energy");
 }
 
 export function discoverHomey() {
