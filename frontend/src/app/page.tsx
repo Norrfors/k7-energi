@@ -54,6 +54,7 @@ export default function Dashboard() {
   const [visibleTemperatures, setVisibleTemperatures] = useState<Set<string>>(new Set());
   const [visibleEnergy, setVisibleEnergy] = useState<Set<string>>(new Set());
   const [sensorLocations, setSensorLocations] = useState<Map<string, "INNE" | "UTE">>(new Map());
+  const [tempListFilter, setTempListFilter] = useState<"INNE" | "UTE" | null>(null); // Filter för temperaturlistan
   
   // Settings state
   const [manualMeterValue, setManualMeterValueInput] = useState<string>("");
@@ -151,9 +152,9 @@ export default function Dashboard() {
     return null;
   };
 
-  // Select all INNE sensors - auto-classify first if needed
+  // Select all INNE sensors - just filter the list, don't affect dashboard visibility
   const selectAllInne = () => {
-    // First, ensure sensors are classified
+    // Ensure sensors are classified
     const updated = new Map(sensorLocations);
     temperatures.forEach(temp => {
       if (!updated.has(temp.deviceName) && temp.temperature !== null) {
@@ -163,17 +164,13 @@ export default function Dashboard() {
     setSensorLocations(updated);
     saveSensorLocations(updated);
     
-    // Filter INNE sensors using the updated classifications
-    const inneNames = temperatures
-      .filter(t => updated.get(t.deviceName) === "INNE")
-      .map(t => t.deviceName);
-    setVisibleTemperatures(new Set(inneNames));
-    saveVisibleSensors(new Set(inneNames));
+    // Just filter the list display to show only INNE sensors
+    setTempListFilter("INNE");
   };
 
-  // Select all UTE sensors - auto-classify first if needed
+  // Select all UTE sensors - just filter the list, don't affect dashboard visibility
   const selectAllUte = () => {
-    // First, ensure sensors are classified
+    // Ensure sensors are classified
     const updated = new Map(sensorLocations);
     temperatures.forEach(temp => {
       if (!updated.has(temp.deviceName) && temp.temperature !== null) {
@@ -183,19 +180,13 @@ export default function Dashboard() {
     setSensorLocations(updated);
     saveSensorLocations(updated);
     
-    // Filter UTE sensors using the updated classifications
-    const uteNames = temperatures
-      .filter(t => updated.get(t.deviceName) === "UTE")
-      .map(t => t.deviceName);
-    setVisibleTemperatures(new Set(uteNames));
-    saveVisibleSensors(new Set(uteNames));
+    // Just filter the list display to show only UTE sensors
+    setTempListFilter("UTE");
   };
 
   // Select all sensors
   const selectAllSensors = () => {
-    const allNames = temperatures.map(t => t.deviceName);
-    setVisibleTemperatures(new Set(allNames));
-    saveVisibleSensors(new Set(allNames));
+    setTempListFilter(null); // Show all sensors
   };
 
   // Auto-classify sensors based on temperature: <10°C = UTE, >=10°C = INNE
@@ -539,7 +530,7 @@ export default function Dashboard() {
         </div>
         <div className="text-right">
           <p className="text-xs font-semibold text-gray-400">Version</p>
-          <p className="text-lg font-bold text-blue-600">v0.20</p>
+          <p className="text-lg font-bold text-blue-600">v0.21</p>
         </div>
       </div>
 
@@ -984,15 +975,23 @@ export default function Dashboard() {
                   {/* Table rows */}
                   {temperatures
                     .sort((a, b) => a.deviceName.localeCompare(b.deviceName))
+                    .filter(temp => {
+                      // Apply list filter (INNE/UTE/null = all)
+                      if (tempListFilter === null) return true;
+                      const location = getSensorLocation(temp.deviceName);
+                      // If sensor not classified, classify based on temp
+                      if (!location && temp.temperature !== null) {
+                        return tempListFilter === (temp.temperature < 10 ? "UTE" : "INNE");
+                      }
+                      return location === tempListFilter;
+                    })
                     .map((temp, idx) => {
                     const isVisible = visibleTemperatures.size === 0 || visibleTemperatures.has(temp.deviceName);
                     const location = getSensorLocation(temp.deviceName);
                     return (
                       <div
                         key={temp.deviceName}
-                        className={`grid grid-cols-12 gap-2 px-2 py-2 items-center text-xs ${
-                          idx % 2 === 0 ? "bg-white" : "bg-gray-50"
-                        } border-b border-gray-200 last:border-b-0 hover:bg-blue-50 transition`}
+                        className={`grid grid-cols-12 gap-2 px-2 py-2 items-center text-xs bg-white border-b border-gray-200 last:border-b-0 hover:bg-blue-50 transition`}
                       >
                         {/* Sensornamn */}
                         <div className="col-span-3 font-medium text-gray-900 truncate">
