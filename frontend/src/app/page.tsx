@@ -344,7 +344,7 @@ export default function Dashboard() {
         </div>
         <div className="text-right">
           <p className="text-xs font-semibold text-gray-400">Version</p>
-          <p className="text-lg font-bold text-blue-600">v0.07</p>
+          <p className="text-lg font-bold text-blue-600">v0.08</p>
         </div>
       </div>
 
@@ -422,8 +422,11 @@ export default function Dashboard() {
                 </div>
                 {temperatures
                   .filter(t => {
+                    // Om ingen sensor-inställningar laddats ännu, visa alla (fallback)
+                    if (temperatureSensors.length === 0) return true;
                     const sensorSetting = temperatureSensors.find(s => s.deviceName === t.deviceName);
-                    return sensorSetting?.isVisible !== false; // Visa om isVisible är true eller ej definierat
+                    // Om inget setting hittas, visa sensorn per default
+                    return sensorSetting ? sensorSetting.isVisible : true;
                   })
                   .map((t, index) => (
                   <div
@@ -456,8 +459,11 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {energy
                   .filter(e => {
+                    // Om ingen sensor-inställningar laddats ännu, visa alla (fallback)
+                    if (energySensors.length === 0) return true;
                     const sensorSetting = energySensors.find(s => s.deviceName === e.deviceName);
-                    return sensorSetting?.isVisible !== false; // Visa om isVisible är true eller ej definierat
+                    // Om inget setting hittas, visa sensorn per default
+                    return sensorSetting ? sensorSetting.isVisible : true;
                   })
                   .map((e) => (
                   <StatusCard
