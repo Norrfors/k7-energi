@@ -257,25 +257,28 @@ export default function Dashboard() {
 
   // Retry with exponential backoff
   const retryLoadData = async () => {
-    const MAX_RETRIES = 10;
+    const MAX_RETRIES = 20; // Increased from 10
     const RETRY_DELAY = 2000;
     
-    setIsRetrying(true); // Start retrying immediately
+    log("=== RETRY LOAD DATA STARTED ===");
+    setIsRetrying(true);
     setLoading(true);
+    setError("");
     
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       try {
         if (attempt > 0) {
           setRetryCount(attempt);
-          setError("");
-          log(`Försöker ansluta... (försök ${attempt}/${MAX_RETRIES})`);
+          log(`⏳ Försöker ansluta... (försök ${attempt}/${MAX_RETRIES})`);
           await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
         } else {
           setRetryCount(1);
-          log("Försöker ansluta till backend...");
+          log("🔄 FÖRSÖK 1 - Ansluter till backend...");
         }
         
+        log(`📡 Calling getHealth on attempt ${attempt + 1}...`);
         const healthData = await getHealth();
+        log("✅ Health check passed! Loading all data...");
         setHealth(healthData);
         
         // Ladda temperaturer, energi och historia
@@ -295,10 +298,12 @@ export default function Dashboard() {
           setTemperatures(tempsWithAverages);
           setEnergy(energyData);
           setHomeyConnected(true);
+          log(`✅ Loaded ${currentTemps.length} temperatures and ${energyData.length} energy sensors`);
         } catch (err) {
           setTemperatures([]);
           setEnergy([]);
           setHomeyConnected(false);
+          log("⚠️ Temperature/Energy load failed, continuing...", err);
         }
         
         // Ladda sensorer
@@ -309,8 +314,9 @@ export default function Dashboard() {
           ]);
           setTemperatureSensors(tempSensors);
           setEnergySensors(engySensors);
+          log("✅ Sensor settings loaded");
         } catch (err) {
-          log("Sensor-inställningar kunde inte hämtas", err);
+          log("⚠️ Sensor settings failed (using fallback)", err);
         }
         
         // Ladda mätardata
@@ -321,22 +327,29 @@ export default function Dashboard() {
           ]);
           setMeter(meterData);
           setMeterHistory(meterHistoryData);
+          log("✅ Meter data loaded");
         } catch (err) {
           setMeter(null);
           setMeterHistory([]);
+          log("⚠️ Meter data failed", err);
         }
         
         setIsRetrying(false);
         setRetryCount(0);
         setLoading(false);
         setError("");
+        log("🎉 CONNECTION SUCCESSFUL - All data loaded!");
         return; // Lyckat
       } catch (err) {
-        log(`Försök ${attempt + 1} misslyckades`, err);
+        log(`❌ Attempt ${attempt + 1}/${MAX_RETRIES} FAILED:`, err instanceof Error ? err.message : String(err));
+        if (attempt === MAX_RETRIES - 1) {
+          log("😞 All retry attempts exhausted");
+        }
       }
     }
     
     // Alla försök misslyckades
+    log("🔴 GIVING UP AFTER 20 ATTEMPTS - Showing error screen");
     setError("Backend svarar inte. Kontrollera att servern körs på port 3001.");
     setIsRetrying(false);
     setLoading(false);

@@ -16,13 +16,19 @@ export async function apiFetch<T>(
   endpoint: string,
   options?: RequestInit
 ): Promise<T> {
-  const response = await fetch(`${API_BASE}${endpoint}`, options);
+  try {
+    const response = await fetch(`${API_BASE}${endpoint}`, options);
 
-  if (!response.ok) {
-    throw new Error(`API-fel: ${response.status} ${response.statusText}`);
+    if (!response.ok) {
+      throw new Error(`API-fel: ${response.status} ${response.statusText}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    // Log all errors including network errors
+    console.error(`[API-Fetch] Error on ${endpoint}:`, error);
+    throw error;
   }
-
-  return response.json();
 }
 
 // Specifika API-funktioner
