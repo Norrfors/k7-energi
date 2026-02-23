@@ -47,6 +47,12 @@ export class HomeyService {
     }
     const devices = await response.json() as Record<string, HomeyDevice>;
     
+    // Debug: Logga Element-Klimat om den finns
+    const elementKlimat = Object.values(devices).find((d: any) => d.name?.includes("Element-Klimat"));
+    if (elementKlimat) {
+      console.log("[HomeyService] Element-Klimat hittad - capabilities:", (elementKlimat as any).capabilities);
+    }
+    
     return Object.values(devices) as HomeyDevice[];
   }
 
@@ -55,15 +61,33 @@ export class HomeyService {
     const devices = await this.fetchDevices();
 
     return devices
-      .filter((d) => d.capabilities.includes("measure_temperature") || d.capabilities.includes("outdoorTemperature"))
+      .filter((d) => 
+        d.capabilities.includes("measure_temperature") || 
+        d.capabilities.includes("outdoorTemperature") ||
+        d.capabilities.some((c) => c.startsWith("measure_temperature."))
+      )
       .map((d) => {
-        const hasOutdoorTemp = d.capabilities.includes("outdoorTemperature");
-        const tempValue = hasOutdoorTemp 
-          ? d.capabilitiesObj?.outdoorTemperature?.value as number | null
-          : d.capabilitiesObj?.measure_temperature?.value as number | null;
-        const lastUpdated = hasOutdoorTemp
-          ? d.capabilitiesObj?.outdoorTemperature?.lastUpdated || ""
-          : d.capabilitiesObj?.measure_temperature?.lastUpdated || "";
+        let tempValue: number | null = null;
+        let lastUpdated = "";
+
+        // Försök hämta measure_temperature
+        if (d.capabilitiesObj?.measure_temperature?.value) {
+          tempValue = d.capabilitiesObj.measure_temperature.value as number;
+          lastUpdated = d.capabilitiesObj.measure_temperature.lastUpdated || "";
+        }
+        // Försök hämta outdoorTemperature
+        else if (d.capabilitiesObj?.outdoorTemperature?.value) {
+          tempValue = d.capabilitiesObj.outdoorTemperature.value as number;
+          lastUpdated = d.capabilitiesObj.outdoorTemperature.lastUpdated || "";
+        }
+        // Försök hämta measure_temperature.outdoorTemperature (nested)
+        else {
+          const nestedCapability = d.capabilities.find((c) => c === "measure_temperature.outdoorTemperature");
+          if (nestedCapability && d.capabilitiesObj?.[nestedCapability]?.value) {
+            tempValue = d.capabilitiesObj[nestedCapability].value as number;
+            lastUpdated = d.capabilitiesObj[nestedCapability].lastUpdated || "";
+          }
+        }
 
         return {
           deviceId: d.id,
@@ -71,7 +95,9 @@ export class HomeyService {
           temperature: tempValue,
           lastUpdated,
         };
-      });
+      })
+      // Filtrera bort sensorer som inte har något temperaturvärde
+      .filter((t) => t.temperature !== null);
   }
 
   // Hämta all energiförbrukning just nu
