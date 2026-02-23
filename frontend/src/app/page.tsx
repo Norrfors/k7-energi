@@ -260,14 +260,19 @@ export default function Dashboard() {
     const MAX_RETRIES = 10;
     const RETRY_DELAY = 2000;
     
+    setIsRetrying(true); // Start retrying immediately
+    setLoading(true);
+    
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
       try {
         if (attempt > 0) {
-          setIsRetrying(true);
           setRetryCount(attempt);
           setError("");
           log(`Försöker ansluta... (försök ${attempt}/${MAX_RETRIES})`);
           await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+        } else {
+          setRetryCount(1);
+          log("Försöker ansluta till backend...");
         }
         
         const healthData = await getHealth();
@@ -324,6 +329,7 @@ export default function Dashboard() {
         setIsRetrying(false);
         setRetryCount(0);
         setLoading(false);
+        setError("");
         return; // Lyckat
       } catch (err) {
         log(`Försök ${attempt + 1} misslyckades`, err);
