@@ -6,8 +6,12 @@ import { homeyRoutes } from "./modules/homey/homey.controller";
 import { historyRoutes } from "./modules/history/history.controller";
 import { meterRoutes } from "./modules/meter/meter.controller";
 import { backupRoutes } from "./modules/backup/backup.controller";
-import { settingsRoutes } from "./modules/settings/settings.controller";
 import { startScheduler } from "./shared/scheduler";
+import {
+  getAllTemperatureSensors,
+  getAllEnergySensors,
+  updateSensorVisibility,
+} from "./modules/settings/settings.service";
 
 // Debug: Visa Homey-konfiguration som laddades
 console.log(`[App] HOMEY_ADDRESS från env: ${process.env.HOMEY_ADDRESS}`);
@@ -34,7 +38,24 @@ async function start() {
   await app.register(historyRoutes);
   await app.register(meterRoutes);
   await app.register(backupRoutes);
-  await app.register(settingsRoutes);
+
+  // Settings routes – inline (plugin-pattern didn't work)
+  app.get("/api/settings/sensors/temperature", async (req, reply) => {
+    const sensors = await getAllTemperatureSensors();
+    reply.send(sensors);
+  });
+
+  app.get("/api/settings/sensors/energy", async (req, reply) => {
+    const sensors = await getAllEnergySensors();
+    reply.send(sensors);
+  });
+
+  app.put("/api/settings/sensors/:deviceId/visibility", async (req, reply) => {
+    const { deviceId } = req.params as { deviceId: string };
+    const { isVisible } = req.body as { isVisible: boolean };
+    const updated = await updateSensorVisibility(deviceId, isVisible);
+    reply.send(updated);
+  });
 
   // Health check – enkel endpoint för att testa att allt kör
   app.get("/api/health", async () => {
