@@ -137,10 +137,24 @@ export default function Dashboard() {
     });
   };
 
+  // Bestäm INNE/UTE för en sensor - först sparad location, sedan fallback från namn
+  const getEffectiveLocation = (deviceName: string): "INNE" | "UTE" | null => {
+    const saved = getSensorLocation(deviceName);
+    if (saved) return saved;
+    
+    // Fallback: klassificera baserat på deviceName
+    const ute = ["ute", "utetemperatur", "utomhus", "exterior", "outside"];
+    const inne = ["inne", "inomhus", "interior", "inside", "innetemperatur"];
+    const lower = deviceName.toLowerCase();
+    if (ute.some(u => lower.includes(u))) return "UTE";
+    if (inne.some(i => lower.includes(i))) return "INNE";
+    return null;
+  };
+
   // Select all INNE sensors
   const selectAllInne = () => {
     const inneNames = temperatures
-      .filter(t => getSensorLocation(t.deviceName) === "INNE")
+      .filter(t => getEffectiveLocation(t.deviceName) === "INNE")
       .map(t => t.deviceName);
     setVisibleTemperatures(new Set(inneNames));
     saveVisibleSensors(new Set(inneNames));
@@ -149,7 +163,7 @@ export default function Dashboard() {
   // Select all UTE sensors
   const selectAllUte = () => {
     const uteNames = temperatures
-      .filter(t => getSensorLocation(t.deviceName) === "UTE")
+      .filter(t => getEffectiveLocation(t.deviceName) === "UTE")
       .map(t => t.deviceName);
     setVisibleTemperatures(new Set(uteNames));
     saveVisibleSensors(new Set(uteNames));
@@ -503,7 +517,7 @@ export default function Dashboard() {
         </div>
         <div className="text-right">
           <p className="text-xs font-semibold text-gray-400">Version</p>
-          <p className="text-lg font-bold text-blue-600">v0.15</p>
+          <p className="text-lg font-bold text-blue-600">v0.16</p>
         </div>
       </div>
 
