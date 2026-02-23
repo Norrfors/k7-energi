@@ -16,19 +16,41 @@ export async function apiFetch<T>(
   endpoint: string,
   options?: RequestInit
 ): Promise<T> {
-  try {
-    const response = await fetch(`${API_BASE}${endpoint}`, options);
+  const MAX_RETRIES = 20;
+  const RETRY_DELAY = 1000; // 1 second between retries
+  let lastError: Error | null = null;
 
-    if (!response.ok) {
-      throw new Error(`API-fel: ${response.status} ${response.statusText}`);
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    try {
+      console.log(`[API] Attempt ${attempt + 1}/${MAX_RETRIES} for ${endpoint}`);
+      
+      const response = await fetch(`${API_BASE}${endpoint}`, {
+        ...options,
+        signal: AbortSignal.timeout(5000), // 5 second timeout per request
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      console.log(`[API] ✅ Success on attempt ${attempt + 1}: ${endpoint}`);
+      return response.json();
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error(String(error));
+      console.warn(`[API] Attempt ${attempt + 1} failed for ${endpoint}:`, lastError.message);
+      
+      // If it's the last attempt, throw immediately
+      if (attempt === MAX_RETRIES - 1) {
+        console.error(`[API] ❌ GIVING UP after ${MAX_RETRIES} attempts on ${endpoint}`);
+        throw lastError;
+      }
+      
+      // Wait before retrying
+      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
     }
-
-    return response.json();
-  } catch (error) {
-    // Log all errors including network errors
-    console.error(`[API-Fetch] Error on ${endpoint}:`, error);
-    throw error;
   }
+
+  throw lastError || new Error("Unknown error");
 }
 
 // Specifika API-funktioner

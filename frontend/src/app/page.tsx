@@ -46,8 +46,6 @@ export default function Dashboard() {
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [homeyConnected, setHomeyConnected] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
-  const [isRetrying, setIsRetrying] = useState(false);
   
   // Sensor visibility state (localStorage-based)
   const [temperatureSensors, setTemperatureSensors] = useState<SensorInfo[]>([]);
@@ -187,11 +185,14 @@ export default function Dashboard() {
 
   async function loadData() {
     try {
-      log("Laddar data...");
+      log("📡 Laddar data från backend (with auto-retry per API call)...");
+      setLoading(true);
+      setError("");
       const healthData = await getHealth();
       setHealth(healthData);
+      log("✅ Health check passed");
 
-      // Ladd temperaturer, energi och historia (separerad från sensorer för att sensorer inte ska bryta huvud-displayen)
+      // Ladda temperaturer, energi och historia
       try {
         const [currentTemps, energyData, historyData] = await Promise.all([
           getTemperatures(),
@@ -199,7 +200,6 @@ export default function Dashboard() {
           getTemperatureHistory(24),
         ]);
         
-        // Beräkna medelvärden för varje enhet från historiken
         const tempsWithAverages = currentTemps.map(t => ({
           ...t,
           avg12h: calculateAverages(historyData, t.deviceName, 12),
@@ -209,17 +209,15 @@ export default function Dashboard() {
         setTemperatures(tempsWithAverages);
         setEnergy(energyData);
         setHomeyConnected(true);
-        log("Temperatur- och energi-data loadad framgångsrikt", currentTemps.length + " enheter");
-        log("DEBUG: temperatures state sätts till", tempsWithAverages.length + " enheter");
-        log("DEBUG: energy state sätts till", energyData.length + " enheter");
+        log(`✅ Loaded ${currentTemps.length} temperatures, ${energyData.length} energy sensors`);
       } catch (err) {
         setTemperatures([]);
         setEnergy([]);
         setHomeyConnected(false);
-        log("Temperatur-data inte tillgänglig", err);
+        log("⚠️ Temperature/Energy failed (continuing)", err);
       }
 
-      // Ladd sensorer separat (kan misslyckas utan att bryta huvud-displayen)
+      // Ladda sensorer separat
       try {
         const [tempSensors, engySensors] = await Promise.all([
           getTemperatureSensors(),
@@ -227,13 +225,12 @@ export default function Dashboard() {
         ]);
         setTemperatureSensors(tempSensors);
         setEnergySensors(engySensors);
-        log("Sensor-inställningar loadade");
+        log("✅ Sensors loaded");
       } catch (err) {
-        log("Sensor-inställningar kunde inte hämtas (fallback visar alla sensorer)", err);
-        // Lämnar temperatureSensors och energySensors som tomma arrays, triggerar fallback
+        log("⚠️ Sensors failed (using fallback)", err);
       }
 
-      // Ladd mätardata separat (ska alltid fungera om DB är ansluten)
+      // Ladda mätardata separat
       try {
         const [meterData, meterHistoryData] = await Promise.all([
           getMeterLatest(),
@@ -241,131 +238,30 @@ export default function Dashboard() {
         ]);
         setMeter(meterData);
         setMeterHistory(meterHistoryData);
-        log("Mätardata loadad framgångsrikt");
+        log("✅ Meter data loaded");
       } catch (err) {
-        log("Fel vid hämtning av mätardata", err);
+        log("⚠️ Meter failed", err);
         setMeter(null);
         setMeterHistory([]);
       }
     } catch (err) {
-      setError("Kunde inte ansluta till backend. Kör den på port 3001?");
-      log("Anslutningsfel", err);
+      log("🔴 FAILED TO CONNECT - all retries exhausted", err);
+      setError("Backend svarar inte. Kontrollera att servern körs på port 3001.");
     } finally {
       setLoading(false);
     }
   }
 
-  // Retry with exponential backoff
-  const retryLoadData = async () => {
-    const MAX_RETRIES = 20; // Increased from 10
-    const RETRY_DELAY = 2000;
-    
-    log("=== RETRY LOAD DATA STARTED ===");
-    setIsRetrying(true);
-    setLoading(true);
-    setError("");
-    
-    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      try {
-        if (attempt > 0) {
-          setRetryCount(attempt);
-          log(`⏳ Försöker ansluta... (försök ${attempt}/${MAX_RETRIES})`);
-          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-        } else {
-          setRetryCount(1);
-          log("🔄 FÖRSÖK 1 - Ansluter till backend...");
-        }
-        
-        log(`📡 Calling getHealth on attempt ${attempt + 1}...`);
-        const healthData = await getHealth();
-        log("✅ Health check passed! Loading all data...");
-        setHealth(healthData);
-        
-        // Ladda temperaturer, energi och historia
-        try {
-          const [currentTemps, energyData, historyData] = await Promise.all([
-            getTemperatures(),
-            getEnergy(),
-            getTemperatureHistory(24),
-          ]);
-          
-          const tempsWithAverages = currentTemps.map(t => ({
-            ...t,
-            avg12h: calculateAverages(historyData, t.deviceName, 12),
-            avg24h: calculateAverages(historyData, t.deviceName, 24),
-          }));
-          
-          setTemperatures(tempsWithAverages);
-          setEnergy(energyData);
-          setHomeyConnected(true);
-          log(`✅ Loaded ${currentTemps.length} temperatures and ${energyData.length} energy sensors`);
-        } catch (err) {
-          setTemperatures([]);
-          setEnergy([]);
-          setHomeyConnected(false);
-          log("⚠️ Temperature/Energy load failed, continuing...", err);
-        }
-        
-        // Ladda sensorer
-        try {
-          const [tempSensors, engySensors] = await Promise.all([
-            getTemperatureSensors(),
-            getEnergySensors(),
-          ]);
-          setTemperatureSensors(tempSensors);
-          setEnergySensors(engySensors);
-          log("✅ Sensor settings loaded");
-        } catch (err) {
-          log("⚠️ Sensor settings failed (using fallback)", err);
-        }
-        
-        // Ladda mätardata
-        try {
-          const [meterData, meterHistoryData] = await Promise.all([
-            getMeterLatest(),
-            getMeterLast24Hours(),
-          ]);
-          setMeter(meterData);
-          setMeterHistory(meterHistoryData);
-          log("✅ Meter data loaded");
-        } catch (err) {
-          setMeter(null);
-          setMeterHistory([]);
-          log("⚠️ Meter data failed", err);
-        }
-        
-        setIsRetrying(false);
-        setRetryCount(0);
-        setLoading(false);
-        setError("");
-        log("🎉 CONNECTION SUCCESSFUL - All data loaded!");
-        return; // Lyckat
-      } catch (err) {
-        log(`❌ Attempt ${attempt + 1}/${MAX_RETRIES} FAILED:`, err instanceof Error ? err.message : String(err));
-        if (attempt === MAX_RETRIES - 1) {
-          log("😞 All retry attempts exhausted");
-        }
-      }
-    }
-    
-    // Alla försök misslyckades
-    log("🔴 GIVING UP AFTER 20 ATTEMPTS - Showing error screen");
-    setError("Backend svarar inte. Kontrollera att servern körs på port 3001.");
-    setIsRetrying(false);
-    setLoading(false);
-  }
-  
   // Manuell retry-knapp
   const handleRetry = () => {
     setLoading(true);
     setError("");
-    setRetryCount(0);
-    retryLoadData();
+    loadData();
   }
 
-  // Ladda data vid mount
+  // Ladda data vid mount och auto-refresh var 30:e sekund
   useEffect(() => {
-    retryLoadData();
+    loadData();
     const interval = setInterval(loadData, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -537,20 +433,13 @@ export default function Dashboard() {
     }
   }
 
-  if (loading && !isRetrying) {
-    return <p className="text-gray-500 text-center py-8">Laddar...</p>;
-  }
-
-  if (isRetrying) {
+  if (loading) {
     return (
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-md mx-auto mt-8">
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
-          <div className="inline-block mb-4">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
-          </div>
-          <h2 className="text-lg font-semibold text-blue-800">Ansluter till backend...</h2>
-          <p className="text-blue-700 mt-2">Försök {retryCount} av 10</p>
-          <p className="text-blue-600 text-sm mt-4">Väntar på att servern ska svara</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Laddar dashboard...</p>
+          <p className="text-gray-400 text-sm mt-2">(med automatisk retry om backend inte svarar)</p>
         </div>
       </div>
     );
@@ -558,15 +447,18 @@ export default function Dashboard() {
 
   if (error) {
     return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto mt-8">
-        <h2 className="text-lg font-semibold text-red-800">Anslutningsfel</h2>
-        <p className="text-red-700 mt-2">{error}</p>
-        <button
-          onClick={handleRetry}
-          className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition font-medium"
-        >
-          Försök igen
-        </button>
+      <div className="flex items-center justify-center min-h-screen bg-red-50">
+        <div className="bg-white rounded-lg shadow-lg p-8 text-center max-w-md">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Anslutningsfel</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <p className="text-sm text-gray-500 mb-6">Backend-API svarat inte efter 20 försök (20 sekunder)</p>
+          <button
+            onClick={handleRetry}
+            className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium"
+          >
+            Försök igen
+          </button>
+        </div>
       </div>
     );
   }
