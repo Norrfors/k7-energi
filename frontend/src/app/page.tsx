@@ -113,6 +113,31 @@ export default function Dashboard() {
     });
   };
 
+  // Select all INNE sensors
+  const selectAllInne = () => {
+    const inneNames = temperatures
+      .filter(t => getLocationLabel(t.deviceName).includes("INNE"))
+      .map(t => t.deviceName);
+    setVisibleTemperatures(new Set(inneNames));
+    saveVisibleSensors(new Set(inneNames));
+  };
+
+  // Select all UTE sensors
+  const selectAllUte = () => {
+    const uteNames = temperatures
+      .filter(t => getLocationLabel(t.deviceName).includes("UTE"))
+      .map(t => t.deviceName);
+    setVisibleTemperatures(new Set(uteNames));
+    saveVisibleSensors(new Set(uteNames));
+  };
+
+  // Select all sensors
+  const selectAllSensors = () => {
+    const allNames = temperatures.map(t => t.deviceName);
+    setVisibleTemperatures(new Set(allNames));
+    saveVisibleSensors(new Set(allNames));
+  };
+
   // Beräkna medelvärder från temperaturhistorik
   const calculateAverages = (history: Array<{id: number; deviceName: string; temperature: number; createdAt: string}>, deviceName: string, hoursBack: number): number | null => {
     const now = Date.now();
@@ -399,7 +424,7 @@ export default function Dashboard() {
         </div>
         <div className="text-right">
           <p className="text-xs font-semibold text-gray-400">Version</p>
-          <p className="text-lg font-bold text-blue-600">v0.10</p>
+          <p className="text-lg font-bold text-blue-600">v0.11</p>
         </div>
       </div>
 
@@ -476,6 +501,7 @@ export default function Dashboard() {
                   <div className="text-right">Snitt 24h</div>
                 </div>
                 {temperatures
+                  .sort((a, b) => a.deviceName.localeCompare(b.deviceName))
                   .filter(t => {
                     // Om användar inte ställt in något (tom set), visa alla
                     if (visibleTemperatures.size === 0) return true;
@@ -794,9 +820,36 @@ export default function Dashboard() {
           {activeSettingsTab === "temperature" && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900">Välj temperatursensorer att visa på Dashboard</h3>
+              
+              {/* Filter buttons */}
+              {temperatures.length > 0 && (
+                <div className="flex gap-2 flex-wrap">
+                  <button
+                    onClick={selectAllSensors}
+                    className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+                  >
+                    Markera alla
+                  </button>
+                  <button
+                    onClick={selectAllInne}
+                    className="px-3 py-1 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition"
+                  >
+                    Visa bara INNE 🏠
+                  </button>
+                  <button
+                    onClick={selectAllUte}
+                    className="px-3 py-1 text-sm bg-orange-600 text-white rounded hover:bg-orange-700 transition"
+                  >
+                    Visa bara UTE 🌤️
+                  </button>
+                </div>
+              )}
+              
               {temperatures.length > 0 ? (
                 <div className="bg-gray-50 border border-gray-300 rounded-lg p-4 space-y-3 max-h-96 overflow-y-auto">
-                  {temperatures.map((temp) => {
+                  {temperatures
+                    .sort((a, b) => a.deviceName.localeCompare(b.deviceName))
+                    .map((temp) => {
                     const isVisible = visibleTemperatures.size === 0 || visibleTemperatures.has(temp.deviceName);
                     const location = getLocationLabel(temp.deviceName);
                     return (
