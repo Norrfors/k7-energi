@@ -151,8 +151,27 @@ export default function Dashboard() {
     return null;
   };
 
-  // Select all INNE sensors
+  // Select all INNE sensors - auto-classify first if needed
   const selectAllInne = () => {
+    // First, ensure sensors are classified
+    const updated = new Map(sensorLocations);
+    let classified = false;
+    temperatures.forEach(temp => {
+      if (!updated.has(temp.deviceName) && temp.temperature !== null) {
+        if (temp.temperature < 10) {
+          updated.set(temp.deviceName, "UTE");
+        } else {
+          updated.set(temp.deviceName, "INNE");
+        }
+        classified = true;
+      }
+    });
+    if (classified) {
+      setSensorLocations(updated);
+      saveSensorLocations(updated);
+    }
+    
+    // Now filter INNE sensors
     const inneNames = temperatures
       .filter(t => getEffectiveLocation(t.deviceName) === "INNE")
       .map(t => t.deviceName);
@@ -160,8 +179,27 @@ export default function Dashboard() {
     saveVisibleSensors(new Set(inneNames));
   };
 
-  // Select all UTE sensors
+  // Select all UTE sensors - auto-classify first if needed
   const selectAllUte = () => {
+    // First, ensure sensors are classified
+    const updated = new Map(sensorLocations);
+    let classified = false;
+    temperatures.forEach(temp => {
+      if (!updated.has(temp.deviceName) && temp.temperature !== null) {
+        if (temp.temperature < 10) {
+          updated.set(temp.deviceName, "UTE");
+        } else {
+          updated.set(temp.deviceName, "INNE");
+        }
+        classified = true;
+      }
+    });
+    if (classified) {
+      setSensorLocations(updated);
+      saveSensorLocations(updated);
+    }
+    
+    // Now filter UTE sensors
     const uteNames = temperatures
       .filter(t => getEffectiveLocation(t.deviceName) === "UTE")
       .map(t => t.deviceName);
@@ -517,7 +555,7 @@ export default function Dashboard() {
         </div>
         <div className="text-right">
           <p className="text-xs font-semibold text-gray-400">Version</p>
-          <p className="text-lg font-bold text-blue-600">v0.16</p>
+          <p className="text-lg font-bold text-blue-600">v0.17</p>
         </div>
       </div>
 
@@ -946,69 +984,72 @@ export default function Dashboard() {
               )}
               
               {temperatures.length > 0 ? (
-                <div className="bg-gray-50 border border-gray-300 rounded-lg p-4 space-y-3 max-h-96 overflow-y-auto">
+                <div className="border border-gray-300 rounded-lg overflow-hidden max-h-96 overflow-y-auto">
+                  {/* Column headers */}
+                  <div className="grid grid-cols-12 gap-4 bg-blue-100 p-3 border-b border-gray-300 font-semibold text-sm text-gray-700 sticky top-0">
+                    <div className="col-span-5">Sensor</div>
+                    <div className="col-span-2 text-center">Visa på dashboard</div>
+                    <div className="col-span-2 text-center">🏠 Inne</div>
+                    <div className="col-span-3 text-center">🌤️ Ute</div>
+                  </div>
+                  
+                  {/* Sensor rows */}
                   {temperatures
                     .sort((a, b) => a.deviceName.localeCompare(b.deviceName))
-                    .map((temp) => {
+                    .map((temp, idx) => {
                     const isVisible = visibleTemperatures.size === 0 || visibleTemperatures.has(temp.deviceName);
                     const location = getSensorLocation(temp.deviceName);
                     return (
                       <div
                         key={temp.deviceName}
-                        className="flex items-center justify-between gap-3 p-3 hover:bg-white rounded transition bg-white border border-gray-200"
+                        className={`grid grid-cols-12 gap-4 p-3 items-center ${
+                          idx % 2 === 0 ? "bg-white" : "bg-gray-50"
+                        } border-b border-gray-200 last:border-b-0 hover:bg-blue-50 transition`}
                       >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              id={`temp-${temp.deviceName}`}
-                              checked={isVisible}
-                              onChange={() => handleToggleTemperatureSensor(temp.deviceName)}
-                              className="w-4 h-4 rounded cursor-pointer"
-                            />
-                            <label
-                              htmlFor={`temp-${temp.deviceName}`}
-                              className="cursor-pointer font-medium text-gray-900"
-                            >
-                              {temp.deviceName}
-                            </label>
-                          </div>
-                          <div className="flex items-center gap-3 mt-2 ml-6">
-                            <span className="text-xs text-gray-600">Typ:</span>
-                            <div className="flex gap-4">
-                              <label className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                  type="radio"
-                                  name={`location-${temp.deviceName}`}
-                                  value="INNE"
-                                  checked={location === "INNE"}
-                                  onChange={() => setSensorLocation(temp.deviceName, "INNE")}
-                                  className="w-4 h-4 cursor-pointer"
-                                />
-                                <span className="text-xs font-medium text-green-700">🏠 INNE</span>
-                              </label>
-                              <label className="flex items-center gap-2 cursor-pointer">
-                                <input
-                                  type="radio"
-                                  name={`location-${temp.deviceName}`}
-                                  value="UTE"
-                                  checked={location === "UTE"}
-                                  onChange={() => setSensorLocation(temp.deviceName, "UTE")}
-                                  className="w-4 h-4 cursor-pointer"
-                                />
-                                <span className="text-xs font-medium text-orange-700">🌤️ UTE</span>
-                              </label>
-                            </div>
-                          </div>
-                          <p className="text-xs text-gray-500 mt-1">{temp.zone}</p>
-                        </div>
-                        <div className="text-right min-w-24">
-                          <p className="font-semibold text-gray-900">
-                            {temp.temperature ? temp.temperature.toFixed(1) : "—"}°C
+                        {/* Sensor name + current temp */}
+                        <div className="col-span-5">
+                          <p className="font-medium text-gray-900">{temp.deviceName}</p>
+                          <p className="text-xs text-gray-600 mt-1">
+                            {temp.temperature ? `${temp.temperature.toFixed(1)}°C` : "—"}
                           </p>
-                          {temp.avg24h && (
-                            <p className="text-xs text-gray-500">24h: {temp.avg24h.toFixed(1)}°C</p>
-                          )}
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Zon: {temp.zone || "okänd"}
+                          </p>
+                        </div>
+                        
+                        {/* Checkbox - Visa på dashboard */}
+                        <div className="col-span-2 flex justify-center">
+                          <input
+                            type="checkbox"
+                            id={`temp-${temp.deviceName}`}
+                            checked={isVisible}
+                            onChange={() => handleToggleTemperatureSensor(temp.deviceName)}
+                            className="w-4 h-4 rounded cursor-pointer"
+                          />
+                        </div>
+                        
+                        {/* Radio - Inne */}
+                        <div className="col-span-2 flex justify-center">
+                          <input
+                            type="radio"
+                            name={`location-${temp.deviceName}`}
+                            value="INNE"
+                            checked={location === "INNE"}
+                            onChange={() => setSensorLocation(temp.deviceName, "INNE")}
+                            className="w-4 h-4 cursor-pointer"
+                          />
+                        </div>
+                        
+                        {/* Radio - Ute */}
+                        <div className="col-span-3 flex justify-center">
+                          <input
+                            type="radio"
+                            name={`location-${temp.deviceName}`}
+                            value="UTE"
+                            checked={location === "UTE"}
+                            onChange={() => setSensorLocation(temp.deviceName, "UTE")}
+                            className="w-4 h-4 cursor-pointer"
+                          />
                         </div>
                       </div>
                     );
