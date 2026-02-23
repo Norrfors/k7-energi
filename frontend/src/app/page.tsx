@@ -555,7 +555,7 @@ export default function Dashboard() {
         </div>
         <div className="text-right">
           <p className="text-xs font-semibold text-gray-400">Version</p>
-          <p className="text-lg font-bold text-blue-600">v0.17</p>
+          <p className="text-lg font-bold text-blue-600">v0.18</p>
         </div>
       </div>
 
@@ -985,15 +985,19 @@ export default function Dashboard() {
               
               {temperatures.length > 0 ? (
                 <div className="border border-gray-300 rounded-lg overflow-hidden max-h-96 overflow-y-auto">
-                  {/* Column headers */}
-                  <div className="grid grid-cols-12 gap-4 bg-blue-100 p-3 border-b border-gray-300 font-semibold text-sm text-gray-700 sticky top-0">
-                    <div className="col-span-5">Sensor</div>
-                    <div className="col-span-2 text-center">Visa på dashboard</div>
-                    <div className="col-span-2 text-center">🏠 Inne</div>
-                    <div className="col-span-3 text-center">🌤️ Ute</div>
+                  {/* Table header */}
+                  <div className="grid grid-cols-12 gap-2 bg-blue-100 px-2 py-2 border-b border-gray-300 font-semibold text-xs text-gray-700 sticky top-0">
+                    <div className="col-span-3">Sensornamn</div>
+                    <div className="col-span-2">Zon</div>
+                    <div className="col-span-2 text-right">Aktuellt</div>
+                    <div className="col-span-1 text-center">Visa</div>
+                    <div className="col-span-2 flex gap-1 justify-center text-center">
+                      <span className="flex-1">INNE</span>
+                      <span className="flex-1">UTE</span>
+                    </div>
                   </div>
                   
-                  {/* Sensor rows */}
+                  {/* Table rows */}
                   {temperatures
                     .sort((a, b) => a.deviceName.localeCompare(b.deviceName))
                     .map((temp, idx) => {
@@ -1002,23 +1006,27 @@ export default function Dashboard() {
                     return (
                       <div
                         key={temp.deviceName}
-                        className={`grid grid-cols-12 gap-4 p-3 items-center ${
+                        className={`grid grid-cols-12 gap-2 px-2 py-2 items-center text-xs ${
                           idx % 2 === 0 ? "bg-white" : "bg-gray-50"
                         } border-b border-gray-200 last:border-b-0 hover:bg-blue-50 transition`}
                       >
-                        {/* Sensor name + current temp */}
-                        <div className="col-span-5">
-                          <p className="font-medium text-gray-900">{temp.deviceName}</p>
-                          <p className="text-xs text-gray-600 mt-1">
-                            {temp.temperature ? `${temp.temperature.toFixed(1)}°C` : "—"}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-0.5">
-                            Zon: {temp.zone || "okänd"}
-                          </p>
+                        {/* Sensornamn */}
+                        <div className="col-span-3 font-medium text-gray-900 truncate">
+                          {temp.deviceName}
+                        </div>
+                        
+                        {/* Zon */}
+                        <div className="col-span-2 text-gray-600 truncate">
+                          {temp.zone && temp.zone !== "okänd" ? temp.zone : "—"}
+                        </div>
+                        
+                        {/* Aktuellt värde */}
+                        <div className="col-span-2 text-right font-semibold text-blue-600">
+                          {temp.temperature ? `${temp.temperature.toFixed(1)}°C` : "—"}
                         </div>
                         
                         {/* Checkbox - Visa på dashboard */}
-                        <div className="col-span-2 flex justify-center">
+                        <div className="col-span-1 flex justify-center">
                           <input
                             type="checkbox"
                             id={`temp-${temp.deviceName}`}
@@ -1028,28 +1036,28 @@ export default function Dashboard() {
                           />
                         </div>
                         
-                        {/* Radio - Inne */}
-                        <div className="col-span-2 flex justify-center">
-                          <input
-                            type="radio"
-                            name={`location-${temp.deviceName}`}
-                            value="INNE"
-                            checked={location === "INNE"}
-                            onChange={() => setSensorLocation(temp.deviceName, "INNE")}
-                            className="w-4 h-4 cursor-pointer"
-                          />
-                        </div>
-                        
-                        {/* Radio - Ute */}
-                        <div className="col-span-3 flex justify-center">
-                          <input
-                            type="radio"
-                            name={`location-${temp.deviceName}`}
-                            value="UTE"
-                            checked={location === "UTE"}
-                            onChange={() => setSensorLocation(temp.deviceName, "UTE")}
-                            className="w-4 h-4 cursor-pointer"
-                          />
+                        {/* Radio buttons - INNE och UTE */}
+                        <div className="col-span-2 flex gap-1 justify-center">
+                          <label className="flex-1 flex justify-center">
+                            <input
+                              type="radio"
+                              name={`location-${temp.deviceName}`}
+                              value="INNE"
+                              checked={location === "INNE"}
+                              onChange={() => setSensorLocation(temp.deviceName, "INNE")}
+                              className="w-4 h-4 cursor-pointer"
+                            />
+                          </label>
+                          <label className="flex-1 flex justify-center">
+                            <input
+                              type="radio"
+                              name={`location-${temp.deviceName}`}
+                              value="UTE"
+                              checked={location === "UTE"}
+                              onChange={() => setSensorLocation(temp.deviceName, "UTE")}
+                              className="w-4 h-4 cursor-pointer"
+                            />
+                          </label>
                         </div>
                       </div>
                     );
