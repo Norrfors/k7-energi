@@ -159,3 +159,31 @@ export function performManualBackup() {
     }
   );
 }
+
+// Settings endpoints – Sensor och visibility
+
+export interface SensorInfo {
+  deviceId: string;
+  deviceName: string;
+  sensorType: "temperature" | "energy";
+  isVisible: boolean;
+}
+
+export function getTemperatureSensors() {
+  return apiFetch<SensorInfo[]>("/api/settings/sensors/temperature");
+}
+
+export function getEnergySensors() {
+  return apiFetch<SensorInfo[]>("/api/settings/sensors/energy");
+}
+
+export function updateSensorVisibility(deviceId: string, isVisible: boolean) {
+  return apiFetch<SensorInfo>(
+    `/api/settings/sensors/${deviceId}/visibility`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ isVisible }),
+    }
+  );
+}

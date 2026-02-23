@@ -1,0 +1,119 @@
+// Service för inställningar och sensor-synlighet
+import prisma from "../../shared/db";
+
+export interface SensorInfo {
+  deviceId: string;
+  deviceName: string;
+  sensorType: "temperature" | "energy";
+  isVisible: boolean;
+}
+
+/**
+ * Hämta alla temperatursensorer från TemperatureLogs (unika)
+ */
+export async function getAllTemperatureSensors(): Promise<SensorInfo[]> {
+  const logs = await prisma.temperatureLog.findMany({
+    distinct: ["deviceId"],
+    select: {
+      deviceId: true,
+      deviceName: true,
+    },
+    orderBy: {
+      deviceName: "asc",
+    },
+  });
+
+  // Hämta visibility-status från databasen
+  const sensors: SensorInfo[] = [];
+  for (const log of logs) {
+    const visibility = await prisma.sensorVisibility.findUnique({
+      where: { deviceId: log.deviceId },
+    });
+
+    sensors.push({
+      deviceId: log.deviceId,
+      deviceName: log.deviceName,
+      sensorType: "temperature",
+      isVisible: visibility?.isVisible ?? true, // Default true om den inte finns i inställningar
+    });
+
+    // Om den inte fanns, skapa ett record
+    if (!visibility) {
+      await prisma.sensorVisibility.create({
+        data: {
+          deviceId: log.deviceId,
+          deviceName: log.deviceName,
+          sensorType: "temperature",
+          isVisible: true,
+        },
+      });
+    }
+  }
+
+  return sensors.sort((a, b) => a.deviceName.localeCompare(b.deviceName));
+}
+
+/**
+ * Hämta alla elförbrukning-sensorer från EnergyLogs (unika)
+ */
+export async function getAllEnergySensors(): Promise<SensorInfo[]> {
+  const logs = await prisma.energyLog.findMany({
+    distinct: ["deviceId"],
+    select: {
+      deviceId: true,
+      deviceName: true,
+    },
+    orderBy: {
+      deviceName: "asc",
+    },
+  });
+
+  // Hämta visibility-status från databasen
+  const sensors: SensorInfo[] = [];
+  for (const log of logs) {
+    const visibility = await prisma.sensorVisibility.findUnique({
+      where: { deviceId: log.deviceId },
+    });
+
+    sensors.push({
+      deviceId: log.deviceId,
+      deviceName: log.deviceName,
+      sensorType: "energy",
+      isVisible: visibility?.isVisible ?? true, // Default true om den inte finns i inställningar
+    });
+
+    // Om den inte fanns, skapa ett record
+    if (!visibility) {
+      await prisma.sensorVisibility.create({
+        data: {
+          deviceId: log.deviceId,
+          deviceName: log.deviceName,
+          sensorType: "energy",
+          isVisible: true,
+        },
+      });
+    }
+  }
+
+  return sensors.sort((a, b) => a.deviceName.localeCompare(b.deviceName));
+}
+
+/**
+ * Uppdatera visibility för en sensor
+ */
+export async function updateSensorVisibility(
+  deviceId: string,
+  isVisible: boolean
+): Promise<SensorInfo> {
+  const updated = await prisma.sensorVisibility.update({
+    where: { deviceId },
+    data: { isVisible },
+  });
+
+  return {
+    deviceId: updated.deviceId,
+    deviceName: updated.deviceName,
+    sensorType: updated.sensorType as "temperature" | "energy",
+    isVisible: updated.isVisible,
+  };
+}

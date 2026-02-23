@@ -6,6 +6,7 @@ import { homeyRoutes } from "./modules/homey/homey.controller";
 import { historyRoutes } from "./modules/history/history.controller";
 import { meterRoutes } from "./modules/meter/meter.controller";
 import { backupRoutes } from "./modules/backup/backup.controller";
+import { settingsRoutes } from "./modules/settings/settings.controller";
 import { startScheduler } from "./shared/scheduler";
 
 // Debug: Visa Homey-konfiguration som laddades
@@ -33,6 +34,7 @@ async function start() {
   await app.register(historyRoutes);
   await app.register(meterRoutes);
   await app.register(backupRoutes);
+  await app.register(settingsRoutes);
 
   // Health check – enkel endpoint för att testa att allt kör
   app.get("/api/health", async () => {

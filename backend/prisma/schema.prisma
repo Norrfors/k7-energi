@@ -71,3 +71,16 @@ model BackupSettings {
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 }
+
+// Sensorsynlighet – lagrar vilka sensorer som ska visas på Dashboard
+model SensorVisibility {
+  id          Int      @id @default(autoincrement())
+  deviceId    String   @unique // Unik ID från Homey
+  deviceName  String   // Sensornamn
+  sensorType  String   // "temperature" eller "energy"
+  isVisible   Boolean  @default(true) // Ska sensorn visas på Dashboard?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([sensorType, isVisible])
+}

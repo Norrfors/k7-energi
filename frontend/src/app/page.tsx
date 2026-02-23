@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getHealth, getTemperatures, getEnergy, getMeterLatest, getMeterToday, getMeterLast24Hours, setManualMeterValue, getBackupSettings, saveBackupSettings, performManualBackup, BackupSettings, getTemperatureHistory } from "@/lib/api";
+import { getHealth, getTemperatures, getEnergy, getMeterLatest, getMeterToday, getMeterLast24Hours, setManualMeterValue, getBackupSettings, saveBackupSettings, performManualBackup, BackupSettings, getTemperatureHistory, getTemperatureSensors, getEnergySensors, updateSensorVisibility, SensorInfo } from "@/lib/api";
 import { StatusCard } from "@/components/StatusCard";
 
 interface Temperature {
@@ -33,9 +33,11 @@ interface MeterReading {
 }
 
 type TabType = "dashboard" | "meter" | "settings";
+type SettingsTabType = "backup" | "temperature" | "energy";
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState<TabType>("dashboard");
+  const [activeSettingsTab, setActiveSettingsTab] = useState<SettingsTabType>("backup");
   const [health, setHealth] = useState<Health | null>(null);
   const [temperatures, setTemperatures] = useState<Temperature[]>([]);
   const [energy, setEnergy] = useState<Energy[]>([]);
@@ -44,6 +46,11 @@ export default function Dashboard() {
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [homeyConnected, setHomeyConnected] = useState(false);
+  
+  // Sensor visibility state
+  const [temperatureSensors, setTemperatureSensors] = useState<SensorInfo[]>([]);
+  const [energySensors, setEnergySensors] = useState<SensorInfo[]>([]);
+  const [sensorsLoading, setSensorsLoading] = useState(false);
   
   // Settings state
   const [manualMeterValue, setManualMeterValueInput] = useState<string>("");
@@ -88,11 +95,17 @@ export default function Dashboard() {
 
       // Ladd temperaturer, energi och historia
       try {
-        const [currentTemps, energyData, historyData] = await Promise.all([
+        const [currentTemps, energyData, historyData, tempSensors, engySensors] = await Promise.all([
           getTemperatures(),
           getEnergy(),
           getTemperatureHistory(24),
+          getTemperatureSensors(),
+          getEnergySensors(),
         ]);
+        
+        // Sätt sensorer (för filtrering senare)
+        setTemperatureSensors(tempSensors);
+        setEnergySensors(engySensors);
         
         // Beräkna medelvärden för varje enhet från historiken
         const tempsWithAverages = currentTemps.map(t => ({
@@ -239,35 +252,9 @@ export default function Dashboard() {
   }
 
   async function handleSelectBackupFolder() {
-    try {
-      setBackupError("");
-      // Kontrollera om File System Access API är tillgängligt
-      if (!('showDirectoryPicker' in window)) {
-        setBackupError('Din webbläsare stöder inte mapputforskarning. Ange sökvägen manuellt.');
-        return;
-      }
-
-      // Öppna mapputforskare
-      const dirHandle = await (window as any).showDirectoryPicker({
-        mode: 'readwrite',
-      });
-
-      // Hämta en representativ sökväg från mappen
-      // Note: Av säkerhetsskäl kan vi inte få full sökväg, men vi får mappen
-      const path = dirHandle.name;
-      
-      // Vi sparar mappens namn som sökväg (rel eller abs)
-      // För en riktig implementering skulle man kvitta med backend
-      setBackupFolderPath(`./${path}`);
-      setBackupMessage(`✓ Vald mapp: ${path}`);
-    } catch (error) {
-      if ((error as any)?.name === 'AbortError') {
-        // Användaren avbröt
-        return;
-      }
-      console.error('Fel vid mapputforskarning:', error);
-      setBackupError('Kunde inte välja mapp. Försök igen eller ange sökvägen manuellt.');
-    }
+    // Denna funktion är inaktiverad - användare bör skriva in sökvägen manuellt
+    // Tidigare användes File System Access API som kräver "Allow"-klick
+    setBackupMessage('Ange sökvägen direkt i textfältet (t.ex. "./backups" eller "C:\\backups")');
   }
 
   async function handlePerformBackup() {
@@ -292,6 +279,48 @@ export default function Dashboard() {
     }
   }
 
+  // Ladda sensorer när Settings-tabben och rätt underflik blir aktiv
+  useEffect(() => {
+    if (activeTab !== "settings") return;
+
+    const loadSensors = async () => {
+      try {
+        setSensorsLoading(true);
+        const [temps, energies] = await Promise.all([
+          getTemperatureSensors(),
+          getEnergySensors(),
+        ]);
+        setTemperatureSensors(temps);
+        setEnergySensors(energies);
+      } catch (err) {
+        log("Fel vid hämtning av sensorer", err);
+      } finally {
+        setSensorsLoading(false);
+      }
+    };
+
+    loadSensors();
+  }, [activeTab]);
+
+  async function handleToggleSensorVisibility(deviceId: string, currentVisibility: boolean) {
+    try {
+      const newVisibility = !currentVisibility;
+      await updateSensorVisibility(deviceId, newVisibility);
+      
+      // Uppdatera listan
+      setTemperatureSensors(prev =>
+        prev.map(s => s.deviceId === deviceId ? {...s, isVisible: newVisibility} : s)
+      );
+      setEnergySensors(prev =>
+        prev.map(s => s.deviceId === deviceId ? {...s, isVisible: newVisibility} : s)
+      );
+      
+      log(`Sensor ${deviceId} synlighet uppdaterad till ${newVisibility}`);
+    } catch (err) {
+      log("Fel vid uppdatering av sensor-synlighet", err);
+    }
+  }
+
   if (loading) {
     return <p className="text-gray-500">Laddar...</p>;
   }
@@ -307,34 +336,46 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Header med titel och version */}
+      <div className="flex items-center justify-between pb-4 border-b-2 border-gray-200">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">K7 Energi Dashboard</h1>
+          <p className="text-sm text-gray-500 mt-1">Realtidsövervakning av hem och energiförbrukning</p>
+        </div>
+        <div className="text-right">
+          <p className="text-xs font-semibold text-gray-400">Version</p>
+          <p className="text-lg font-bold text-blue-600">v0.07</p>
+        </div>
+      </div>
+
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-gray-300">
+      <div className="flex items-center gap-1 border-b border-gray-300 bg-gray-50 px-2 py-1 rounded-t-lg">
         <button
           onClick={() => setActiveTab("dashboard")}
-          className={`px-4 py-2 font-semibold transition ${
+          className={`px-4 py-2 font-semibold transition rounded-t-lg ${
             activeTab === "dashboard"
-              ? "border-b-2 border-blue-600 text-blue-600"
-              : "text-gray-600 hover:text-gray-900"
+              ? "bg-white text-blue-600 border-b-2 border-blue-600"
+              : "text-gray-600 hover:text-gray-900 hover:bg-white"
           }`}
         >
-          Dashboard
+          📊 Dashboard
         </button>
         <button
           onClick={() => setActiveTab("meter")}
-          className={`px-4 py-2 font-semibold transition ${
+          className={`px-4 py-2 font-semibold transition rounded-t-lg ${
             activeTab === "meter"
-              ? "border-b-2 border-blue-600 text-blue-600"
-              : "text-gray-600 hover:text-gray-900"
+              ? "bg-white text-blue-600 border-b-2 border-blue-600"
+              : "text-gray-600 hover:text-gray-900 hover:bg-white"
           }`}
         >
-          Mätardata
+          ⚡ Mätardata
         </button>
         <button
           onClick={() => setActiveTab("settings")}
-          className={`px-4 py-2 font-semibold transition ml-auto flex items-center gap-2 ${
+          className={`px-4 py-2 font-semibold transition rounded-t-lg ml-auto flex items-center gap-2 ${
             activeTab === "settings"
-              ? "border-b-2 border-blue-600 text-blue-600"
-              : "text-gray-600 hover:text-gray-900"
+              ? "bg-white text-blue-600 border-b-2 border-blue-600"
+              : "text-gray-600 hover:text-gray-900 hover:bg-white"
           }`}
         >
           ⚙️ Inställningar
@@ -345,7 +386,9 @@ export default function Dashboard() {
       {activeTab === "dashboard" && (
         <div className="space-y-8">
           <section>
-            <h2 className="text-lg font-semibold mb-3">System</h2>
+            <h2 className="text-2xl font-bold mb-4 text-gray-900 flex items-center gap-2">
+              📱 System Status
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <StatusCard
                 title="Backend"
@@ -367,15 +410,22 @@ export default function Dashboard() {
 
           {temperatures.length > 0 && (
             <section>
-              <h2 className="text-lg font-semibold mb-3">Temperaturer</h2>
-              <div className="border border-gray-300 rounded-lg overflow-hidden">
+              <h2 className="text-2xl font-bold mb-4 text-gray-900 flex items-center gap-2">
+                🌡️ Temperaturer
+              </h2>
+              <div className="border border-gray-300 rounded-lg overflow-hidden shadow-sm">
                 <div className="bg-blue-50 p-4 border-b border-gray-300 grid grid-cols-4 gap-4 font-semibold text-gray-700 text-sm">
                   <div>Enhet</div>
                   <div className="text-right">Aktuell</div>
                   <div className="text-right">Snitt 12h</div>
                   <div className="text-right">Snitt 24h</div>
                 </div>
-                {temperatures.map((t, index) => (
+                {temperatures
+                  .filter(t => {
+                    const sensorSetting = temperatureSensors.find(s => s.deviceName === t.deviceName);
+                    return sensorSetting?.isVisible !== false; // Visa om isVisible är true eller ej definierat
+                  })
+                  .map((t, index) => (
                   <div
                     key={t.deviceName}
                     className={`grid grid-cols-4 gap-4 p-4 ${
@@ -400,9 +450,16 @@ export default function Dashboard() {
 
           {energy.length > 0 && (
             <section>
-              <h2 className="text-lg font-semibold mb-3">Energi</h2>
+              <h2 className="text-2xl font-bold mb-4 text-gray-900 flex items-center gap-2">
+                ⚡ Energiförbrukning
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {energy.map((e) => (
+                {energy
+                  .filter(e => {
+                    const sensorSetting = energySensors.find(s => s.deviceName === e.deviceName);
+                    return sensorSetting?.isVisible !== false; // Visa om isVisible är true eller ej definierat
+                  })
+                  .map((e) => (
                   <StatusCard
                     key={e.deviceName}
                     title={e.deviceName}
@@ -420,7 +477,9 @@ export default function Dashboard() {
       {activeTab === "meter" && (
         <div className="space-y-8">
           <section>
-            <h2 className="text-lg font-semibold mb-3">Mätardata</h2>
+            <h2 className="text-2xl font-bold mb-4 text-gray-900 flex items-center gap-2">
+              ⚡ Mätardata
+            </h2>
             {meter ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <StatusCard
@@ -441,7 +500,9 @@ export default function Dashboard() {
 
           {meterHistory.length > 0 && (
             <section>
-              <h2 className="text-lg font-semibold mb-3">Historik (idag)</h2>
+              <h2 className="text-2xl font-bold mb-4 text-gray-900 flex items-center gap-2">
+                📈 Historik (idag)
+              </h2>
               <div className="overflow-x-auto">
                 <table className="min-w-full border border-gray-300 rounded-lg">
                   <thead className="bg-gray-100">
@@ -480,172 +541,252 @@ export default function Dashboard() {
       {/* Settings Tab */}
       {activeTab === "settings" && (
         <div className="space-y-6">
-          <section>
-            <h2 className="text-lg font-semibold mb-4">Inställningar</h2>
-            <div className="bg-gray-50 border border-gray-300 rounded-lg p-6 max-w-md">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Manuell mätarställning (kWh)
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  value={manualMeterValue}
-                  onChange={(e) => setManualMeterValueInput(e.target.value)}
-                  placeholder="T.ex. 64161.21"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  disabled={settingsMeterValue}
-                />
-                <button
-                  onClick={handleSetManualMeter}
-                  disabled={settingsMeterValue || !manualMeterValue}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition"
-                >
-                  {settingsMeterValue ? "Sparar..." : "Spara"}
-                </button>
-              </div>
+          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            ⚙️ Inställningar
+          </h2>
 
-              {settingsError && (
-                <p className="text-red-600 text-sm mt-2">{settingsError}</p>
-              )}
-              {settingsSuccess && (
-                <p className="text-green-600 text-sm mt-2">{settingsSuccess}</p>
-              )}
+          {/* Settings sous-tabs */}
+          <div className="flex items-center gap-1 border-b border-gray-300 bg-gray-50 px-2 py-1 rounded-t-lg">
+            <button
+              onClick={() => setActiveSettingsTab("backup")}
+              className={`px-4 py-2 font-semibold transition rounded-t-lg ${
+                activeSettingsTab === "backup"
+                  ? "bg-white text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-white"
+              }`}
+            >
+              💾 Backup
+            </button>
+            <button
+              onClick={() => setActiveSettingsTab("temperature")}
+              className={`px-4 py-2 font-semibold transition rounded-t-lg ${
+                activeSettingsTab === "temperature"
+                  ? "bg-white text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-white"
+              }`}
+            >
+              🌡️ Temperaturer
+            </button>
+            <button
+              onClick={() => setActiveSettingsTab("energy")}
+              className={`px-4 py-2 font-semibold transition rounded-t-lg ${
+                activeSettingsTab === "energy"
+                  ? "bg-white text-blue-600 border-b-2 border-blue-600"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-white"
+              }`}
+            >
+              ⚡ El
+            </button>
+          </div>
 
-              <p className="text-xs text-gray-500 mt-4">
-                Ställ in den totala mätarställningen för energimätaren.
-              </p>
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-semibold mb-4">Databas Backup</h2>
-            
-            {/* Manuell Backup */}
-            <div className="bg-gray-50 border border-gray-300 rounded-lg p-6 mb-4">
-              <h3 className="text-md font-medium text-gray-800 mb-3">Manuell Backup</h3>
-              <button
-                onClick={handlePerformBackup}
-                disabled={backupPerforming}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition"
-              >
-                {backupPerforming ? "Kör backup..." : "Kör backup nu"}
-              </button>
-
-              {backupMessage && (
-                <p className="text-green-600 text-sm mt-2">{backupMessage}</p>
-              )}
-              
-              {backupSettings?.lastBackupAt && (
-                <p className="text-xs text-gray-600 mt-2">
-                  Senaste backup: {new Date(backupSettings.lastBackupAt).toLocaleString("sv-SE")}
-                </p>
-              )}
-            </div>
-
-            {/* Backup-inställningar */}
-            <div className="bg-gray-50 border border-gray-300 rounded-lg p-6">
-              <h3 className="text-md font-medium text-gray-800 mb-4">Automatisk Backup</h3>
-
-              <div className="space-y-4">
-                {/* Backup-mapp */}
-                <div>
+          {/* BACKUP Tab */}
+          {activeSettingsTab === "backup" && (
+            <div className="space-y-6">
+              {/* Manuell mätarställning */}
+              <section>
+                <h3 className="text-xl font-bold mb-4 text-gray-900 flex items-center gap-2">
+                  ⚙️ Mätardata
+                </h3>
+                <div className="bg-gray-50 border border-gray-300 rounded-lg p-6 max-w-md">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Backup-mapp (lokal sökväg)
+                    Manuell mätarställning (kWh)
                   </label>
                   <div className="flex gap-2">
                     <input
-                      type="text"
-                      value={backupFolderPath}
-                      onChange={(e) => setBackupFolderPath(e.target.value)}
-                      placeholder="./backups"
+                      type="number"
+                      value={manualMeterValue}
+                      onChange={(e) => setManualMeterValueInput(e.target.value)}
+                      placeholder="T.ex. 64161.21"
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      disabled={backupLoading}
+                      disabled={settingsMeterValue}
                     />
                     <button
-                      onClick={handleSelectBackupFolder}
-                      disabled={backupLoading}
-                      className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:bg-gray-400 transition whitespace-nowrap"
-                      title="Välj mapp från filväljare"
+                      onClick={handleSetManualMeter}
+                      disabled={settingsMeterValue || !manualMeterValue}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition"
                     >
-                      📁 Bläddra
+                      {settingsMeterValue ? "Sparar..." : "Spara"}
                     </button>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Klicka "Bläddra" för att välja mapp, eller ange relativ/absolut sökväg på servern
-                  </p>
+                  {settingsError && <p className="text-red-600 text-sm mt-2">{settingsError}</p>}
+                  {settingsSuccess && <p className="text-green-600 text-sm mt-2">{settingsSuccess}</p>}
+                  <p className="text-xs text-gray-500 mt-4">Ställ in den totala mätarställningen för energimätaren.</p>
+                </div>
+              </section>
+
+              {/* Databas Backup */}
+              <section>
+                <h3 className="text-xl font-bold mb-4 text-gray-900 flex items-center gap-2">
+                  💾 Databas Backup
+                </h3>
+                
+                {/* Manuell Backup */}
+                <div className="bg-gray-50 border border-gray-300 rounded-lg p-6 mb-4">
+                  <h4 className="text-md font-medium text-gray-800 mb-3">Manuell Backup</h4>
+                  <button
+                    onClick={handlePerformBackup}
+                    disabled={backupPerforming}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition"
+                  >
+                    {backupPerforming ? "Kör backup..." : "Kör backup nu"}
+                  </button>
+                  {backupMessage && <p className="text-green-600 text-sm mt-2">{backupMessage}</p>}
+                  {backupSettings?.lastBackupAt && (
+                    <p className="text-xs text-gray-600 mt-2">
+                      Senaste backup: {new Date(backupSettings.lastBackupAt).toLocaleString("sv-SE")}
+                    </p>
+                  )}
                 </div>
 
-                {/* Aktivera automatisk backup */}
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    id="enableAutoBackup"
-                    checked={enableAutoBackup}
-                    onChange={(e) => setEnableAutoBackup(e.target.checked)}
-                    disabled={backupLoading}
-                    className="w-4 h-4 rounded"
-                  />
-                  <label htmlFor="enableAutoBackup" className="text-sm font-medium text-gray-700">
-                    Aktivera automatisk backup
-                  </label>
-                </div>
-
-                {/* Dag och tid för automatisk backup */}
-                {enableAutoBackup && (
-                  <div className="grid grid-cols-2 gap-4">
+                {/* Automatisk Backup */}
+                <div className="bg-gray-50 border border-gray-300 rounded-lg p-6">
+                  <h4 className="text-md font-medium text-gray-800 mb-4">Automatisk Backup</h4>
+                  <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Dag
+                        Backup-mapp (lokal sökväg)
                       </label>
-                      <select
-                        value={backupDay}
-                        onChange={(e) => setBackupDay(e.target.value)}
-                        disabled={backupLoading}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option>Monday</option>
-                        <option>Tuesday</option>
-                        <option>Wednesday</option>
-                        <option>Thursday</option>
-                        <option>Friday</option>
-                        <option>Saturday</option>
-                        <option>Sunday</option>
-                      </select>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={backupFolderPath}
+                          onChange={(e) => setBackupFolderPath(e.target.value)}
+                          placeholder="./backups"
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          disabled={backupLoading}
+                        />
+                        <button
+                          onClick={handleSelectBackupFolder}
+                          disabled={backupLoading}
+                          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:bg-gray-400 transition whitespace-nowrap"
+                        >
+                          📁 Bläddra
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">Ange sökväg på servern eller klicka Bläddra</p>
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Tid (HH:MM)
-                      </label>
+                    <div className="flex items-center gap-3">
                       <input
-                        type="time"
-                        value={backupTime}
-                        onChange={(e) => setBackupTime(e.target.value)}
+                        type="checkbox"
+                        id="enableAutoBackup"
+                        checked={enableAutoBackup}
+                        onChange={(e) => setEnableAutoBackup(e.target.checked)}
                         disabled={backupLoading}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-4 h-4 rounded"
                       />
+                      <label htmlFor="enableAutoBackup" className="text-sm font-medium text-gray-700">
+                        Aktivera automatisk backup
+                      </label>
                     </div>
+
+                    {enableAutoBackup && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Dag</label>
+                          <select
+                            value={backupDay}
+                            onChange={(e) => setBackupDay(e.target.value)}
+                            disabled={backupLoading}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option>Monday</option>
+                            <option>Tuesday</option>
+                            <option>Wednesday</option>
+                            <option>Thursday</option>
+                            <option>Friday</option>
+                            <option>Saturday</option>
+                            <option>Sunday</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Tid (HH:MM)</label>
+                          <input
+                            type="time"
+                            value={backupTime}
+                            onChange={(e) => setBackupTime(e.target.value)}
+                            disabled={backupLoading}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={handleSaveBackupSettings}
+                      disabled={backupLoading}
+                      className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition mt-4"
+                    >
+                      {backupLoading ? "Sparar..." : "Spara backup-inställningar"}
+                    </button>
+
+                    {backupError && <p className="text-red-600 text-sm mt-2">{backupError}</p>}
+                    {backupMessage && !backupPerforming && (
+                      <p className="text-green-600 text-sm mt-2">{backupMessage}</p>
+                    )}
                   </div>
-                )}
-
-                {/* Spara-knapp */}
-                <button
-                  onClick={handleSaveBackupSettings}
-                  disabled={backupLoading}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition mt-4"
-                >
-                  {backupLoading ? "Sparar..." : "Spara backup-inställningar"}
-                </button>
-
-                {backupError && (
-                  <p className="text-red-600 text-sm mt-2">{backupError}</p>
-                )}
-                {backupMessage && !backupPerforming && (
-                  <p className="text-green-600 text-sm mt-2">{backupMessage}</p>
-                )}
-              </div>
+                </div>
+              </section>
             </div>
-          </section>
+          )}
+
+          {/* TEMPERATURE Tab */}
+          {activeSettingsTab === "temperature" && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900">Välj temperatursensorer att visa på Dashboard</h3>
+              {sensorsLoading ? (
+                <p className="text-gray-500">Laddar sensorer...</p>
+              ) : temperatureSensors.length > 0 ? (
+                <div className="bg-gray-50 border border-gray-300 rounded-lg p-4 space-y-2 max-h-96 overflow-y-auto">
+                  {temperatureSensors.map((sensor) => (
+                    <div key={sensor.deviceId} className="flex items-center gap-3 p-2 hover:bg-white rounded transition">
+                      <input
+                        type="checkbox"
+                        id={`temp-${sensor.deviceId}`}
+                        checked={sensor.isVisible}
+                        onChange={() => handleToggleSensorVisibility(sensor.deviceId, sensor.isVisible)}
+                        className="w-4 h-4 rounded cursor-pointer"
+                      />
+                      <label htmlFor={`temp-${sensor.deviceId}`} className="flex-1 cursor-pointer text-sm font-medium text-gray-700">
+                        {sensor.deviceName}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">Inga temperatursensorer hittades</p>
+              )}
+            </div>
+          )}
+
+          {/* ENERGY Tab */}
+          {activeSettingsTab === "energy" && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900">Välj elförbrukningssensorer att visa på Dashboard</h3>
+              {sensorsLoading ? (
+                <p className="text-gray-500">Laddar sensorer...</p>
+              ) : energySensors.length > 0 ? (
+                <div className="bg-gray-50 border border-gray-300 rounded-lg p-4 space-y-2 max-h-96 overflow-y-auto">
+                  {energySensors.map((sensor) => (
+                    <div key={sensor.deviceId} className="flex items-center gap-3 p-2 hover:bg-white rounded transition">
+                      <input
+                        type="checkbox"
+                        id={`energy-${sensor.deviceId}`}
+                        checked={sensor.isVisible}
+                        onChange={() => handleToggleSensorVisibility(sensor.deviceId, sensor.isVisible)}
+                        className="w-4 h-4 rounded cursor-pointer"
+                      />
+                      <label htmlFor={`energy-${sensor.deviceId}`} className="flex-1 cursor-pointer text-sm font-medium text-gray-700">
+                        {sensor.deviceName}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">Inga elförbrukningssensorer hittades</p>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
