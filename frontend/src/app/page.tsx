@@ -162,6 +162,23 @@ export default function Dashboard() {
     saveVisibleSensors(new Set(allNames));
   };
 
+  // Auto-classify sensors based on temperature: <10°C = UTE, >=10°C = INNE
+  const autoClassifySensors = () => {
+    const updated = new Map(sensorLocations);
+    temperatures.forEach(temp => {
+      if (temp.temperature !== null) {
+        // Under 10°C = UTE (typically outside temperatures in February)
+        if (temp.temperature < 10) {
+          updated.set(temp.deviceName, "UTE");
+        } else {
+          updated.set(temp.deviceName, "INNE");
+        }
+      }
+    });
+    setSensorLocations(updated);
+    saveSensorLocations(updated);
+  };
+
   // Beräkna medelvärder från temperaturhistorik
   const calculateAverages = (history: Array<{id: number; deviceName: string; temperature: number; createdAt: string}>, deviceName: string, hoursBack: number): number | null => {
     const now = Date.now();
@@ -259,12 +276,16 @@ export default function Dashboard() {
     loadData();
   }
 
-  // Ladda data vid mount och auto-refresh var 30:e sekund
+  // Ladda data vid mount och auto-refresh var 30:e sekund (men INTE när man är i settings)
   useEffect(() => {
     loadData();
+    
+    // Uppdatera data var 30:e sekund, MEN BARA när man är INTE i inställningar
+    if (activeTab === "settings") return;
+    
     const interval = setInterval(loadData, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [activeTab]);
 
   // Auto-refresh meter varje minut om meter-tab är aktiv
   useEffect(() => {
@@ -327,6 +348,9 @@ export default function Dashboard() {
       setSettingsSuccess(`Mätarställning inställd på ${value} kWh`);
       setManualMeterValueInput("");
       
+      // Gör att framgångsmeddelandet försvinner efter 3 sekunder
+      setTimeout(() => setSettingsSuccess(""), 3000);
+      
       const meterData = await getMeterLatest();
       const meterHistoryData = await getMeterToday();
       setMeter(meterData);
@@ -353,6 +377,9 @@ export default function Dashboard() {
       });
 
       setBackupMessage("Backup-inställningar sparade framgångsrikt");
+      // Gör att meddelandet försvinner efter 3 sekunder
+      setTimeout(() => setBackupMessage(""), 3000);
+      
       const updated = await getBackupSettings();
       setBackupSettingsState(updated);
     } catch (err) {
@@ -378,6 +405,9 @@ export default function Dashboard() {
       const result = await performManualBackup();
       if (result.success) {
         setBackupMessage(`✓ Backup genomförd: ${result.filename}`);
+        // Gör att meddelandet försvinner efter 4 sekunder
+        setTimeout(() => setBackupMessage(""), 4000);
+        
         const updated = await getBackupSettings();
         setBackupSettingsState(updated);
       } else {
@@ -473,7 +503,7 @@ export default function Dashboard() {
         </div>
         <div className="text-right">
           <p className="text-xs font-semibold text-gray-400">Version</p>
-          <p className="text-lg font-bold text-blue-600">v0.13</p>
+          <p className="text-lg font-bold text-blue-600">v0.15</p>
         </div>
       </div>
 
@@ -891,6 +921,13 @@ export default function Dashboard() {
                   >
                     Visa bara UTE 🌤️
                   </button>
+                  <button
+                    onClick={autoClassifySensors}
+                    className="px-3 py-1 text-sm bg-purple-600 text-white rounded hover:bg-purple-700 transition ml-auto"
+                    title="Auto-classify: <10°C = UTE, ≥10°C = INNE"
+                  >
+                    🤖 Auto-klassificera
+                  </button>
                 </div>
               )}
               
@@ -924,27 +961,29 @@ export default function Dashboard() {
                           </div>
                           <div className="flex items-center gap-3 mt-2 ml-6">
                             <span className="text-xs text-gray-600">Typ:</span>
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => setSensorLocation(temp.deviceName, "INNE")}
-                                className={`px-2 py-1 text-xs rounded transition ${
-                                  location === "INNE"
-                                    ? "bg-green-200 text-green-900 font-semibold"
-                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                                }`}
-                              >
-                                🏠 INNE
-                              </button>
-                              <button
-                                onClick={() => setSensorLocation(temp.deviceName, "UTE")}
-                                className={`px-2 py-1 text-xs rounded transition ${
-                                  location === "UTE"
-                                    ? "bg-orange-200 text-orange-900 font-semibold"
-                                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                                }`}
-                              >
-                                🌤️ UTE
-                              </button>
+                            <div className="flex gap-4">
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name={`location-${temp.deviceName}`}
+                                  value="INNE"
+                                  checked={location === "INNE"}
+                                  onChange={() => setSensorLocation(temp.deviceName, "INNE")}
+                                  className="w-4 h-4 cursor-pointer"
+                                />
+                                <span className="text-xs font-medium text-green-700">🏠 INNE</span>
+                              </label>
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name={`location-${temp.deviceName}`}
+                                  value="UTE"
+                                  checked={location === "UTE"}
+                                  onChange={() => setSensorLocation(temp.deviceName, "UTE")}
+                                  className="w-4 h-4 cursor-pointer"
+                                />
+                                <span className="text-xs font-medium text-orange-700">🌤️ UTE</span>
+                              </label>
                             </div>
                           </div>
                           <p className="text-xs text-gray-500 mt-1">{temp.zone}</p>
