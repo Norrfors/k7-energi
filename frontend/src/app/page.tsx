@@ -93,19 +93,13 @@ export default function Dashboard() {
       const healthData = await getHealth();
       setHealth(healthData);
 
-      // Ladd temperaturer, energi och historia
+      // Ladd temperaturer, energi och historia (separerad från sensorer för att sensorer inte ska bryta huvud-displayen)
       try {
-        const [currentTemps, energyData, historyData, tempSensors, engySensors] = await Promise.all([
+        const [currentTemps, energyData, historyData] = await Promise.all([
           getTemperatures(),
           getEnergy(),
           getTemperatureHistory(24),
-          getTemperatureSensors(),
-          getEnergySensors(),
         ]);
-        
-        // Sätt sensorer (för filtrering senare)
-        setTemperatureSensors(tempSensors);
-        setEnergySensors(engySensors);
         
         // Beräkna medelvärden för varje enhet från historiken
         const tempsWithAverages = currentTemps.map(t => ({
@@ -118,11 +112,27 @@ export default function Dashboard() {
         setEnergy(energyData);
         setHomeyConnected(true);
         log("Temperatur- och energi-data loadad framgångsrikt", currentTemps.length + " enheter");
+        log("DEBUG: temperatures state sätts till", tempsWithAverages.length + " enheter");
+        log("DEBUG: energy state sätts till", energyData.length + " enheter");
       } catch (err) {
         setTemperatures([]);
         setEnergy([]);
         setHomeyConnected(false);
         log("Temperatur-data inte tillgänglig", err);
+      }
+
+      // Ladd sensorer separat (kan misslyckas utan att bryta huvud-displayen)
+      try {
+        const [tempSensors, engySensors] = await Promise.all([
+          getTemperatureSensors(),
+          getEnergySensors(),
+        ]);
+        setTemperatureSensors(tempSensors);
+        setEnergySensors(engySensors);
+        log("Sensor-inställningar loadade");
+      } catch (err) {
+        log("Sensor-inställningar kunde inte hämtas (fallback visar alla sensorer)", err);
+        // Lämnar temperatureSensors och energySensors som tomma arrays, triggerar fallback
       }
 
       // Ladd mätardata separat (ska alltid fungera om DB är ansluten)
@@ -344,7 +354,7 @@ export default function Dashboard() {
         </div>
         <div className="text-right">
           <p className="text-xs font-semibold text-gray-400">Version</p>
-          <p className="text-lg font-bold text-blue-600">v0.08</p>
+          <p className="text-lg font-bold text-blue-600">v0.08+</p>
         </div>
       </div>
 

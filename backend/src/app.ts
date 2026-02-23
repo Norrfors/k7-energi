@@ -53,6 +53,11 @@ async function start() {
     };
   });
 
+  // TEST: Inline test-route för att verifiera plugin-issue
+  app.get("/api/test/settings", async () => {
+    return { message: "Inline settings test works!" };
+  });
+
   // Starta schemaläggaren (uppdaterar mätardata varje minut, loggar temp/energi var 5:e minut)
   startScheduler();
 
