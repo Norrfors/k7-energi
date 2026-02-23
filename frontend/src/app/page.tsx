@@ -47,10 +47,12 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [homeyConnected, setHomeyConnected] = useState(false);
   
-  // Sensor visibility state
+  // Sensor visibility state (localStorage-based)
   const [temperatureSensors, setTemperatureSensors] = useState<SensorInfo[]>([]);
   const [energySensors, setEnergySensors] = useState<SensorInfo[]>([]);
   const [sensorsLoading, setSensorsLoading] = useState(false);
+  const [visibleTemperatures, setVisibleTemperatures] = useState<Set<string>>(new Set());
+  const [visibleEnergy, setVisibleEnergy] = useState<Set<string>>(new Set());
   
   // Settings state
   const [manualMeterValue, setManualMeterValueInput] = useState<string>("");
@@ -74,6 +76,43 @@ export default function Dashboard() {
     console.log(`[Dashboard] ${message}`, data || "");
   };
 
+  // Bestäm INNE/UTE-etikett baserat på deviceName
+  const getLocationLabel = (deviceName: string): string => {
+    const ute = ["ute", "utetemperatur", "utomhus", "exterior", "outside"];
+    const inne = ["inne", "inomhus", "interior", "inside", "innetemperatur"];
+    
+    const lower = deviceName.toLowerCase();
+    if (ute.some(u => lower.includes(u))) return "🌤️ UTE";
+    if (inne.some(i => lower.includes(i))) return "🏠 INNE";
+    return "📍 MÄTARE";
+  };
+
+  // localStorage helpers
+  const loadVisibleSensors = (): Set<string> => {
+    if (typeof window === "undefined") return new Set();
+    const stored = localStorage.getItem("visibleTemperatures");
+    return stored ? new Set(JSON.parse(stored)) : new Set();
+  };
+
+  const saveVisibleSensors = (visible: Set<string>) => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem("visibleTemperatures", JSON.stringify(Array.from(visible)));
+  };
+
+  // Toggle temperature sensor visibility
+  const handleToggleTemperatureSensor = (deviceName: string) => {
+    setVisibleTemperatures((prev) => {
+      const updated = new Set(prev);
+      if (updated.has(deviceName)) {
+        updated.delete(deviceName);
+      } else {
+        updated.add(deviceName);
+      }
+      saveVisibleSensors(updated);
+      return updated;
+    });
+  };
+
   // Beräkna medelvärder från temperaturhistorik
   const calculateAverages = (history: Array<{id: number; deviceName: string; temperature: number; createdAt: string}>, deviceName: string, hoursBack: number): number | null => {
     const now = Date.now();
@@ -86,6 +125,12 @@ export default function Dashboard() {
     const sum = readings.reduce((acc, r) => acc + r.temperature, 0);
     return sum / readings.length;
   };
+
+  // Ladda synliga sensorer från localStorage vid start
+  useEffect(() => {
+    const visible = loadVisibleSensors();
+    setVisibleTemperatures(visible);
+  }, []);
 
   async function loadData() {
     try {
@@ -432,11 +477,10 @@ export default function Dashboard() {
                 </div>
                 {temperatures
                   .filter(t => {
-                    // Om ingen sensor-inställningar laddats ännu, visa alla (fallback)
-                    if (temperatureSensors.length === 0) return true;
-                    const sensorSetting = temperatureSensors.find(s => s.deviceName === t.deviceName);
-                    // Om inget setting hittas, visa sensorn per default
-                    return sensorSetting ? sensorSetting.isVisible : true;
+                    // Om användar inte ställt in något (tom set), visa alla
+                    if (visibleTemperatures.size === 0) return true;
+                    // Annars visa bara de som markerats som synliga
+                    return visibleTemperatures.has(t.deviceName);
                   })
                   .map((t, index) => (
                   <div
@@ -750,27 +794,51 @@ export default function Dashboard() {
           {activeSettingsTab === "temperature" && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900">Välj temperatursensorer att visa på Dashboard</h3>
-              {sensorsLoading ? (
-                <p className="text-gray-500">Laddar sensorer...</p>
-              ) : temperatureSensors.length > 0 ? (
-                <div className="bg-gray-50 border border-gray-300 rounded-lg p-4 space-y-2 max-h-96 overflow-y-auto">
-                  {temperatureSensors.map((sensor) => (
-                    <div key={sensor.deviceId} className="flex items-center gap-3 p-2 hover:bg-white rounded transition">
-                      <input
-                        type="checkbox"
-                        id={`temp-${sensor.deviceId}`}
-                        checked={sensor.isVisible}
-                        onChange={() => handleToggleSensorVisibility(sensor.deviceId, sensor.isVisible)}
-                        className="w-4 h-4 rounded cursor-pointer"
-                      />
-                      <label htmlFor={`temp-${sensor.deviceId}`} className="flex-1 cursor-pointer text-sm font-medium text-gray-700">
-                        {sensor.deviceName}
-                      </label>
-                    </div>
-                  ))}
+              {temperatures.length > 0 ? (
+                <div className="bg-gray-50 border border-gray-300 rounded-lg p-4 space-y-3 max-h-96 overflow-y-auto">
+                  {temperatures.map((temp) => {
+                    const isVisible = visibleTemperatures.size === 0 || visibleTemperatures.has(temp.deviceName);
+                    const location = getLocationLabel(temp.deviceName);
+                    return (
+                      <div
+                        key={temp.deviceName}
+                        className="flex items-center justify-between gap-3 p-3 hover:bg-white rounded transition bg-white border border-gray-200"
+                      >
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              id={`temp-${temp.deviceName}`}
+                              checked={isVisible}
+                              onChange={() => handleToggleTemperatureSensor(temp.deviceName)}
+                              className="w-4 h-4 rounded cursor-pointer"
+                            />
+                            <label
+                              htmlFor={`temp-${temp.deviceName}`}
+                              className="cursor-pointer font-medium text-gray-900"
+                            >
+                              {temp.deviceName}
+                            </label>
+                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                              {location}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">{temp.zone}</p>
+                        </div>
+                        <div className="text-right min-w-24">
+                          <p className="font-semibold text-gray-900">
+                            {temp.temperature ? temp.temperature.toFixed(1) : "—"}°C
+                          </p>
+                          {temp.avg24h && (
+                            <p className="text-xs text-gray-500">24h: {temp.avg24h.toFixed(1)}°C</p>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
-                <p className="text-gray-500">Inga temperatursensorer hittades</p>
+                <p className="text-gray-500">Laddar temperatursensorer...</p>
               )}
             </div>
           )}
