@@ -92,6 +92,7 @@ export class HomeyService {
         return {
           deviceId: d.id,
           deviceName: d.name,
+          zone: d.zoneName || "Okänd",
           temperature: tempValue,
           lastUpdated,
         };
@@ -109,6 +110,7 @@ export class HomeyService {
       .map((d) => ({
         deviceId: d.id,
         deviceName: d.name,
+        zone: d.zoneName || "Okänd",
         watts: d.capabilitiesObj?.measure_power?.value as number | null,
         meterPower: d.capabilitiesObj?.meter_power?.value as number | null,
         lastUpdated: d.capabilitiesObj?.measure_power?.lastUpdated || "",
@@ -125,7 +127,7 @@ export class HomeyService {
           data: {
             deviceId: reading.deviceId,
             deviceName: reading.deviceName,
-            zone: "Okänd",
+            zone: reading.zone,
             temperature: reading.temperature,
           },
         });
@@ -145,7 +147,7 @@ export class HomeyService {
           data: {
             deviceId: reading.deviceId,
             deviceName: reading.deviceName,
-            zone: "Okänd",
+            zone: reading.zone,
             watts: reading.watts,
           },
         });
