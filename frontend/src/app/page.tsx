@@ -539,7 +539,7 @@ export default function Dashboard() {
         </div>
         <div className="text-right">
           <p className="text-xs font-semibold text-gray-400">Version</p>
-          <p className="text-lg font-bold text-blue-600">v0.19</p>
+          <p className="text-lg font-bold text-blue-600">v0.20</p>
         </div>
       </div>
 
@@ -974,7 +974,7 @@ export default function Dashboard() {
                     <div className="col-span-3">Sensornamn</div>
                     <div className="col-span-2">Zon</div>
                     <div className="col-span-2 text-right">Aktuellt</div>
-                    <div className="col-span-1 text-center">Visa</div>
+                    <div className="col-span-1 text-center">Dashboard</div>
                     <div className="col-span-2 flex gap-1 justify-center text-center">
                       <span className="flex-1">INNE</span>
                       <span className="flex-1">UTE</span>
@@ -1000,8 +1000,8 @@ export default function Dashboard() {
                         </div>
                         
                         {/* Zon */}
-                        <div className="col-span-2 text-gray-600 truncate">
-                          {temp.zone && temp.zone !== "okänd" ? temp.zone : "—"}
+                        <div className="col-span-2 text-gray-600 truncate text-xs">
+                          {temp.zone && temp.zone.toLowerCase() !== "okänd" ? temp.zone : "—"}
                         </div>
                         
                         {/* Aktuellt värde */}
