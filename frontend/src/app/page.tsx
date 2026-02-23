@@ -7,6 +7,7 @@ import { StatusCard } from "@/components/StatusCard";
 interface Temperature {
   deviceName: string;
   temperature: number | null;
+  zone: string;
   avg12h?: number | null;
   avg24h?: number | null;
 }
@@ -14,6 +15,7 @@ interface Temperature {
 interface Energy {
   deviceName: string;
   watts: number | null;
+  zone: string;
 }
 
 interface Health {
@@ -598,8 +600,9 @@ export default function Dashboard() {
                 🌡️ Temperaturer
               </h2>
               <div className="border border-gray-300 rounded-lg overflow-hidden shadow-sm">
-                <div className="bg-blue-50 p-4 border-b border-gray-300 grid grid-cols-4 gap-4 font-semibold text-gray-700 text-sm">
+                <div className="bg-blue-50 p-4 border-b border-gray-300 grid grid-cols-5 gap-4 font-semibold text-gray-700 text-sm">
                   <div>Enhet</div>
+                  <div>Zon</div>
                   <div className="text-right">Aktuell</div>
                   <div className="text-right">Snitt 12h</div>
                   <div className="text-right">Snitt 24h</div>
@@ -615,11 +618,12 @@ export default function Dashboard() {
                   .map((t, index) => (
                   <div
                     key={t.deviceName}
-                    className={`grid grid-cols-4 gap-4 p-4 ${
+                    className={`grid grid-cols-5 gap-4 p-4 ${
                       index % 2 === 0 ? "bg-white" : "bg-gray-50"
                     } border-b border-gray-200 last:border-b-0 hover:bg-blue-100 transition`}
                   >
                     <div className="text-gray-800 font-medium">{t.deviceName}</div>
+                    <div className="text-gray-600">{t.zone}</div>
                     <div className="text-right font-semibold text-blue-600">
                       {t.temperature !== null ? `${t.temperature.toFixed(1)}°C` : "N/A"}
                     </div>
@@ -654,6 +658,7 @@ export default function Dashboard() {
                     key={e.deviceName}
                     title={e.deviceName}
                     value={e.watts !== null ? `${e.watts.toFixed(0)}W` : "N/A"}
+                    subtitle={e.zone}
                     color="yellow"
                   />
                 ))}
