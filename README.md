@@ -5,9 +5,83 @@
 En komplett webbapplikation för att övervaka och styra **Krokgatan 7** via **Homey Pro**. Systemet samlar realtidsdata från smarthemenheten, lagrar historisk data i en databas och presenterar det i ett interaktivt dashboard med möjlighet till fjärråtkomst över lokalt nätverk.
 
 **Repo:** https://github.com/Norrfors/k7-energi  
-**Aktuell version:** v0.02  
+**Aktuell version:** v0.09  
 **Teknikstack:** TypeScript, Fastify, Next.js 14, PostgreSQL, Prisma ORM, Tailwind CSS  
 **Status:** ✅ Produktion-redo för lokal nätverk
+
+---
+
+## ⚡ Quick Start
+
+### 1. Förutsättningar
+- Windows 10+ (PowerShell 5.1+)
+- Node.js v18+
+- Docker Desktop
+- Homey Pro på lokala nätverket (t.ex. `192.168.1.122`)
+
+### 2. Installation
+
+```powershell
+# Klona repository
+git clone https://github.com/Norrfors/k7-energi.git
+cd k7-energi
+
+# Installera dependencies
+cd backend && npm install && cd ..
+cd frontend && npm install && cd ..
+```
+
+### 3. Starta allt automatiskt
+
+Kör `start.ps1`-skriptet från projektets rotmapp:
+
+```powershell
+.\start.ps1
+```
+
+**Vad skriptet gör:**
+1. ✅ Stoppar gamla Node.js-processer
+2. ✅ Startar PostgreSQL i Docker
+3. ✅ Startar backend-servern
+4. ✅ **Väntar** på att backend är redo (poll `/api/health`)
+5. ✅ Startar frontend-servern
+6. ✅ Visar status och URL:er
+
+**Resultat:**
+```
+✓ Backend ready!
+✓ Frontend starting...
+✓ All services running!
+
+📊 Dashboard:  http://localhost:3000 (eller 192.168.1.211:3000)
+🔧 API:        http://localhost:3001
+```
+
+### 4. Stoppa tjänsterna
+
+Starta **Task Manager** → Sök `node.exe` → Högerklick → **End Task**
+
+Ellan kan du köra:
+```powershell
+taskkill /f /im node.exe
+```
+
+### 🆘 Troubleshooting
+
+**"Connection refused" eller "ERR_NETWORK" i webbläsaren?**
+- Vänta 5 sekunder efter att `start.ps1` slutförts
+- Backend behöver tid att ansluta till database och Homey
+- Uppdatera webbläsaren (F5)
+
+**Backend startar inte?**
+- Kontrollera att Docker Desktop körs: `docker ps`
+- Kontrollera att port 3001 är ledig: `netstat -ano | findstr :3001`
+- Om den är upptagen: `taskkill /f /im node.exe` och försök igen
+
+**Kan inte nå Homey (alla mätvärden är 0)?**
+- Verifiera Homey Pro IP: Se `backend/.env` eller `HOMEY_IP` i loggarna
+- Pinga Homey från Command Prompt: `ping 192.168.1.122`
+- Kontrollera brandvägg
 
 ---
 
