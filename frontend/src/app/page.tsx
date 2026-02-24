@@ -530,7 +530,7 @@ export default function Dashboard() {
         </div>
         <div className="text-right">
           <p className="text-xs font-semibold text-gray-400">Version</p>
-          <p className="text-lg font-bold text-blue-600">v0.24</p>
+          <p className="text-lg font-bold text-blue-600">v0.25</p>
         </div>
       </div>
 
@@ -965,10 +965,11 @@ export default function Dashboard() {
                 <div className="border border-gray-300 rounded-lg overflow-hidden max-h-96 overflow-y-auto">
                   {/* Table header */}
                   <div className="grid grid-cols-12 gap-2 bg-blue-100 px-2 py-2 border-b border-gray-300 font-semibold text-xs text-gray-700 sticky top-0">
-                    <div className="col-span-4">Sensornamn</div>
+                    <div className="col-span-3">Sensornamn</div>
+                    <div className="col-span-2">Zon</div>
                     <div className="col-span-2 text-right">Aktuellt</div>
                     <div className="col-span-1 text-center">Dashboard</div>
-                    <div className="col-span-3 flex gap-1 justify-center text-center">
+                    <div className="col-span-2 flex gap-1 justify-center text-center">
                       <span className="flex-1">INNE</span>
                       <span className="flex-1">UTE</span>
                     </div>
@@ -996,8 +997,13 @@ export default function Dashboard() {
                         className={`grid grid-cols-12 gap-2 px-2 py-2 items-center text-xs bg-white border-b border-gray-200 last:border-b-0 hover:bg-blue-50 transition`}
                       >
                         {/* Sensornamn */}
-                        <div className="col-span-4 font-medium text-gray-900 truncate">
+                        <div className="col-span-3 font-medium text-gray-900 truncate">
                           {temp.deviceName}
+                        </div>
+                        
+                        {/* Zone */}
+                        <div className="col-span-2 text-gray-600">
+                          {temp.zone || "—"}
                         </div>
                         
                         {/* Aktuellt värde */}
@@ -1017,7 +1023,7 @@ export default function Dashboard() {
                         </div>
                         
                         {/* Radio buttons - INNE och UTE */}
-                        <div className="col-span-3 flex gap-1 justify-center">
+                        <div className="col-span-2 flex gap-1 justify-center">
                           <label className="flex-1 flex justify-center">
                             <input
                               type="radio"
@@ -1067,7 +1073,8 @@ export default function Dashboard() {
                         className="w-4 h-4 rounded cursor-pointer"
                       />
                       <label htmlFor={`energy-${sensor.deviceId}`} className="flex-1 cursor-pointer text-sm font-medium text-gray-700">
-                        {sensor.deviceName}
+                        <div>{sensor.deviceName}</div>
+                        {sensor.zone && <div className="text-xs text-gray-500">Zon: {sensor.zone}</div>}
                       </label>
                     </div>
                   ))}
