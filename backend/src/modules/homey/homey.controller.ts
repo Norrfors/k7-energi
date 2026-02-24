@@ -33,6 +33,10 @@ export async function homeyRoutes(app: FastifyInstance) {
   app.get("/api/homey/temperatures", async (request, reply) => {
     try {
       const temperatures = await homeyService.getTemperatures();
+      // DEBUG: Logg första sensorn för att verifiera zone
+      if (temperatures.length > 0) {
+        console.log("[DEBUG] Första sensorn:", JSON.stringify(temperatures[0]));
+      }
       return temperatures;
     } catch (error) {
       console.error("Kunde inte hämta temperaturer:", error);

@@ -27,10 +27,49 @@ export class HomeyService {
   private address: string;
   private token: string;
 
+  // Manuell mappning av sensornamn till zoner
+  private deviceZoneMapping: Record<string, string> = {
+    "Outdoor Occupancy Sensor GARAGE": "Garage",
+    "Outdoor Occupancy Sensor HUVUDENTRE": "Huvudentre",
+    "k7 — ÖV Huvudsovrum": "Huvudsovrum",
+    "k7 — ÖV Sovrum Norr": "Sovrum Norr",
+    "k7 — ÖV Sovrum Syd": "Sovrum Syd",
+    "k7 BV  — Vardagsrum": "Vardagsrum",
+    "k7 — BV Hall": "BV Hall",
+    "k7 — ÖV Hall": "ÖV Hall",
+    "k7 — BV Matsal": "Matsal",
+    "k7 — ÖV Kontor": "Kontor",
+    "ÖV Badrum termostat  4512744/45": "Badrum",
+  };
+
   constructor() {
     this.address = process.env.HOMEY_ADDRESS || "http://192.168.1.100";
     this.token = process.env.HOMEY_TOKEN || "";
     console.log(`[HomeyService] Initialiserad med address: ${this.address}`);
+  }
+
+  // Extrahera och mappa enhets-zon
+  private getZoneForDevice(deviceName: string): string {
+    // Först: Kolla om den finns i manuell mappning
+    if (this.deviceZoneMapping[deviceName]) {
+      return this.deviceZoneMapping[deviceName];
+    }
+
+    // Sedan: Försök automatiskt extrahera från namn (ofta sista ordet eller inom parenteser)
+    // För sensorer som "k7 — BV Vardagsrum" -> "Vardagsrum"
+    const parts = deviceName.split(" — ");
+    if (parts.length > 1) {
+      return parts[parts.length - 1].trim();
+    }
+
+    // Eller ordet dentro parenteser
+    const parenMatch = deviceName.match(/\((.*?)\)/);
+    if (parenMatch) {
+      return parenMatch[1].trim();
+    }
+
+    // Fallback
+    return "Okänd";
   }
 
   // Hämta alla enheter direkt via HTTP (utan homey-api biblioteket)
@@ -60,7 +99,7 @@ export class HomeyService {
   async getTemperatures() {
     const devices = await this.fetchDevices();
 
-    return devices
+    const result = devices
       .filter((d) => 
         d.capabilities.includes("measure_temperature") || 
         d.capabilities.includes("outdoorTemperature") ||
@@ -89,16 +128,26 @@ export class HomeyService {
           }
         }
 
-        return {
+        const reading = {
           deviceId: d.id,
           deviceName: d.name,
-          zone: d.zoneName || "Okänd",
+          zone: this.getZoneForDevice(d.name),
           temperature: tempValue,
           lastUpdated,
         };
+        
+        // DEBUG
+        if (d.name.includes("GARAGE")) {
+          console.log("[HomeyService] GARAGE-sensor mapping:", reading);
+        }
+        
+        return reading;
       })
       // Filtrera bort sensorer som inte har något temperaturvärde
       .filter((t) => t.temperature !== null);
+    
+    console.log("[HomeyService] getTemperatures returnerar första sensorn:", JSON.stringify(result[0]));
+    return result;
   }
 
   // Hämta all energiförbrukning just nu
@@ -110,7 +159,7 @@ export class HomeyService {
       .map((d) => ({
         deviceId: d.id,
         deviceName: d.name,
-        zone: d.zoneName || "Okänd",
+        zone: this.getZoneForDevice(d.name),
         watts: d.capabilitiesObj?.measure_power?.value as number | null,
         meterPower: d.capabilitiesObj?.meter_power?.value as number | null,
         lastUpdated: d.capabilitiesObj?.measure_power?.lastUpdated || "",
