@@ -15,10 +15,21 @@ Ett smarthems-dashboard som kopplar mot **Homey Pro** via lokalt nätverk och vi
 | Lager | Teknik |
 |-------|--------|
 | Backend API | TypeScript, Fastify, Node.js |
-| Databas | PostgreSQL (Docker) + Prisma ORM |
+| Databas | PostgreSQL (Docker only) |
 | Frontend | Next.js 14, React, Tailwind CSS |
 | Delat | `shared/types.ts` – kontrakt mellan front och back |
 | Schemaläggning | `node-cron` – loggar data var 5:e minut |
+| **Dev-miljö** | **LOCAL (inte Docker)** - bara DB i container |
+
+### 🚀 Starta utveckling (rekommenderat)
+
+**En terminal:**
+
+```bash
+docker-compose up -d
+```
+
+Sedan öppna: http://localhost:3000
 
 ### Portar
 
@@ -54,13 +65,15 @@ Versionstaggar följer formatet `vX.XX` (t.ex. `v0.01`, `v0.02`, `v1.00`).
 
 ### Kommandot "starta"
 
-När användaren skriver **starta** ska följande göras automatiskt:
+Kör dessa 3 commands i **3 separata CMD-fönster**:
 
-1. Stoppa eventuella körande Node.js-processer: `taskkill //f //im node.exe` (ignorera fel om ingen kör)
-2. Starta databasen i bakgrunden: `docker compose up -d`
-3. Starta backend i en bakgrundsterminal: `cd backend && npm run dev`
-4. Starta frontend i en bakgrundsterminal: `cd frontend && npm run dev`
-5. Bekräfta för användaren att alla tre tjänster startats
+```bash
+1-START-DB.bat        # Terminal 1
+2-START-BACKEND.bat   # Terminal 2  
+3-START-FRONTEND.bat  # Terminal 3
+```
+
+Frontend är då klar på: http://localhost:3000
 
 ---
 
