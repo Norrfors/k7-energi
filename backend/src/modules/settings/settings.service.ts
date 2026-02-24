@@ -6,6 +6,7 @@ export interface SensorInfo {
   deviceName: string;
   sensorType: "temperature" | "energy";
   isVisible: boolean;
+  zone?: string; // "INNE", "UTE" eller tom sträng
 }
 
 /**
@@ -35,6 +36,7 @@ export async function getAllTemperatureSensors(): Promise<SensorInfo[]> {
       deviceName: log.deviceName,
       sensorType: "temperature",
       isVisible: visibility?.isVisible ?? true, // Default true om den inte finns i inställningar
+      zone: visibility?.zone ?? "", // Hämta zone från SensorVisibility
     });
 
     // Om den inte fanns, skapa ett record
@@ -45,6 +47,7 @@ export async function getAllTemperatureSensors(): Promise<SensorInfo[]> {
           deviceName: log.deviceName,
           sensorType: "temperature",
           isVisible: true,
+          zone: "", // Default tom zon
         },
       });
     }
@@ -80,6 +83,7 @@ export async function getAllEnergySensors(): Promise<SensorInfo[]> {
       deviceName: log.deviceName,
       sensorType: "energy",
       isVisible: visibility?.isVisible ?? true, // Default true om den inte finns i inställningar
+      zone: visibility?.zone ?? "", // Hämta zone från SensorVisibility
     });
 
     // Om den inte fanns, skapa ett record
@@ -90,6 +94,7 @@ export async function getAllEnergySensors(): Promise<SensorInfo[]> {
           deviceName: log.deviceName,
           sensorType: "energy",
           isVisible: true,
+          zone: "", // Default tom zon
         },
       });
     }

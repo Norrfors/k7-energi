@@ -7,6 +7,7 @@ import { StatusCard } from "@/components/StatusCard";
 interface Temperature {
   deviceName: string;
   temperature: number | null;
+  zone?: string;
   avg12h?: number | null;
   avg24h?: number | null;
 }
@@ -14,6 +15,7 @@ interface Temperature {
 interface Energy {
   deviceName: string;
   watts: number | null;
+  zone?: string;
 }
 
 interface Health {
@@ -528,7 +530,7 @@ export default function Dashboard() {
         </div>
         <div className="text-right">
           <p className="text-xs font-semibold text-gray-400">Version</p>
-          <p className="text-lg font-bold text-blue-600">v0.22</p>
+          <p className="text-lg font-bold text-blue-600">v0.28</p>
         </div>
       </div>
 
@@ -619,7 +621,10 @@ export default function Dashboard() {
                       index % 2 === 0 ? "bg-white" : "bg-gray-50"
                     } border-b border-gray-200 last:border-b-0 hover:bg-blue-100 transition`}
                   >
-                    <div className="text-gray-800 font-medium">{t.deviceName}</div>
+                    <div className="text-gray-800 font-medium">
+                      {t.deviceName}
+                      {t.zone && <span className="text-gray-500 text-sm ml-2">({t.zone})</span>}
+                    </div>
                     <div className="text-right font-semibold text-blue-600">
                       {t.temperature !== null ? `${t.temperature.toFixed(1)}°C` : "N/A"}
                     </div>
@@ -652,7 +657,7 @@ export default function Dashboard() {
                   .map((e) => (
                   <StatusCard
                     key={e.deviceName}
-                    title={e.deviceName}
+                    title={e.zone ? `${e.deviceName} (${e.zone})` : e.deviceName}
                     value={e.watts !== null ? `${e.watts.toFixed(0)}W` : "N/A"}
                     color="yellow"
                   />
@@ -990,9 +995,16 @@ export default function Dashboard() {
                         key={temp.deviceName}
                         className={`grid grid-cols-12 gap-2 px-2 py-2 items-center text-xs bg-white border-b border-gray-200 last:border-b-0 hover:bg-blue-50 transition`}
                       >
-                        {/* Sensornamn */}
-                        <div className="col-span-4 font-medium text-gray-900 truncate">
-                          {temp.deviceName}
+                        {/* Sensornamn + ZONE */}
+                        <div className="col-span-4 font-medium text-gray-900">
+                          <div className="truncate">{temp.deviceName}</div>
+                          <span className={`text-xs font-normal ${
+                            location === "INNE" ? "text-green-600" :
+                            location === "UTE" ? "text-orange-600" :
+                            "text-gray-500"
+                          }`}>
+                            {location === "INNE" ? "🏠 INNE" : location === "UTE" ? "🌤️ UTE" : "—"}
+                          </span>
                         </div>
                         
                         {/* Aktuellt värde */}

@@ -79,6 +79,7 @@ model SensorVisibility {
   deviceName  String   // Sensornamn
   sensorType  String   // "temperature" eller "energy"
   isVisible   Boolean  @default(true) // Ska sensorn visas på Dashboard?
+  zone        String   @default("") // Zon: "INNE", "UTE" eller ""
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
