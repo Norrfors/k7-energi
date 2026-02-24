@@ -7,7 +7,6 @@ import { StatusCard } from "@/components/StatusCard";
 interface Temperature {
   deviceName: string;
   temperature: number | null;
-  zone: string;
   avg12h?: number | null;
   avg24h?: number | null;
 }
@@ -15,7 +14,6 @@ interface Temperature {
 interface Energy {
   deviceName: string;
   watts: number | null;
-  zone: string;
 }
 
 interface Health {
@@ -530,7 +528,7 @@ export default function Dashboard() {
         </div>
         <div className="text-right">
           <p className="text-xs font-semibold text-gray-400">Version</p>
-          <p className="text-lg font-bold text-blue-600">v0.25</p>
+          <p className="text-lg font-bold text-blue-600">v0.22</p>
         </div>
       </div>
 
@@ -600,9 +598,8 @@ export default function Dashboard() {
                 🌡️ Temperaturer
               </h2>
               <div className="border border-gray-300 rounded-lg overflow-hidden shadow-sm">
-                <div className="bg-blue-50 p-4 border-b border-gray-300 grid grid-cols-5 gap-4 font-semibold text-gray-700 text-sm">
+                <div className="bg-blue-50 p-4 border-b border-gray-300 grid grid-cols-4 gap-4 font-semibold text-gray-700 text-sm">
                   <div>Enhet</div>
-                  <div>Zon</div>
                   <div className="text-right">Aktuell</div>
                   <div className="text-right">Snitt 12h</div>
                   <div className="text-right">Snitt 24h</div>
@@ -618,12 +615,11 @@ export default function Dashboard() {
                   .map((t, index) => (
                   <div
                     key={t.deviceName}
-                    className={`grid grid-cols-5 gap-4 p-4 ${
+                    className={`grid grid-cols-4 gap-4 p-4 ${
                       index % 2 === 0 ? "bg-white" : "bg-gray-50"
                     } border-b border-gray-200 last:border-b-0 hover:bg-blue-100 transition`}
                   >
                     <div className="text-gray-800 font-medium">{t.deviceName}</div>
-                    <div className="text-gray-600">{t.zone}</div>
                     <div className="text-right font-semibold text-blue-600">
                       {t.temperature !== null ? `${t.temperature.toFixed(1)}°C` : "N/A"}
                     </div>
@@ -658,7 +654,6 @@ export default function Dashboard() {
                     key={e.deviceName}
                     title={e.deviceName}
                     value={e.watts !== null ? `${e.watts.toFixed(0)}W` : "N/A"}
-                    subtitle={e.zone}
                     color="yellow"
                   />
                 ))}
@@ -965,11 +960,10 @@ export default function Dashboard() {
                 <div className="border border-gray-300 rounded-lg overflow-hidden max-h-96 overflow-y-auto">
                   {/* Table header */}
                   <div className="grid grid-cols-12 gap-2 bg-blue-100 px-2 py-2 border-b border-gray-300 font-semibold text-xs text-gray-700 sticky top-0">
-                    <div className="col-span-3">Sensornamn</div>
-                    <div className="col-span-2">Zon</div>
+                    <div className="col-span-4">Sensornamn</div>
                     <div className="col-span-2 text-right">Aktuellt</div>
                     <div className="col-span-1 text-center">Dashboard</div>
-                    <div className="col-span-2 flex gap-1 justify-center text-center">
+                    <div className="col-span-3 flex gap-1 justify-center text-center">
                       <span className="flex-1">INNE</span>
                       <span className="flex-1">UTE</span>
                     </div>
@@ -997,13 +991,8 @@ export default function Dashboard() {
                         className={`grid grid-cols-12 gap-2 px-2 py-2 items-center text-xs bg-white border-b border-gray-200 last:border-b-0 hover:bg-blue-50 transition`}
                       >
                         {/* Sensornamn */}
-                        <div className="col-span-3 font-medium text-gray-900 truncate">
+                        <div className="col-span-4 font-medium text-gray-900 truncate">
                           {temp.deviceName}
-                        </div>
-                        
-                        {/* Zone */}
-                        <div className="col-span-2 text-gray-600">
-                          {temp.zone || "—"}
                         </div>
                         
                         {/* Aktuellt värde */}
@@ -1023,7 +1012,7 @@ export default function Dashboard() {
                         </div>
                         
                         {/* Radio buttons - INNE och UTE */}
-                        <div className="col-span-2 flex gap-1 justify-center">
+                        <div className="col-span-3 flex gap-1 justify-center">
                           <label className="flex-1 flex justify-center">
                             <input
                               type="radio"
@@ -1073,8 +1062,7 @@ export default function Dashboard() {
                         className="w-4 h-4 rounded cursor-pointer"
                       />
                       <label htmlFor={`energy-${sensor.deviceId}`} className="flex-1 cursor-pointer text-sm font-medium text-gray-700">
-                        <div>{sensor.deviceName}</div>
-                        {sensor.zone && <div className="text-xs text-gray-500">Zon: {sensor.zone}</div>}
+                        {sensor.deviceName}
                       </label>
                     </div>
                   ))}

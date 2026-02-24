@@ -79,14 +79,6 @@ async function start() {
     return { message: "Inline settings test works!" };
   });
 
-  // TEST: Zone-test endpoint i app.ts
-  app.get("/api/test/zone", async (request, reply) => {
-    reply.send({
-      zone: "ZONE-VALUE",
-      name: "Direct from app.ts"
-    });
-  });
-
   // Starta schemaläggaren (uppdaterar mätardata varje minut, loggar temp/energi var 5:e minut)
   startScheduler();
 

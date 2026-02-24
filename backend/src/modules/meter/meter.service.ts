@@ -134,6 +134,7 @@ export class MeterService {
         data: {
           deviceId: PULSE_ID,
           deviceName: PULSE_NAME,
+          zone: pulseData.zone || "Okänd",
           consumptionSinceMidnight,
           consumptionSincePreviousReading,
           totalMeterValue,
@@ -168,6 +169,7 @@ export class MeterService {
         data: {
           deviceId: PULSE_ID,
           deviceName: PULSE_NAME,
+          zone: pulseData?.zone || "Okänd",
           consumptionSinceMidnight,
           consumptionSincePreviousReading: 0, // Manuell inställning, ingen delta
           totalMeterValue,
