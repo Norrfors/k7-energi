@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import { homeyService } from "./homey.service";
 import { discoverHomey, getLocalIPs } from "./homey.discover";
+import prisma from "../../shared/db";
 
 // Controller = definierar vilka HTTP-endpoints som finns.
 // Varje route kopplas till en funktion i service-lagret.
@@ -29,44 +30,51 @@ export async function homeyRoutes(app: FastifyInstance) {
     }
   });
 
-  // GET /api/homey/temperatures – hämta temperaturer just nu
+  // GET /api/homey/temperatures – hämta temperaturer just nu (från Homey real-time)
   app.get("/api/homey/temperatures", async (request, reply) => {
     try {
       const temperatures = await homeyService.getTemperatures();
-      // DEBUG: Logg första sensorn för att verifiera zone
-      if (temperatures.length > 0) {
-        console.log("[DEBUG] Första sensorn:", JSON.stringify(temperatures[0]));
-      }
-      // TEST: Lägg till hardkodad zone för enktest
-      const testResponse = temperatures.map((t: any) => ({
-        ...t,
-        zone: t.zone || "TEST",
-        testField: "exists"
+      
+      // Exportera som vanliga objekt med all info inkl zone
+      const result = temperatures.map((t) => ({
+        deviceId: t.deviceId,
+        deviceName: t.deviceName,
+        zone: t.zone || "Okänd",
+        temperature: t.temperature,
+        lastUpdated: t.lastUpdated,
       }));
-      console.log("[DEBUG] Response före send:", JSON.stringify(testResponse[0]));
-      return testResponse;
+      
+      reply.send(result);
     } catch (error) {
       console.error("Kunde inte hämta temperaturer:", error);
-      reply.status(503);
-      return {
+      reply.status(503).send({
         error: "Kunde inte nå Homey",
         message: "Kontrollera att Homey är igång och att IP/token stämmer",
-      };
+      });
     }
   });
 
-  // GET /api/homey/energy – hämta energiförbrukning just nu
+  // GET /api/homey/energy – hämta energiförbrukning just nu (från Homey real-time)
   app.get("/api/homey/energy", async (request, reply) => {
     try {
       const energy = await homeyService.getEnergy();
-      return energy;
+      
+      // Exportera som vanliga objekt med all info inkl zone
+      const result = energy.map((e) => ({
+        deviceId: e.deviceId,
+        deviceName: e.deviceName,
+        zone: e.zone || "Okänd",
+        watts: e.watts,
+        lastUpdated: e.lastUpdated,
+      }));
+      
+      reply.send(result);
     } catch (error) {
       console.error("Kunde inte hämta energidata:", error);
-      reply.status(503);
-      return {
+      reply.status(503).send({
         error: "Kunde inte nå Homey",
         message: "Kontrollera att Homey är igång och att IP/token stämmer",
-      };
+      });
     }
   });
 }
