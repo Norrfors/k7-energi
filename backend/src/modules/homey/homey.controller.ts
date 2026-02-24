@@ -37,7 +37,14 @@ export async function homeyRoutes(app: FastifyInstance) {
       if (temperatures.length > 0) {
         console.log("[DEBUG] Första sensorn:", JSON.stringify(temperatures[0]));
       }
-      return temperatures;
+      // TEST: Lägg till hardkodad zone för enktest
+      const testResponse = temperatures.map((t: any) => ({
+        ...t,
+        zone: t.zone || "TEST",
+        testField: "exists"
+      }));
+      console.log("[DEBUG] Response före send:", JSON.stringify(testResponse[0]));
+      return testResponse;
     } catch (error) {
       console.error("Kunde inte hämta temperaturer:", error);
       reply.status(503);
