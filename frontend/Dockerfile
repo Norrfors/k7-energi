@@ -20,22 +20,17 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Installera bara production dependencies
+# Installera dependencies
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci
 
-# Kopiera built app från builder stage
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/next.config.js ./
-
-# Hälsocheck
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})" || exit 1
+# Kopiera alla source files
+COPY . .
 
 # Port för frontend
-ENV NODE_ENV=production
+ENV NODE_ENV=development
 ENV PORT=3000
 EXPOSE 3000
 
-CMD ["npm", "start"]
+# Kör dev server för dynamic updates
+CMD ["npm", "run", "dev"]

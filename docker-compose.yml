@@ -31,8 +31,6 @@ services:
     environment:
       NODE_ENV: development
       DATABASE_URL: postgresql://postgres:postgres@db:5432/homey_db
-    depends_on:
-      - db
     restart: unless-stopped
     networks:
       - homey_network
@@ -47,8 +45,6 @@ services:
     environment:
       NODE_ENV: development
       NEXT_PUBLIC_API_URL: http://localhost:3001
-    depends_on:
-      - backend
     restart: unless-stopped
     networks:
       - homey_network

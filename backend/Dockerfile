@@ -20,13 +20,9 @@ RUN npx prisma generate
 COPY src ./src
 COPY tsconfig.json ./
 
-# Hälsocheck
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/api/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
-
-# Starta backend
-ENV NODE_ENV=production
+# Starta backend i development mode
+ENV NODE_ENV=development
 ENV PORT=3001
 EXPOSE 3001
 
-CMD ["npm", "run", "build-run"]
+CMD ["npm", "run", "dev"]
