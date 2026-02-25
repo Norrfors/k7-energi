@@ -16,8 +16,8 @@ export async function apiFetch<T>(
   endpoint: string,
   options?: RequestInit
 ): Promise<T> {
-  const MAX_RETRIES = 20;
-  const RETRY_DELAY = 1000; // 1 second between retries
+  const MAX_RETRIES = 3;
+  const RETRY_DELAY = 500; // 500ms between retries
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {

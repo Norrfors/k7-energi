@@ -303,14 +303,14 @@ export default function Dashboard() {
     loadData();
   }
 
-  // Ladda data vid mount och auto-refresh var 30:e sekund (men INTE när man är i settings)
+  // Ladda data vid mount och auto-refresh var 60:e sekund (men INTE när man är i settings)
   useEffect(() => {
     loadData();
     
-    // Uppdatera data var 30:e sekund, MEN BARA när man är INTE i inställningar
+    // Uppdatera data var 60:e sekund, MEN BARA när man är INTE i inställningar
     if (activeTab === "settings") return;
     
-    const interval = setInterval(loadData, 30000);
+    const interval = setInterval(loadData, 60000);
     return () => clearInterval(interval);
   }, [activeTab]);
 
