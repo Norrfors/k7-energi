@@ -20,9 +20,9 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Installera bara production dependencies
+# Installera alla dependencies (tailwindcss & postcss behövs ej i prod men .next redan compilerat)
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci
 
 # Kopiera built app från builder stage
 COPY --from=builder /app/.next ./.next
