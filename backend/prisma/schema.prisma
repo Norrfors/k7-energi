@@ -16,7 +16,7 @@ model TemperatureLog {
   id          Int      @id @default(autoincrement())
   deviceId    String
   deviceName  String
-  zone        String   @default("")
+  zone        String?
   temperature Float
   createdAt   DateTime @default(now())
 
@@ -28,7 +28,7 @@ model EnergyLog {
   id         Int      @id @default(autoincrement())
   deviceId   String
   deviceName String
-  zone       String   @default("")
+  zone       String?
   watts      Float
   createdAt  DateTime @default(now())
 

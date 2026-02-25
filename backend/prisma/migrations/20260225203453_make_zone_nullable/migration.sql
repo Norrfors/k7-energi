@@ -1,0 +1,7 @@
+-- AlterTable
+ALTER TABLE "EnergyLog" ALTER COLUMN "zone" DROP NOT NULL,
+ALTER COLUMN "zone" DROP DEFAULT;
+
+-- AlterTable
+ALTER TABLE "TemperatureLog" ALTER COLUMN "zone" DROP NOT NULL,
+ALTER COLUMN "zone" DROP DEFAULT;
