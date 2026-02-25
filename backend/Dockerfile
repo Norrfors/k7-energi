@@ -20,9 +20,11 @@ RUN npx prisma generate
 COPY src ./src
 COPY tsconfig.json ./
 
-# Starta backend i development mode
-ENV NODE_ENV=development
+# Bygg och starta backend i production mode
+RUN npm run build
+
+ENV NODE_ENV=production
 ENV PORT=3001
 EXPOSE 3001
 
-CMD ["npm", "run", "dev"]
+CMD ["npm", "start"]

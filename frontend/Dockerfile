@@ -20,17 +20,18 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Installera dependencies
+# Installera production dependencies
 COPY package*.json ./
-RUN npm ci
+RUN npm ci --only=production
 
-# Kopiera alla source files
-COPY . .
+# Kopiera built app från builder stage
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
 
 # Port för frontend
-ENV NODE_ENV=development
+ENV NODE_ENV=production
 ENV PORT=3000
 EXPOSE 3000
 
-# Kör dev server för dynamic updates
-CMD ["npm", "run", "dev"]
+# Kör production server
+CMD ["npm", "start"]
