@@ -7,7 +7,7 @@ import { StatusCard } from "@/components/StatusCard";
 interface Temperature {
   deviceName: string;
   temperature: number | null;
-  zone?: string;
+  zone?: string | null;
   avg12h?: number | null;
   avg24h?: number | null;
 }
@@ -15,7 +15,7 @@ interface Temperature {
 interface Energy {
   deviceName: string;
   watts: number | null;
-  zone?: string;
+  zone?: string | null;
 }
 
 interface Health {

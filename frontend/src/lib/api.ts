@@ -66,7 +66,7 @@ export function getTemperatures() {
     Array<{
       deviceName: string;
       temperature: number | null;
-      zone: string;
+      zone: string | null;
       lastUpdated: string;
     }>
   >("/api/homey/temperatures");
@@ -88,7 +88,7 @@ export function getEnergy() {
     Array<{
       deviceName: string;
       watts: number | null;
-      zone: string;
+      zone: string | null;
       lastUpdated: string;
     }>
   >("/api/homey/energy");
