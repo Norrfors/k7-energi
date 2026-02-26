@@ -57,7 +57,16 @@ Sedan öppna: http://localhost:3000
 
 ---
 
-## 🔴 NÄSTA SESSION - MÅSTE GÖRAS FÖRST
+## � Homey Pro - K7Energy API
+
+**API-nyckel (2026-02-26):**  
+`b4809290-ee33-47ec-a01e-709a79fef249:bff3730e-d41b-4647-b66c-5ba256c3769c:7d78b40e702dd6848f1e05abaedbb06a779a14bf`
+
+Sparad i: `backend/.env` → `HOMEY_TOKEN`
+
+---
+
+## �🔴 NÄSTA SESSION - MÅSTE GÖRAS FÖRST
 
 ### VERSIONSNUMRET I DASHBOARD-RUBRIKEN ⭐⭐⭐
 
