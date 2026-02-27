@@ -23,13 +23,31 @@ Ett smarthems-dashboard som kopplar mot **Homey Pro** via lokalt nätverk och vi
 
 ### 🚀 Starta utveckling (rekommenderat)
 
-**En terminal:**
+**Ett kommando (startar allt i rätt ordning):**
 
-```bash
-docker-compose up -d
+```powershell
+.\START-ALL.ps1
 ```
 
-Sedan öppna: http://localhost:3000
+Detta startar:
+1. 📦 PostgreSQL Database (Docker)
+2. 🔧 Backend (port 3001)
+3. 🎨 Frontend (port 3000)
+
+med health checks mellan varje steg.
+
+**Eller manuellt (3 separata CMD-fönster - DEPRECATED):**
+```
+1-START-DB.bat        # Terminal 1
+2-START-BACKEND.bat   # Terminal 2  
+3-START-FRONTEND.bat  # Terminal 3
+```
+
+**Diagnostik:**
+```powershell
+.\DIAGNOSE.ps1        # Visa status på alla tjänster
+.\STOP-ALL.ps1        # Stäng allt
+```
 
 ### Portar
 
@@ -98,62 +116,46 @@ Sparad i: `backend/.env` → `HOMEY_TOKEN`
 
 ---
 
-Aktuell version: **v0.30** (STABILT & FUNGERANDE)
+Aktuell version: **v0.31** (Zone-funktionaliteten implementerad)
 
 ---
 
-## 🟢 SESSION 2026-02-27 - v0.30 COMPLETE
+## 🟢 SESSION 2026-02-27 CONT. - v0.31 Zone-Funktionalitet
 
-✅ **Versionsnumret är nu synligt på två ställen:**
-- Dashboard-header (layout.tsx): "Krokgatan 7 - v0.30"
-- K7 Energi Dashboard-sektionen: "v0.30"
+✅ **v0.31 implementerad och pushad:**
+- Backend: `/api/settings/sensors/:deviceId/zone` (PUT) - sparar zone per sensor
+- Frontend: Zone-selector i Settings → Temperatursensorer
+- UI: Radio buttons för INNE/UTE per sensor med async save-feedback
+- Database: `SensorVisibility.zone` persisterar klassificering
+- Async loading: "Sparar..." visas när zone uppdateras
 
-✅ **Databas:**
-- PostgreSQL körs i Docker (homey_db)
-- Alla 7 Prisma-migrationer körda
-- Tabeller skapade: TemperatureLog, EnergyLog, MeterReading, BackupSettings, SensorVisibility
+**Commit:** `040825f` - "Implementera zone-funktionaliteten med backend-persistering"
 
-✅ **Backend & Frontend:**
-- Startas lokalt med npm run dev
-- Database URL: `postgresql://postgres:postgres@localhost:5432/homey_db`
-- Inga hardkodade version-strings – allt från git describe --tags
-
-✅ **Infinite loop fixat:**
-- API retries: 20 → 3 försök
-- Auto-refresh: 30s → 60s
-- Frontend fallback när Homey inte svarar: "Homey ej ansluten"
-
-**Commit:** `37b83a4` - "Fixa version-display även i dashboard-header"
+**Test:** Gå till http://localhost:3000 → Settings → Temperatursensorer → klicka INNE/UTE för vilken sensor
 
 ---
-
-## 🔴 NÄSTA PRIORITET - ZONE-FUNKTIONALITETEN (v0.31)
-
-**Mål:** Användaren ska kunna ange i vilken ZON varje Homey-enhet finns.
-
-**Tidigare implementation:** v0.23 hade en zone-UI som kunde tilldelad enheterna.
-
-**Vad behövs:**
-1. Backend-endpoint för att spara zone för en enhet
-2. Frontend UI för zone-tilldelning (INNE/UTE dropdown)
-3. Persistering i databasen (`SensorVisibility.zone`)
-4. Sortera/filtrera dashboard efter zone
-
-Versionstaggar följer formatet `vX.XX` (t.ex. `v0.28`, `v0.29`, `v0.30`).
 
 **Versionshistorik:**
-- **v0.30** 🟢 STABILT – Version-display på två ställen, databasen körs, infinite loop fixat
+- **v0.31** 🟢 NYTT – Zone-funktionaliteten, backend-persistering av INNE/UTE klassificering
+- **v0.30** ✅ STABILT – Version-display på två ställen, databasen körs, infinite loop fixat
 - **v0.29** ✅ – Frontend production build, Tailwind CSS fixed
 - **v0.28** ✅ – Zone-struktur i databas (zone nullable)
 
 ### Kommandot "starta"
 
-Kör dessa 3 commands i **3 separata CMD-fönster**:
+Enklast möjliga: **Kör bara ett script**
 
-```bash
-1-START-DB.bat        # Terminal 1
-2-START-BACKEND.bat   # Terminal 2  
-3-START-FRONTEND.bat  # Terminal 3
+```powershell
+.\START-ALL.ps1
+```
+
+Det startar allt i rätt ordning med health checks.
+
+**Eller diagnostisera befintligt system:**
+
+```powershell
+.\DIAGNOSE.ps1     # Visar vad som körs / inte körs
+.\STOP-ALL.ps1     # Stänger allt
 ```
 
 Frontend är då klar på: http://localhost:3000
@@ -196,21 +198,26 @@ shared/types.ts                       # Delade TypeScript-typer
 
 ## Vanliga åtgärder
 
-```bash
+```powershell
 # Starta hela stacken
-docker compose up -d
-cd backend && npm run dev
-cd frontend && npm run dev
+.\START-ALL.ps1
+
+# Diagnostisera problem
+.\DIAGNOSE.ps1
+
+# Stäng allt
+.\STOP-ALL.ps1
 
 # Ny Prisma-migration efter schemaändring
-cd backend && npx prisma migrate dev --name beskrivning
+cd backend
+npx prisma migrate dev --name beskrivning
 
-# Bygg för produktion
-cd backend && npm run build
-cd frontend && npm run build
-
-# Commit + push
-git add -A && git commit -m "meddelande" && git push
+# Commit + push + tag
+git add -A
+git commit -m "meddelande"
+git push
+git tag -a vX.XX -m "Release vX.XX"
+git push origin vX.XX
 ```
 
 ---

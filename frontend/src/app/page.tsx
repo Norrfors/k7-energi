@@ -291,7 +291,18 @@ export default function Dashboard() {
         ]);
         setTemperatureSensors(tempSensors);
         setEnergySensors(engySensors);
-        log("✅ Sensors loaded");
+        
+        // Uppdatera sensorLocations från databasen-zonen
+        const zonesFromDB = new Map<string, "INNE" | "UTE">();
+        tempSensors.forEach(sensor => {
+          if (sensor.zone === "INNE" || sensor.zone === "UTE") {
+            zonesFromDB.set(sensor.deviceName, sensor.zone as "INNE" | "UTE");
+          }
+        });
+        setSensorLocations(zonesFromDB);
+        saveSensorLocations(zonesFromDB); // Spara också till localStorage
+        
+        log("✅ Sensors loaded with zones from database");
       } catch (err) {
         log("⚠️ Sensors failed (using fallback)", err);
       }
@@ -645,7 +656,12 @@ export default function Dashboard() {
                   >
                     <div className="text-gray-800 font-medium">
                       {t.deviceName}
-                      {t.zone && <span className="text-gray-500 text-sm ml-2">({t.zone})</span>}
+                      <span className="text-gray-500 text-sm ml-2">
+                        {(() => {
+                          const location = getSensorLocation(t.deviceName);
+                          return location === "INNE" ? "🏠 INNE" : location === "UTE" ? "🌤️ UTE" : "—";
+                        })()}
+                      </span>
                     </div>
                     <div className="text-right font-semibold text-blue-600">
                       {t.temperature !== null ? `${t.temperature.toFixed(1)}°C` : "N/A"}
