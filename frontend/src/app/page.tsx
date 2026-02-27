@@ -656,6 +656,12 @@ export default function Dashboard() {
                   >
                     <div className="text-gray-800 font-medium">
                       {t.deviceName}
+                      <span className="text-gray-500 text-sm ml-2">
+                        {(() => {
+                          const location = getSensorLocation(t.deviceName);
+                          return location === "INNE" ? "🏠" : location === "UTE" ? "🌤️" : "";
+                        })()}
+                      </span>
                     </div>
                     <div className="text-right font-semibold text-blue-600">
                       {t.temperature !== null ? `${t.temperature.toFixed(1)}°C` : "N/A"}
