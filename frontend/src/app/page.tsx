@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getHealth, getTemperatures, getEnergy, getMeterLatest, getMeterToday, getMeterLast24Hours, setManualMeterValue, getBackupSettings, saveBackupSettings, performManualBackup, BackupSettings, getTemperatureHistory, getTemperatureSensors, getEnergySensors, updateSensorVisibility, SensorInfo } from "@/lib/api";
+import { getHealth, getTemperatures, getEnergy, getMeterLatest, getMeterToday, getMeterLast24Hours, setManualMeterValue, getBackupSettings, saveBackupSettings, performManualBackup, BackupSettings, getTemperatureHistory, getTemperatureSensors, getEnergySensors, updateSensorVisibility, updateSensorZone, SensorInfo } from "@/lib/api";
 import { StatusCard } from "@/components/StatusCard";
 
 interface Temperature {
@@ -56,6 +56,7 @@ export default function Dashboard() {
   const [visibleEnergy, setVisibleEnergy] = useState<Set<string>>(new Set());
   const [sensorLocations, setSensorLocations] = useState<Map<string, "INNE" | "UTE">>(new Map());
   const [tempListFilter, setTempListFilter] = useState<"INNE" | "UTE" | null>(null); // Filter för temperaturlistan
+  const [zoneSavingDevices, setZoneSavingDevices] = useState<Set<string>>(new Set()); // Devicenavn som sparas för närvarande
   
   // Settings state
   const [manualMeterValue, setManualMeterValueInput] = useState<string>("");
@@ -114,11 +115,31 @@ export default function Dashboard() {
     localStorage.setItem("sensorLocations", JSON.stringify(Array.from(locations.entries())));
   };
 
-  const setSensorLocation = (deviceName: string, location: "INNE" | "UTE") => {
+  const setSensorLocation = async (deviceName: string, location: "INNE" | "UTE") => {
+    // Uppdatera localStorage lokalt
     const updated = new Map(sensorLocations);
     updated.set(deviceName, location);
     setSensorLocations(updated);
     saveSensorLocations(updated);
+
+    // Hitta deviceId från temperatureSensors och spara till backend
+    const sensor = temperatureSensors.find(s => s.deviceName === deviceName);
+    if (sensor) {
+      setZoneSavingDevices(prev => new Set(prev).add(deviceName));
+      try {
+        await updateSensorZone(sensor.deviceId, location);
+        log(`Sparat zon för ${deviceName}: ${location}`);
+      } catch (err) {
+        log("Fel vid sparning av zon till backend", err);
+        setSettingsError(`Kunde inte spara zon för ${deviceName}`);
+      } finally {
+        setZoneSavingDevices(prev => {
+          const next = new Set(prev);
+          next.delete(deviceName);
+          return next;
+        });
+      }
+    }
   };
 
   const getSensorLocation = (deviceName: string): "INNE" | "UTE" | null => {
@@ -1026,26 +1047,33 @@ export default function Dashboard() {
                         
                         {/* Radio buttons - INNE och UTE */}
                         <div className="col-span-3 flex gap-1 justify-center">
-                          <label className="flex-1 flex justify-center">
+                          <label className="flex-1 flex justify-center opacity-75 hover:opacity-100 transition" title={zoneSavingDevices.has(temp.deviceName) ? "Sparar..." : ""}>
                             <input
                               type="radio"
                               name={`location-${temp.deviceName}`}
                               value="INNE"
                               checked={location === "INNE"}
                               onChange={() => setSensorLocation(temp.deviceName, "INNE")}
-                              className="w-4 h-4 cursor-pointer"
+                              disabled={zoneSavingDevices.has(temp.deviceName)}
+                              className="w-4 h-4 cursor-pointer disabled:cursor-not-allowed"
                             />
                           </label>
-                          <label className="flex-1 flex justify-center">
+                          <label className="flex-1 flex justify-center opacity-75 hover:opacity-100 transition" title={zoneSavingDevices.has(temp.deviceName) ? "Sparar..." : ""}>
                             <input
                               type="radio"
                               name={`location-${temp.deviceName}`}
                               value="UTE"
                               checked={location === "UTE"}
                               onChange={() => setSensorLocation(temp.deviceName, "UTE")}
-                              className="w-4 h-4 cursor-pointer"
+                              disabled={zoneSavingDevices.has(temp.deviceName)}
+                              className="w-4 h-4 cursor-pointer disabled:cursor-not-allowed"
                             />
                           </label>
+                          {zoneSavingDevices.has(temp.deviceName) && (
+                            <div className="flex-1 flex justify-center">
+                              <span className="text-xs text-blue-600 font-semibold">Sparar...</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     );

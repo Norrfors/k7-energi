@@ -215,3 +215,14 @@ export function updateSensorVisibility(deviceId: string, isVisible: boolean) {
     }
   );
 }
+
+export function updateSensorZone(deviceId: string, zone: string) {
+  return apiFetch<SensorInfo>(
+    `/api/settings/sensors/${deviceId}/zone`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ zone }),
+    }
+  );
+}

@@ -4,6 +4,7 @@ import {
   getAllTemperatureSensors,
   getAllEnergySensors,
   updateSensorVisibility,
+  updateSensorZone,
 } from "./settings.service";
 
 /**
@@ -54,6 +55,27 @@ export async function settingsRoutes(app: FastifyInstance) {
       } catch (error) {
         console.error("[Settings] Fel vid uppdatering av sensor-synlighet:", error);
         reply.code(500).send({ error: "Kunde inte uppdatera sensor-synlighet" });
+      }
+    });
+
+    // PUT /api/settings/sensors/:deviceId/zone
+    app.put("/api/settings/sensors/:deviceId/zone", async (req, reply) => {
+      try {
+        const { deviceId } = req.params as { deviceId: string };
+        const { zone } = req.body as { zone: string };
+
+        console.log(`[Settings] PUT /api/settings/sensors/${deviceId}/zone called, zone=${zone}`);
+        
+        // Validera zon: måste vara "INNE", "UTE", eller tom sträng
+        if (!["INNE", "UTE", ""].includes(zone)) {
+          return reply.code(400).send({ error: "Zon måste vara 'INNE', 'UTE', eller tom" });
+        }
+
+        const updated = await updateSensorZone(deviceId, zone);
+        reply.send(updated);
+      } catch (error) {
+        console.error("[Settings] Fel vid uppdatering av sensor-zon:", error);
+        reply.code(500).send({ error: "Kunde inte uppdatera sensor-zon" });
       }
     });
 

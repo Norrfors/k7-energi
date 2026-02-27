@@ -120,5 +120,27 @@ export async function updateSensorVisibility(
     deviceName: updated.deviceName,
     sensorType: updated.sensorType as "temperature" | "energy",
     isVisible: updated.isVisible,
+    zone: updated.zone,
+  };
+}
+
+/**
+ * Uppdatera zon för en sensor (INNE, UTE, eller tom sträng)
+ */
+export async function updateSensorZone(
+  deviceId: string,
+  zone: string
+): Promise<SensorInfo> {
+  const updated = await prisma.sensorVisibility.update({
+    where: { deviceId },
+    data: { zone },
+  });
+
+  return {
+    deviceId: updated.deviceId,
+    deviceName: updated.deviceName,
+    sensorType: updated.sensorType as "temperature" | "energy",
+    isVisible: updated.isVisible,
+    zone: updated.zone,
   };
 }

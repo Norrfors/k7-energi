@@ -98,23 +98,53 @@ Sparad i: `backend/.env` → `HOMEY_TOKEN`
 
 ---
 
-Aktuell version: **v0.30** (under development)
+Aktuell version: **v0.30** (STABILT & FUNGERANDE)
+
+---
+
+## 🟢 SESSION 2026-02-27 - v0.30 COMPLETE
+
+✅ **Versionsnumret är nu synligt på två ställen:**
+- Dashboard-header (layout.tsx): "Krokgatan 7 - v0.30"
+- K7 Energi Dashboard-sektionen: "v0.30"
+
+✅ **Databas:**
+- PostgreSQL körs i Docker (homey_db)
+- Alla 7 Prisma-migrationer körda
+- Tabeller skapade: TemperatureLog, EnergyLog, MeterReading, BackupSettings, SensorVisibility
+
+✅ **Backend & Frontend:**
+- Startas lokalt med npm run dev
+- Database URL: `postgresql://postgres:postgres@localhost:5432/homey_db`
+- Inga hardkodade version-strings – allt från git describe --tags
+
+✅ **Infinite loop fixat:**
+- API retries: 20 → 3 försök
+- Auto-refresh: 30s → 60s
+- Frontend fallback när Homey inte svarar: "Homey ej ansluten"
+
+**Commit:** `37b83a4` - "Fixa version-display även i dashboard-header"
+
+---
+
+## 🔴 NÄSTA PRIORITET - ZONE-FUNKTIONALITETEN (v0.31)
+
+**Mål:** Användaren ska kunna ange i vilken ZON varje Homey-enhet finns.
+
+**Tidigare implementation:** v0.23 hade en zone-UI som kunde tilldelad enheterna.
+
+**Vad behövs:**
+1. Backend-endpoint för att spara zone för en enhet
+2. Frontend UI för zone-tilldelning (INNE/UTE dropdown)
+3. Persistering i databasen (`SensorVisibility.zone`)
+4. Sortera/filtrera dashboard efter zone
 
 Versionstaggar följer formatet `vX.XX` (t.ex. `v0.28`, `v0.29`, `v0.30`).
 
-**Senaste stabila versioner:**
-- **v0.29** ✅ – Frontend production build fungerar, zone-struktur redo (Homey-data displayas ej ännu pga timeout)
-- **v0.28** ✅ – Zone visar på UI i temperatur (men Homey inte ihopkopplat)
-
-### KRITISK PRIORITET (nästa session):
-1. **Versionsnumret MÅSTE visas i dashboard-rubriken** (just nu saknas helt)
-   - Hämta från `git describe --tags`
-   - Visa i `layout.tsx` header: `Krokgatan 7 - v0.30`
-   - Verifiera uppdaterar vid VARJE build (test med `--no-cache`)
-2. **Infinite loop fixed** – reducerat retries 20→3, auto-refresh 30s→60s
-3. **Homey Pro redan kopplat** – backend hittar enheter men timeout pga Homey inte tillgänglig
-   - Backend logs: `ConnectTimeoutError` på `HOMEY_ADDRESS` (192.168.1.122)
-   - Frontend visar "Homey ej ansluten" efter 3 försök (bra fallback)
+**Versionshistorik:**
+- **v0.30** 🟢 STABILT – Version-display på två ställen, databasen körs, infinite loop fixat
+- **v0.29** ✅ – Frontend production build, Tailwind CSS fixed
+- **v0.28** ✅ – Zone-struktur i databas (zone nullable)
 
 ### Kommandot "starta"
 
