@@ -65,7 +65,8 @@ Write-Host "`n⚙️ NODE PROCESSER" -ForegroundColor Yellow
 $nodeProcs = Get-Process node -ErrorAction SilentlyContinue
 if ($nodeProcs) {
     $nodeProcs | ForEach-Object {
-        Write-Host "   ✅ node.exe PID $($_.Id) - Minne: $($_.WorkingSet / 1MB | [math]::Round())MB" -ForegroundColor Green
+        $mem = [math]::Round($_.WorkingSet / 1MB)
+        Write-Host "   ✅ node.exe PID $($_.Id) - Minne: $($mem)MB" -ForegroundColor Green
     }
 } else {
     Write-Host "   ❌ Ingen Node process körs" -ForegroundColor Red

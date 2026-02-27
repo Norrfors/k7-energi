@@ -1,7 +1,7 @@
 # START-ALL.ps1
-# Startar hela stacken i rätt ordning med health checks
+# Startar hela stacken i ratt ordning med health checks
 
-Write-Host "🚀 Startar Hem Dashboard (v0.31)" -ForegroundColor Cyan
+Write-Host "Startar Hem Dashboard (v0.31)" -ForegroundColor Cyan
 Write-Host "================================" -ForegroundColor Cyan
 
 # 1. Starta databasen

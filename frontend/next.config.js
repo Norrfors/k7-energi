@@ -3,9 +3,9 @@ const { execSync } = require('child_process');
 
 let version = 'dev';
 try {
-  version = execSync('git describe --tags', { encoding: 'utf8' }).trim();
+  version = execSync('git describe --tags --abbrev=0', { encoding: 'utf8' }).trim();
 } catch (e) {
-  console.warn('⚠️ Could not get git version:', e.message);
+  console.warn('Could not get git version:', e.message);
 }
 
 console.log(`📦 Building frontend version: ${version}`);
