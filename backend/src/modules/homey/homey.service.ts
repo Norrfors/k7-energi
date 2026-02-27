@@ -18,7 +18,7 @@ interface HomeyDeviceCapability {
 interface HomeyDevice {
   id: string;
   name: string;
-  zoneName?: string;
+  zone: string | null; // Zone ID från Homey
   capabilities: string[];
   capabilitiesObj: Record<string, HomeyDeviceCapability>;
 }
@@ -26,11 +26,53 @@ interface HomeyDevice {
 export class HomeyService {
   private address: string;
   private token: string;
+  private zoneCache: Map<string, string> = new Map(); // zoneName -> zoneID
 
   constructor() {
     this.address = process.env.HOMEY_ADDRESS || "http://192.168.1.100";
     this.token = process.env.HOMEY_TOKEN || "";
     console.log(`[HomeyService] Initialiserad med address: ${this.address}`);
+  }
+
+  // Hämta och cacha alla zoner från Homey
+  private async fetchZones(): Promise<Map<string, string>> {
+    if (this.zoneCache.size > 0) {
+      return this.zoneCache;
+    }
+
+    try {
+      const response = await fetch(`${this.address}/api/manager/zones`, {
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+      });
+
+      if (!response.ok) {
+        console.warn(`[HomeyService] Kunde inte hämta zones: ${response.status}`);
+        return new Map();
+      }
+
+      const zones = await response.json() as Record<string, { name: string; id: string }>;
+      
+      // Cacha: id -> namn
+      Object.values(zones).forEach(zone => {
+        this.zoneCache.set(zone.id, zone.name);
+      });
+
+      console.log(`[HomeyService] Cachade ${this.zoneCache.size} zoner från Homey`);
+      return this.zoneCache;
+    } catch (error) {
+      console.error("[HomeyService] Fel vid hämtning av zones:", error);
+      return new Map();
+    }
+  }
+
+  // Slå upp zone-namn från zone-ID
+  private async getZoneName(zoneId: string | null): Promise<string | null> {
+    if (!zoneId) return null;
+
+    const zones = await this.fetchZones();
+    return zones.get(zoneId) || null;
   }
 
   // Hämta alla enheter direkt via HTTP (utan homey-api biblioteket)
@@ -54,9 +96,9 @@ export class HomeyService {
   async getTemperatures() {
     const devices = await this.fetchDevices();
 
-    return devices
-      .filter((d) => d.capabilities.includes("measure_temperature") || d.capabilities.includes("outdoorTemperature"))
-      .map((d) => {
+    const results = [];
+    for (const d of devices) {
+      if (d.capabilities.includes("measure_temperature") || d.capabilities.includes("outdoorTemperature")) {
         const hasOutdoorTemp = d.capabilities.includes("outdoorTemperature");
         const tempValue = hasOutdoorTemp 
           ? d.capabilitiesObj?.outdoorTemperature?.value as number | null
@@ -65,30 +107,43 @@ export class HomeyService {
           ? d.capabilitiesObj?.outdoorTemperature?.lastUpdated || ""
           : d.capabilitiesObj?.measure_temperature?.lastUpdated || "";
 
-        return {
+        // Slå upp zone-namn från zone-ID
+        const zoneName = await this.getZoneName(d.zone);
+
+        results.push({
           deviceId: d.id,
           deviceName: d.name,
-          zone: d.zoneName && d.zoneName.trim() ? d.zoneName : null,
+          zone: zoneName,
           temperature: tempValue,
           lastUpdated,
-        };
-      });
+        });
+      }
+    }
+
+    return results;
   }
 
   // Hämta all energiförbrukning just nu
   async getEnergy() {
     const devices = await this.fetchDevices();
 
-    return devices
-      .filter((d) => d.capabilities.includes("measure_power"))
-      .map((d) => ({
-        deviceId: d.id,
-        deviceName: d.name,
-        zone: d.zoneName && d.zoneName.trim() ? d.zoneName : null,
-        watts: d.capabilitiesObj?.measure_power?.value as number | null,
-        meterPower: d.capabilitiesObj?.meter_power?.value as number | null,
-        lastUpdated: d.capabilitiesObj?.measure_power?.lastUpdated || "",
-      }));
+    const results = [];
+    for (const d of devices) {
+      if (d.capabilities.includes("measure_power")) {
+        const zoneName = await this.getZoneName(d.zone);
+
+        results.push({
+          deviceId: d.id,
+          deviceName: d.name,
+          zone: zoneName,
+          watts: d.capabilitiesObj?.measure_power?.value as number | null,
+          meterPower: d.capabilitiesObj?.meter_power?.value as number | null,
+          lastUpdated: d.capabilitiesObj?.measure_power?.lastUpdated || "",
+        });
+      }
+    }
+
+    return results;
   }
 
   // Spara en snapshot av temperaturer till databasen

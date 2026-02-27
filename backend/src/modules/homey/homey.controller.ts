@@ -58,4 +58,20 @@ export async function homeyRoutes(app: FastifyInstance) {
       };
     }
   });
+
+  // DEBUG: GET /api/homey/raw – visa RAW Homey API-svar för första enhet
+  app.get("/api/homey/raw", async (request, reply) => {
+    try {
+      const devices = await (homeyService as any).fetchDevices();
+      const firstDevice = devices[0];
+      return {
+        message: "Raw Homey API enhet",
+        device: firstDevice,
+        allKeys: firstDevice ? Object.keys(firstDevice) : []
+      };
+    } catch (error) {
+      reply.status(500);
+      return { error: String(error) };
+    }
+  });
 }
