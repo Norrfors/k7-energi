@@ -14,13 +14,15 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const version = process.env.NEXT_PUBLIC_VERSION || 'dev';
+  
   return (
     <html lang="sv">
       <body className="bg-gray-50 text-gray-900 min-h-screen">
         {/* Header */}
         <header className="bg-white shadow-sm border-b">
           <div className="max-w-6xl mx-auto px-4 py-4">
-            <h1 className="text-2xl font-bold">Krokgatan 7</h1>
+            <h1 className="text-2xl font-bold">Krokgatan 7 - {version}</h1>
             <p className="text-sm text-gray-500">🏠 Hem Dashboard</p>
           </div>
         </header>
