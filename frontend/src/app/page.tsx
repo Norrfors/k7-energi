@@ -46,6 +46,7 @@ export default function Dashboard() {
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [homeyConnected, setHomeyConnected] = useState(false);
+  const version = process.env.NEXT_PUBLIC_VERSION || "dev";
   
   // Sensor visibility state (localStorage-based)
   const [temperatureSensors, setTemperatureSensors] = useState<SensorInfo[]>([]);
@@ -530,7 +531,7 @@ export default function Dashboard() {
         </div>
         <div className="text-right">
           <p className="text-xs font-semibold text-gray-400">Version</p>
-          <p className="text-lg font-bold text-blue-600">v0.28</p>
+          <p className="text-lg font-bold text-blue-600">{version}</p>
         </div>
       </div>
 
