@@ -655,8 +655,7 @@ export default function Dashboard() {
                     } border-b border-gray-200 last:border-b-0 hover:bg-blue-100 transition`}
                   >
                     <div className="text-gray-800 font-medium">
-                      {t.deviceName}
-                      {t.zone && <span className="text-gray-600 ml-1">— {t.zone}</span>}
+                      {t.zone ? `${t.deviceName} / ${t.zone}` : t.deviceName}
                       <span className="text-gray-600 ml-2">
                         {(() => {
                           const location = getSensorLocation(t.deviceName);
@@ -696,7 +695,7 @@ export default function Dashboard() {
                   .map((e) => (
                   <StatusCard
                     key={e.deviceName}
-                    title={e.zone ? `${e.deviceName} (${e.zone})` : e.deviceName}
+                    title={e.zone ? `${e.deviceName} / ${e.zone}` : e.deviceName}
                     value={e.watts !== null ? `${e.watts.toFixed(0)}W` : "N/A"}
                     color="yellow"
                   />

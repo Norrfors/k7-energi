@@ -26,7 +26,53 @@ interface HomeyDevice {
 export class HomeyService {
   private address: string;
   private token: string;
-  private zoneCache: Map<string, string> = new Map(); // zoneName -> zoneID
+
+  // Manuell mappning av sensornamn till zoner (baserat på sensorernas namn)
+  private deviceZoneMapping: Record<string, string> = {
+    // Occupancy sensorer
+    "Outdoor Occupancy Sensor GARAGE": "Garage",
+    "Outdoor Occupancy Sensor HUVUDENTRE": "Huvudentre",
+    
+    // k7 sensorer - ÖV (Övervåning)
+    "k7 – ÖV Huvudsovrum": "Huvudsovrum",
+    "k7 – ÖV Sovrum Norr": "Sovrum Norr",
+    "k7 – ÖV Sovrum Syd": "Sovrum Syd",
+    "k7 – ÖV Hall": "ÖV Hall",
+    "k7 – ÖV Kontor": "Kontor",
+    
+    // k7 sensorer - BV (Bottenvåning)
+    "k7 BV  – Vardagsrum": "Vardagsrum",
+    "k7 – BV Hall": "BV Hall",
+    "k7 – BV Matsal": "Matsal",
+    
+    // Termostater
+    "ÖV Badrum termostat  4512744/45": "Badrum",
+    
+    // Hybrid/annat
+    "k7 (K7-INNE) – K7-INNE": "K7-INNE",
+    "k7 (K7-INNE) – K7-UTE": "K7-INNE",
+    
+    // Altherma
+    "Altherma Hotwatertank": "Värmepump",
+    
+    // WH2 sensorer  
+    "WH2 Inne Gatuplan": "Gatuplan",
+    "WH2 UTE Norr Inglas ": "UTE Norr",
+    "WH2 ÖV  xx IN": "ÖV",
+    "WH2 ny  UTE Telldus ": "UTE",
+    "WH2 ÖV UTE ": "ÖV UTE",
+    "WH2 kanske skyddsrum eller garage": "Garage/Skyddsrum",
+    "WH2 -- kanske garage el skyddsrum": "Garage/Skyddsrum",
+    
+    // Oregon sensorer
+    "Oregon INNE": "INNE",
+    "Oregon Temp THGN800": "UTE",
+    
+    // Övriga
+    "Namron Multisensor 4512734": "Multisensor",
+    "T01": "T01",
+    "WH2 x OUT": "UTE",
+  };
 
   constructor() {
     this.address = process.env.HOMEY_ADDRESS || "http://192.168.1.100";
@@ -34,45 +80,56 @@ export class HomeyService {
     console.log(`[HomeyService] Initialiserad med address: ${this.address}`);
   }
 
-  // Hämta och cacha alla zoner från Homey
-  private async fetchZones(): Promise<Map<string, string>> {
-    if (this.zoneCache.size > 0) {
-      return this.zoneCache;
+  // Extrahera och mappa enhets-zon från sensornamnet
+  private getZoneForDevice(deviceName: string): string {
+    // Först: Kolla om den finns i manuell mappning
+    if (this.deviceZoneMapping[deviceName]) {
+      return this.deviceZoneMapping[deviceName];
     }
 
-    try {
-      const response = await fetch(`${this.address}/api/manager/zones`, {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      });
+    // Sedan: Försök automatiskt extrahera från namn
+    // För sensorer som "k7 – BV Vardagsrum" eller "k7 — ÖV Sovrum Norr"
+    // Försök matcher för olika bindestreckvariationer
+    
+    // Matcher för "k7 – ÖV Sovrum Norr" pattern
+    let match = deviceName.match(/k7\s*[-–—]\s*[ÖÆ]V\s+(.+)/);
+    if (match) return match[1].trim();
+    
+    // Matcher för "k7 – BV Vardagsrum" pattern  
+    match = deviceName.match(/k7\s*[-–—]\s*BV\s+(.+)/);
+    if (match) return match[1].trim();
+    
+    // Matcher för "k7 BV – Vardagsrum" pattern (två ord innan tankestreck)
+    match = deviceName.match(/k7\s+BV\s*[-–—]\s*(.+)/);
+    if (match) return match[1].trim();
+    
+    // Matcher för "k7 (X) – Y" pattern
+    match = deviceName.match(/k7\s*\([^)]*\)\s*[-–—]\s*(.+)/);
+    if (match) return match[1].trim();
+    
+    // Matcher för sensornamn med mellanslag
+    match = deviceName.match(/(.+?)\s+[-–—]\s+/);
+    if (match) return match[1].trim();
 
-      if (!response.ok) {
-        console.warn(`[HomeyService] Kunde inte hämta zones: ${response.status}`);
-        return new Map();
-      }
-
-      const zones = await response.json() as Record<string, { name: string; id: string }>;
-      
-      // Cacha: id -> namn
-      Object.values(zones).forEach(zone => {
-        this.zoneCache.set(zone.id, zone.name);
-      });
-
-      console.log(`[HomeyService] Cachade ${this.zoneCache.size} zoner från Homey`);
-      return this.zoneCache;
-    } catch (error) {
-      console.error("[HomeyService] Fel vid hämtning av zones:", error);
-      return new Map();
+    // Matcher för WH2 sensorer
+    match = deviceName.match(/WH2\s+(.+)/);
+    if (match) {
+      let zone = match[1].trim();
+      // Rensa upp lite
+      if (zone.includes("UTE")) return "UTE";
+      if (zone.includes("INNE") || zone.includes("Inne")) return "INNE";
+      return zone;
     }
-  }
+    
+    // Matcher för Oregon sensorer
+    if (deviceName.includes("Oregon")) {
+      if (deviceName.includes("INNE") || deviceName.includes("Inne")) return "INNE";
+      if (deviceName.includes("THGN")) return "UTE";
+      return "Oregon";
+    }
 
-  // Slå upp zone-namn från zone-ID
-  private async getZoneName(zoneId: string | null): Promise<string | null> {
-    if (!zoneId) return null;
-
-    const zones = await this.fetchZones();
-    return zones.get(zoneId) || null;
+    // Fallback
+    return "Okänd";
   }
 
   // Hämta alla enheter direkt via HTTP (utan homey-api biblioteket)
@@ -107,13 +164,13 @@ export class HomeyService {
           ? d.capabilitiesObj?.outdoorTemperature?.lastUpdated || ""
           : d.capabilitiesObj?.measure_temperature?.lastUpdated || "";
 
-        // Slå upp zone-namn från zone-ID
-        const zoneName = await this.getZoneName(d.zone);
+        // Hämta zone från sensornamnet
+        const zone = this.getZoneForDevice(d.name);
 
         results.push({
           deviceId: d.id,
           deviceName: d.name,
-          zone: zoneName,
+          zone: zone,
           temperature: tempValue,
           lastUpdated,
         });
@@ -130,12 +187,12 @@ export class HomeyService {
     const results = [];
     for (const d of devices) {
       if (d.capabilities.includes("measure_power")) {
-        const zoneName = await this.getZoneName(d.zone);
+        const zone = this.getZoneForDevice(d.name);
 
         results.push({
           deviceId: d.id,
           deviceName: d.name,
-          zone: zoneName,
+          zone: zone,
           watts: d.capabilitiesObj?.measure_power?.value as number | null,
           meterPower: d.capabilitiesObj?.meter_power?.value as number | null,
           lastUpdated: d.capabilitiesObj?.measure_power?.lastUpdated || "",
