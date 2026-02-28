@@ -692,14 +692,18 @@ export default function Dashboard() {
                     // Om inget setting hittas, visa sensorn per default
                     return sensorSetting ? sensorSetting.isVisible : true;
                   })
-                  .map((e) => (
-                  <StatusCard
-                    key={e.deviceName}
-                    title={e.zone ? `${e.deviceName} / ${e.zone}` : e.deviceName}
-                    value={e.watts !== null ? `${e.watts.toFixed(0)}W` : "N/A"}
-                    color="yellow"
-                  />
-                ))}
+                  .map((e) => {
+                    const location = getSensorLocation(e.deviceName);
+                    return (
+                      <StatusCard
+                        key={e.deviceName}
+                        title={e.zone ? `${e.deviceName} / ${e.zone}` : e.deviceName}
+                        value={e.watts !== null ? `${e.watts.toFixed(0)}W` : "N/A"}
+                        subtitle={location === "INNE" ? "🏠 INNE" : location === "UTE" ? "🌤️ UTE" : undefined}
+                        color="yellow"
+                      />
+                    );
+                  })}
               </div>
             </section>
           )}
@@ -1033,9 +1037,11 @@ export default function Dashboard() {
                         key={temp.deviceName}
                         className={`grid grid-cols-12 gap-2 px-2 py-2 items-center text-xs bg-white border-b border-gray-200 last:border-b-0 hover:bg-blue-50 transition`}
                       >
-                        {/* Sensornamn + ZONE */}
+                        {/* Sensornamn + ZONE + INNE/UTE */}
                         <div className="col-span-4 font-medium text-gray-900">
-                          <div className="truncate">{temp.deviceName}</div>
+                          <div className="truncate">
+                            {temp.zone ? `${temp.deviceName} / ${temp.zone}` : temp.deviceName}
+                          </div>
                           <span className={`text-xs font-normal ${
                             location === "INNE" ? "text-green-600" :
                             location === "UTE" ? "text-orange-600" :
@@ -1108,21 +1114,85 @@ export default function Dashboard() {
               {sensorsLoading ? (
                 <p className="text-gray-500">Laddar sensorer...</p>
               ) : energySensors.length > 0 ? (
-                <div className="bg-gray-50 border border-gray-300 rounded-lg p-4 space-y-2 max-h-96 overflow-y-auto">
-                  {energySensors.map((sensor) => (
-                    <div key={sensor.deviceId} className="flex items-center gap-3 p-2 hover:bg-white rounded transition">
-                      <input
-                        type="checkbox"
-                        id={`energy-${sensor.deviceId}`}
-                        checked={sensor.isVisible}
-                        onChange={() => handleToggleSensorVisibility(sensor.deviceId, sensor.isVisible)}
-                        className="w-4 h-4 rounded cursor-pointer"
-                      />
-                      <label htmlFor={`energy-${sensor.deviceId}`} className="flex-1 cursor-pointer text-sm font-medium text-gray-700">
-                        {sensor.deviceName}
-                      </label>
+                <div className="border border-gray-300 rounded-lg overflow-hidden max-h-96 overflow-y-auto">
+                  {/* Table header */}
+                  <div className="grid grid-cols-12 gap-2 bg-yellow-100 px-2 py-2 border-b border-gray-300 font-semibold text-xs text-gray-700 sticky top-0">
+                    <div className="col-span-4">Sensornamn</div>
+                    <div className="col-span-3 text-center">Dashboard</div>
+                    <div className="col-span-3 flex gap-1 justify-center text-center">
+                      <span className="flex-1">INNE</span>
+                      <span className="flex-1">UTE</span>
                     </div>
-                  ))}
+                  </div>
+                  
+                  {/* Table rows */}
+                  {energySensors
+                    .sort((a, b) => a.deviceName.localeCompare(b.deviceName))
+                    .map((sensor, idx) => {
+                      const location = getSensorLocation(sensor.deviceName);
+                      return (
+                        <div
+                          key={sensor.deviceId}
+                          className={`grid grid-cols-12 gap-2 px-2 py-2 items-center text-xs bg-white border-b border-gray-200 last:border-b-0 hover:bg-yellow-50 transition`}
+                        >
+                          {/* Sensornamn + ZONE + INNE/UTE */}
+                          <div className="col-span-4 font-medium text-gray-900">
+                            <div className="truncate">
+                              {sensor.zone ? `${sensor.deviceName} / ${sensor.zone}` : sensor.deviceName}
+                            </div>
+                            <span className={`text-xs font-normal ${
+                              location === "INNE" ? "text-green-600" :
+                              location === "UTE" ? "text-orange-600" :
+                              "text-gray-500"
+                            }`}>
+                              {location === "INNE" ? "🏠 INNE" : location === "UTE" ? "🌤️ UTE" : "—"}
+                            </span>
+                          </div>
+                          
+                          {/* Checkbox - Visa på dashboard */}
+                          <div className="col-span-3 flex justify-center">
+                            <input
+                              type="checkbox"
+                              id={`energy-${sensor.deviceId}`}
+                              checked={sensor.isVisible}
+                              onChange={() => handleToggleSensorVisibility(sensor.deviceId, sensor.isVisible)}
+                              className="w-4 h-4 rounded cursor-pointer"
+                            />
+                          </div>
+                          
+                          {/* Radio buttons - INNE och UTE */}
+                          <div className="col-span-3 flex gap-1 justify-center">
+                            <label className="flex-1 flex justify-center opacity-75 hover:opacity-100 transition" title={zoneSavingDevices.has(sensor.deviceName) ? "Sparar..." : ""}>
+                              <input
+                                type="radio"
+                                name={`location-energy-${sensor.deviceId}`}
+                                value="INNE"
+                                checked={location === "INNE"}
+                                onChange={() => setSensorLocation(sensor.deviceName, "INNE")}
+                                disabled={zoneSavingDevices.has(sensor.deviceName)}
+                                className="w-4 h-4 cursor-pointer disabled:cursor-not-allowed"
+                              />
+                            </label>
+                            <label className="flex-1 flex justify-center opacity-75 hover:opacity-100 transition" title={zoneSavingDevices.has(sensor.deviceName) ? "Sparar..." : ""}>
+                              <input
+                                type="radio"
+                                name={`location-energy-${sensor.deviceId}`}
+                                value="UTE"
+                                checked={location === "UTE"}
+                                onChange={() => setSensorLocation(sensor.deviceName, "UTE")}
+                                disabled={zoneSavingDevices.has(sensor.deviceName)}
+                                className="w-4 h-4 cursor-pointer disabled:cursor-not-allowed"
+                              />
+                            </label>
+                            {zoneSavingDevices.has(sensor.deviceName) && (
+                              <div className="flex-1 flex justify-center">
+                                <span className="text-xs text-blue-600 font-semibold">Sparar...</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                 </div>
               ) : (
                 <p className="text-gray-500">Inga elförbrukningssensorer hittades</p>
