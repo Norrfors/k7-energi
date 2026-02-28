@@ -8,6 +8,7 @@
 // Om importen inte fungerar direkt, se kommentaren längst ner.
 
 import prisma from "../../shared/db";
+import { recalculateMeterValuesFromLatestCalibration } from "../meter/meter.calibration";
 
 // Typer för det vi får tillbaka från Homey
 interface HomeyDeviceCapability {
@@ -246,6 +247,9 @@ export class HomeyService {
     }
 
     console.log(`Loggade ${readings.length} energiavläsningar`);
+
+    // 🔄 Beräkna mätarvärden retroaktivt från senaste kalibreringspunkt
+    await recalculateMeterValuesFromLatestCalibration();
   }
 }
 

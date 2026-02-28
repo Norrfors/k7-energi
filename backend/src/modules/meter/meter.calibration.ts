@@ -107,20 +107,32 @@ export async function calibrateMeterReading(
 
     logger.info(`✓ Beräknade ${allCalculatedValues.length} mätarvärden`);
 
-    // 7. Uppdatera EnergyLog-tabellen med beräknade mätarvärden
+    // 7. Uppdatera EnergyLog-tabellen med beräknade mätarvärden (transactions för snabbhet)
     let updateCount = 0;
-    for (const calc of allCalculatedValues) {
-      const updated = await prisma.energyLog.updateMany({
-        where: {
-          deviceId: PULSE_ID,
-          createdAt: calc.logDateTime,
-        },
-        data: {
-          meterValue: calc.meterValue,
-        },
-      });
-
-      updateCount += updated.count;
+    
+    if (allCalculatedValues.length > 0) {
+      // Batch updates in groups of 50 to avoid too many open connections
+      const batchSize = 50;
+      for (let i = 0; i < allCalculatedValues.length; i += batchSize) {
+        const batch = allCalculatedValues.slice(i, i + batchSize);
+        
+        // Use transaction to group multiple updates
+        const updatePromises = batch.map((calc) =>
+          prisma.energyLog.updateMany({
+            where: {
+              deviceId: PULSE_ID,
+              createdAt: calc.logDateTime,
+            },
+            data: {
+              meterValue: calc.meterValue,
+            },
+          })
+        );
+        
+        // Execute batch updates in parallel
+        const results = await Promise.all(updatePromises);
+        updateCount += results.reduce((sum, r) => sum + r.count, 0);
+      }
     }
 
     logger.info(`✓ Uppdaterade ${updateCount} EnergyLog-poster med mätarvärden`);
@@ -240,12 +252,89 @@ function calculateConsumptionSinceMidnight(logDateTime: Date, meterValue: number
 }
 
 /**
- * Hämtar tidigare kalibreringspunkter
+ * Hämtar alla sparade kalibreringspunkter
  */
-export async function getCalibrationHistory(): Promise<any[]> {
+export async function getCalibrationHistory() {
   return prisma.meterCalibration.findMany({
     where: { deviceId: PULSE_ID },
     orderBy: { calibrationDateTime: 'desc' },
-    take: 10,
   });
+}
+
+/**
+ * Hämtar senaste kalibreringspunkten
+ */
+export async function getLatestCalibration() {
+  return prisma.meterCalibration.findFirst({
+    where: { deviceId: PULSE_ID },
+    orderBy: { calibrationDateTime: 'desc' },
+  });
+}
+
+/**
+ * Beräknar och uppdaterar mätarvärden framåt från senaste kalibrering
+ * Anropas automatiskt vid varje energiloggning från Homey
+ */
+export async function recalculateMeterValuesFromLatestCalibration() {
+  try {
+    const calibration = await getLatestCalibration();
+    
+    if (!calibration) {
+      logger.debug('Ingen kalibreringspunkt funnen - hoppar över mätarvärdes-beräkning');
+      return;
+    }
+
+    // Hämta alla EnergyLog-poster från kalibreringspunkten fram till nu
+    const energyLogs = await prisma.energyLog.findMany({
+      where: {
+        deviceId: PULSE_ID,
+        createdAt: {
+          gte: calibration.calibrationDateTime,
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    if (energyLogs.length === 0) {
+      return; // Inget att uppdatera
+    }
+
+    logger.debug(
+      `📊 Beräknar mätarvärden för ${energyLogs.length} poster från kalibreringspunkten...`
+    );
+
+    let currentMeterValue = calibration.calibrationValue;
+
+    // Beräkna framåt från kalibreringspunkten
+    for (let i = 0; i < energyLogs.length; i++) {
+      const current = energyLogs[i];
+      const previous = i > 0 ? energyLogs[i - 1] : null;
+
+      // Första posten är själva kalibreringspunkten - måste inte lägga till förbrukning
+      if (i === 0) {
+        // Uppdatera själva kalibreringspunkten med calibrationValue
+        await prisma.energyLog.update({
+          where: { id: current.id },
+          data: { meterValue: calibration.calibrationValue },
+        });
+        continue;
+      }
+
+      // För övriga poster: beräkna förbrukning sedan föregående post
+      if (previous) {
+        const timeInterval = (current.createdAt.getTime() - previous.createdAt.getTime()) / (1000 * 60);
+        const consumption = (current.watts * timeInterval) / 60;
+        currentMeterValue += consumption;
+
+        await prisma.energyLog.update({
+          where: { id: current.id },
+          data: { meterValue: Math.max(0, currentMeterValue) },
+        });
+      }
+    }
+
+    logger.debug(`✓ Uppdaterade mätarvärden för ${energyLogs.length} poster`);
+  } catch (error) {
+    logger.error(`❌ Fel vid automatisk mätarvärdes-beräkning: ${error}`);
+  }
 }
