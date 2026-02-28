@@ -84,6 +84,8 @@ export default function Dashboard() {
   // Sensor detail modal state
   const [selectedSensor, setSelectedSensor] = useState<{ name: string; type: "temperature" | "energy" } | null>(null);
   const [historicalData, setHistoricalData] = useState<Array<{ deviceName: string; temperature?: number; watts?: number; meterPower?: number; createdAt: string }>>([]);
+  const [sensorModalPage, setSensorModalPage] = useState(1);
+  const itemsPerPage = 100;
 
   // Logga till console
   const log = (message: string, data?: unknown) => {
@@ -754,7 +756,7 @@ export default function Dashboard() {
                   .map((t, index) => (
                   <div
                     key={t.deviceName}
-                    onClick={() => setSelectedSensor({ name: t.deviceName, type: "temperature" })}
+                    onClick={() => { setSelectedSensor({ name: t.deviceName, type: "temperature" }); setSensorModalPage(1); }}
                     className={`grid grid-cols-6 gap-1 p-2 ${
                       index % 2 === 0 ? "bg-white" : "bg-gray-50"
                     } border-b border-gray-200 last:border-b-0 hover:bg-blue-100 transition text-xs cursor-pointer`}
@@ -814,7 +816,7 @@ export default function Dashboard() {
                     return (
                       <div
                         key={e.deviceName}
-                        onClick={() => setSelectedSensor({ name: e.deviceName, type: "energy" })}
+                        onClick={() => { setSelectedSensor({ name: e.deviceName, type: "energy" }); setSensorModalPage(1); }}
                         className={`grid grid-cols-9 gap-1 p-2 ${
                           index % 2 === 0 ? "bg-white" : "bg-gray-50"
                         } border-b border-gray-200 last:border-b-0 hover:bg-yellow-100 transition text-xs cursor-pointer`}
@@ -1386,11 +1388,17 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {historicalData
-                      .filter(h => h.deviceName === selectedSensor.name)
-                      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                      .slice(0, 200) // Visa max 200 rader
-                      .map((h, index) => (
+                    {(() => {
+                      const filteredData = historicalData
+                        .filter(h => h.deviceName === selectedSensor.name)
+                        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+                      
+                      const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+                      const startIdx = (sensorModalPage - 1) * itemsPerPage;
+                      const endIdx = startIdx + itemsPerPage;
+                      const pageData = filteredData.slice(startIdx, endIdx);
+                      
+                      return pageData.map((h, index) => (
                         <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                           <td className="border border-gray-300 p-2">
                             {new Date(h.createdAt).toLocaleString("sv-SE")}
@@ -1410,10 +1418,42 @@ export default function Dashboard() {
                             </>
                           )}
                         </tr>
-                      ))}
+                      ));
+                    })()}
                   </tbody>
                 </table>
               </div>
+              
+              {/* Pagination */}
+              {(() => {
+                const filteredData = historicalData.filter(h => h.deviceName === selectedSensor.name);
+                const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+                
+                return (
+                  <div className="mt-4 flex justify-between items-center">
+                    <button
+                      onClick={() => setSensorModalPage(p => Math.max(1, p - 1))}
+                      disabled={sensorModalPage === 1}
+                      className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50 text-sm"
+                    >
+                      ← Tidigare
+                    </button>
+                    
+                    <span className="text-sm text-gray-600">
+                      Sida {sensorModalPage} av {totalPages} ({filteredData.length} rader)
+                    </span>
+                    
+                    <button
+                      onClick={() => setSensorModalPage(p => Math.min(totalPages, p + 1))}
+                      disabled={sensorModalPage === totalPages}
+                      className="px-3 py-1 bg-gray-300 rounded disabled:opacity-50 text-sm"
+                    >
+                      Nästa →
+                    </button>
+                  </div>
+                );
+              })()}
+              
               {historicalData.filter(h => h.deviceName === selectedSensor.name).length === 0 && (
                 <p className="text-gray-500 text-center py-4">Ingen historik tillgänglig för denna sensor</p>
               )}
