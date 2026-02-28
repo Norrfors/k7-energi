@@ -238,6 +238,7 @@ export interface EnergySummary {
   consumption1h: number;
   consumption12h: number;
   consumption24h: number;
+  consumptionToday: number;
   consumptionPreviousDay: number;
 }
 

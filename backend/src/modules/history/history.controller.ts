@@ -36,12 +36,22 @@ export async function historyRoutes(app: FastifyInstance) {
   app.get("/api/history/energy-summary", async (request) => {
     const { deviceId } = request.query as { deviceId?: string };
 
-    // Hämta aktuell förbrukning (senaste mätning)
-    const currentReading = await prisma.energyLog.findFirst({
-      where: deviceId ? { deviceId } : {},
-      orderBy: { createdAt: "desc" },
-      take: 1,
-    });
+    // Hämta senaste mätning - om det är "all" måste vi söka efter Pulse specifikt
+    let currentReading;
+    if (deviceId) {
+      currentReading = await prisma.energyLog.findFirst({
+        where: { deviceId },
+        orderBy: { createdAt: "desc" },
+        take: 1,
+      });
+    } else {
+      // För "all" - söka efter Pulse (den riktiga energisensorn)
+      currentReading = await prisma.energyLog.findFirst({
+        where: { deviceName: { contains: "Pulse" } },
+        orderBy: { createdAt: "desc" },
+        take: 1,
+      });
+    }
 
     // Beräkna totala förbrukningsmängder för olika tidsperioder
     const now = new Date();
@@ -57,8 +67,10 @@ export async function historyRoutes(app: FastifyInstance) {
     const yesterdayEnd = new Date(yesterday);
     yesterdayEnd.setHours(23, 59, 59, 999);
 
-    // Hämta loggar för alla tidsperioder
-    const baseWhere = deviceId ? { deviceId } : {};
+    // Hämta loggar för alla tidsperioder - filtrera på deviceId eller Pulse för "all"
+    const baseWhere = deviceId 
+      ? { deviceId } 
+      : { deviceName: { contains: "Pulse" } };
 
     const [oneHourLogs, twelveHourLogs, twentyFourHourLogs, previousDayLogs] = await Promise.all([
       prisma.energyLog.findMany({
@@ -83,15 +95,26 @@ export async function historyRoutes(app: FastifyInstance) {
       return Math.round(avgWatts * hoursSpan * 100) / 100; // Wh (watt-timmar)
     };
 
-    // Beräkna förbrukning för föregående dygn baserat på meterPower (ackumulerad kWh)
-    // meterPower = förbrukning sedan midnatt, så MAX - MIN = total förbrukning för dagen
+    // Beräkna TODAYS förbrukning från senaste meterPower (den har varit igång sedan midnatt)
+    // meterPower = kumulativ förbrukning sedan midnatt
+    const calculateTodyConsumption = () => {
+      if (!currentReading?.meterPower) return 0;
+      // meterPower är i kWh, konvertera till Wh
+      return Math.round(currentReading.meterPower * 1000 * 100) / 100;
+    };
+
+    // Beräkna förbrukning för föregående dygn (behöver MAX-MIN från två olika dagar)
+    // Vi kan bara visa detta när vi har meterPower-loggar från igår
     const calculatePreviousDayConsumption = (logs: any[]) => {
-      if (logs.length === 0) return 0;
       const meterPowerValues = logs
         .filter(log => log.meterPower !== null && log.meterPower !== undefined)
         .map(log => log.meterPower as number);
       
-      if (meterPowerValues.length === 0) return 0;
+      // Om vi saknar data från igår kan vi inte räkna
+      if (meterPowerValues.length === 0) {
+        console.log("[History] Ingen meterPower-data från Pulse igår ännu - kan inte räkna föregående dag");
+        return 0;
+      }
       
       const maxMeterPower = Math.max(...meterPowerValues);
       const minMeterPower = Math.min(...meterPowerValues);
@@ -107,6 +130,7 @@ export async function historyRoutes(app: FastifyInstance) {
       consumption1h: calculateConsumption(oneHourLogs, 1),
       consumption12h: calculateConsumption(twelveHourLogs, 12),
       consumption24h: calculateConsumption(twentyFourHourLogs, 24),
+      consumptionToday: calculateTodyConsumption(),
       consumptionPreviousDay: calculatePreviousDayConsumption(previousDayLogs),
     };
   });
