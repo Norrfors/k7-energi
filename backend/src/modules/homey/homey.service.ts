@@ -189,12 +189,16 @@ export class HomeyService {
       if (d.capabilities.includes("measure_power")) {
         const zone = this.getZoneForDevice(d.name);
 
+        // Hämta accumulated cost om den finns (för Pulse)
+        const costSinceMidnight = d.capabilitiesObj?.accumulatedCost?.value as number | null;
+
         results.push({
           deviceId: d.id,
           deviceName: d.name,
           zone: zone,
           watts: d.capabilitiesObj?.measure_power?.value as number | null,
           meterPower: d.capabilitiesObj?.meter_power?.value as number | null,
+          costSinceMidnight: costSinceMidnight || null,
           lastUpdated: d.capabilitiesObj?.measure_power?.lastUpdated || "",
         });
       }

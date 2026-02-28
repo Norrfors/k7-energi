@@ -137,6 +137,7 @@ export class MeterService {
           consumptionSinceMidnight,
           consumptionSincePreviousReading,
           totalMeterValue,
+          costSinceMidnight: (pulseData.costSinceMidnight as number) || null,
         },
       });
 
@@ -171,6 +172,7 @@ export class MeterService {
           consumptionSinceMidnight,
           consumptionSincePreviousReading: 0, // Manuell inställning, ingen delta
           totalMeterValue,
+          costSinceMidnight: (pulseData?.costSinceMidnight as number) || null,
         },
       });
 

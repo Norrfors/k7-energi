@@ -54,6 +54,7 @@ model MeterReading {
   consumptionSinceMidnight        Float  // Förbrukning sedan midnatt (kWh)
   consumptionSincePreviousReading Float  @default(0) // Förbrukning sedan föregående avläsning (kWh)
   totalMeterValue                 Float  // Total mätarställning (kWh)
+  costSinceMidnight               Float?  // Kostnad sedan midnatt
   createdAt                       DateTime @default(now())
 
   @@index([deviceId, createdAt])
