@@ -1,5 +1,6 @@
 // Service för inställningar och sensor-synlighet
 import prisma from "../../shared/db";
+import { homeyService } from "../homey/homey.service";
 
 export interface SensorInfo {
   deviceId: string;
@@ -57,7 +58,7 @@ export async function getAllTemperatureSensors(): Promise<SensorInfo[]> {
 }
 
 /**
- * Hämta alla elförbrukning-sensorer från EnergyLogs (unika)
+ * Hämta alla elförbrukning-sensorer från EnergyLogs (unika) + live zoner från Homey
  */
 export async function getAllEnergySensors(): Promise<SensorInfo[]> {
   const logs = await prisma.energyLog.findMany({
@@ -71,6 +72,20 @@ export async function getAllEnergySensors(): Promise<SensorInfo[]> {
     },
   });
 
+  // Hämta live energi-data för att få zonen
+  let energyData: any[] = [];
+  try {
+    energyData = await homeyService.getEnergy();
+  } catch (error) {
+    console.warn("[Settings] Kunde inte hämta live energi-data från Homey, använder databas-värden");
+  }
+
+  // Skapa en map för snabb lookup av zoner från Homey
+  const homeyZoneMap = new Map<string, string>();
+  for (const energy of energyData) {
+    homeyZoneMap.set(energy.deviceId, energy.zone);
+  }
+
   // Hämta visibility-status från databasen
   const sensors: SensorInfo[] = [];
   for (const log of logs) {
@@ -78,12 +93,15 @@ export async function getAllEnergySensors(): Promise<SensorInfo[]> {
       where: { deviceId: log.deviceId },
     });
 
+    // Hämta zon från Homey live-data, fallback till databas
+    const zone = homeyZoneMap.get(log.deviceId) || (visibility?.zone ?? "");
+
     sensors.push({
       deviceId: log.deviceId,
       deviceName: log.deviceName,
       sensorType: "energy",
       isVisible: visibility?.isVisible ?? true, // Default true om den inte finns i inställningar
-      zone: visibility?.zone ?? "", // Hämta zone från SensorVisibility
+      zone: zone,
     });
 
     // Om den inte fanns, skapa ett record
@@ -94,7 +112,7 @@ export async function getAllEnergySensors(): Promise<SensorInfo[]> {
           deviceName: log.deviceName,
           sensorType: "energy",
           isVisible: true,
-          zone: "", // Default tom zon
+          zone: zone || "", // Använd Homey-zonen om vi fick en
         },
       });
     }
