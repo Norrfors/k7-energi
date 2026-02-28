@@ -7,11 +7,12 @@ export interface SensorInfo {
   deviceName: string;
   sensorType: "temperature" | "energy";
   isVisible: boolean;
-  zone?: string; // "INNE", "UTE" eller tom sträng
+  zone?: string; // Fysisk plats från Homey (Hall, Matsal, etc)
+  classification?: string; // INNE, UTE eller tom sträng
 }
 
 /**
- * Hämta alla temperatursensorer från TemperatureLogs (unika)
+ * Hämta alla temperatursensorer från TemperatureLogs (unika) + live zoner från Homey
  */
 export async function getAllTemperatureSensors(): Promise<SensorInfo[]> {
   const logs = await prisma.temperatureLog.findMany({
@@ -25,6 +26,20 @@ export async function getAllTemperatureSensors(): Promise<SensorInfo[]> {
     },
   });
 
+  // Hämta live temperatur-data för att få zonen
+  let temperatureData: any[] = [];
+  try {
+    temperatureData = await homeyService.getTemperatures();
+  } catch (error) {
+    console.warn("[Settings] Kunde inte hämta live temperatur-data från Homey, använder databas-värden");
+  }
+
+  // Skapa en map för snabb lookup av zoner från Homey
+  const homeyZoneMap = new Map<string, string>();
+  for (const temp of temperatureData) {
+    homeyZoneMap.set(temp.deviceId, temp.zone);
+  }
+
   // Hämta visibility-status från databasen
   const sensors: SensorInfo[] = [];
   for (const log of logs) {
@@ -32,12 +47,17 @@ export async function getAllTemperatureSensors(): Promise<SensorInfo[]> {
       where: { deviceId: log.deviceId },
     });
 
+    // Hämta zon från Homey (fysisk plats) och klassificering från databas (INNE/UTE)
+    const zone = homeyZoneMap.get(log.deviceId);
+    const classification = visibility?.zone ?? ""; // Klassificering sparad i zone-fältet tidigare!
+
     sensors.push({
       deviceId: log.deviceId,
       deviceName: log.deviceName,
       sensorType: "temperature",
-      isVisible: visibility?.isVisible ?? true, // Default true om den inte finns i inställningar
-      zone: visibility?.zone ?? "", // Hämta zone från SensorVisibility
+      isVisible: visibility?.isVisible ?? true,
+      zone: zone,
+      classification: classification,
     });
 
     // Om den inte fanns, skapa ett record
@@ -48,7 +68,7 @@ export async function getAllTemperatureSensors(): Promise<SensorInfo[]> {
           deviceName: log.deviceName,
           sensorType: "temperature",
           isVisible: true,
-          zone: "", // Default tom zon
+          zone: "", // Klassificering tom initialt
         },
       });
     }
@@ -93,15 +113,17 @@ export async function getAllEnergySensors(): Promise<SensorInfo[]> {
       where: { deviceId: log.deviceId },
     });
 
-    // Hämta zon från Homey live-data, fallback till databas
-    const zone = homeyZoneMap.get(log.deviceId) || (visibility?.zone ?? "");
+    // Hämta zon från Homey (fysisk plats) och klassificering från databas (INNE/UTE)
+    const zone = homeyZoneMap.get(log.deviceId);
+    const classification = visibility?.zone ?? ""; // Klassificering sparad i zone-fältet tidigare!
 
     sensors.push({
       deviceId: log.deviceId,
       deviceName: log.deviceName,
       sensorType: "energy",
-      isVisible: visibility?.isVisible ?? true, // Default true om den inte finns i inställningar
+      isVisible: visibility?.isVisible ?? true,
       zone: zone,
+      classification: classification,
     });
 
     // Om den inte fanns, skapa ett record
@@ -112,7 +134,7 @@ export async function getAllEnergySensors(): Promise<SensorInfo[]> {
           deviceName: log.deviceName,
           sensorType: "energy",
           isVisible: true,
-          zone: zone || "", // Använd Homey-zonen om vi fick en
+          zone: "", // Klassificering tom initialt
         },
       });
     }

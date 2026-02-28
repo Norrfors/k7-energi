@@ -3,6 +3,8 @@
 # Build stage
 FROM node:18-alpine AS builder
 
+ARG VERSION=0.40.0
+
 WORKDIR /app
 
 # Installera dependencies
@@ -11,6 +13,9 @@ RUN npm ci
 
 # Kopiera alla filer
 COPY . .
+
+# Visa version under build
+RUN echo "BUILDING FRONTEND v${VERSION}" && echo "NEXT_PUBLIC_VERSION=${VERSION}" > .env.local
 
 # Bygg Next.js app
 RUN npm run build

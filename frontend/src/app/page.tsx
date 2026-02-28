@@ -292,17 +292,17 @@ export default function Dashboard() {
         setTemperatureSensors(tempSensors);
         setEnergySensors(engySensors);
         
-        // Uppdatera sensorLocations från databasen-zonen
-        const zonesFromDB = new Map<string, "INNE" | "UTE">();
+        // Uppdatera sensorLocations från klassificeringen (INNE/UTE)
+        const classificationsFromDB = new Map<string, "INNE" | "UTE">();
         tempSensors.forEach(sensor => {
-          if (sensor.zone === "INNE" || sensor.zone === "UTE") {
-            zonesFromDB.set(sensor.deviceName, sensor.zone as "INNE" | "UTE");
+          if (sensor.classification === "INNE" || sensor.classification === "UTE") {
+            classificationsFromDB.set(sensor.deviceName, sensor.classification as "INNE" | "UTE");
           }
         });
-        setSensorLocations(zonesFromDB);
-        saveSensorLocations(zonesFromDB); // Spara också till localStorage
+        setSensorLocations(classificationsFromDB);
+        saveSensorLocations(classificationsFromDB); // Spara också till localStorage
         
-        log("✅ Sensors loaded with zones from database");
+        log("✅ Sensors loaded with classifications from database");
       } catch (err) {
         log("⚠️ Sensors failed (using fallback)", err);
       }

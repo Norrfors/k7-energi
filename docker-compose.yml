@@ -39,12 +39,15 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        VERSION: "0.40.0"
     container_name: homey_frontend
     ports:
       - "3000:3000"
     environment:
       NODE_ENV: development
       NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXT_PUBLIC_VERSION: "0.40.0"
     restart: unless-stopped
     networks:
       - homey_network

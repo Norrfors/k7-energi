@@ -195,6 +195,8 @@ export interface SensorInfo {
   deviceName: string;
   sensorType: "temperature" | "energy";
   isVisible: boolean;
+  zone?: string; // Fysisk plats från Homey (Hall, Matsal, etc)
+  classification?: string; // INNE, UTE eller tom sträng - för radioknapparna
 }
 
 export function getTemperatureSensors() {
