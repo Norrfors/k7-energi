@@ -1,5 +1,36 @@
 # Session Log - 2026-02-28 (Latest)
 
+## v0.41 - Energisensor-Historik ✅
+
+### Implementerat denna session:
+- ✅ **Backend endpoint:** `/api/history/energy-summary` returnerar aktuell förbrukning + medelvärden
+- ✅ **Tidsperioder:** 1 timme, 12 timmar, 24 timmar med genomsnittsvärden
+- ✅ **Frontend API:** `getEnergySummary()` och `getEnergyHistory()` funktioner
+- ✅ **Database:** Använder befintlig `EnergyLog` för beräkningar
+- ✅ **Beräkningslogik:** Genomsnitt beräknas från alla datapunkter per period
+
+### API Response-struktur:
+```json
+{
+  "deviceId": "all",
+  "currentWatts": 2450.5,
+  "currentTime": "2026-02-28T14:30:00Z",
+  "averageWatts1h": 2380.2,
+  "averageWatts12h": 2250.8,
+  "averageWatts24h": 2145.3,
+  "count1h": 12,
+  "count12h": 144,
+  "count24h": 288
+}
+```
+
+### Nästa steg:
+- Frontend widget för energiförbrukning
+- Grafisk visualisering av data
+- Filtrera per sensor
+
+---
+
 ## v0.40 - Dual API Response för Zone-Funktionalitet ✅
 
 ### Implementerat denna session:

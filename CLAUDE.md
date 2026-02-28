@@ -116,33 +116,28 @@ Sparad i: `backend/.env` → `HOMEY_TOKEN`
 
 ---
 
-Aktuell version: **v0.40** (Dual API response med zone + classification)
+Aktuell version: **v0.41** (Energisensor-historik med aktuell förbrukning)
 
 ---
 
-## 🟢 SESSION 2026-02-28 - v0.40 Dual API Response för Zone-Funktionalitet
+## 🟢 SESSION 2026-02-28 CONT. - v0.41 Energisensor-Historik
 
-✅ **v0.40 implementerad och pushad:**
-- **Backend:** Dual API response - `zone` från Homey (fysisk plats) + `classification` från DB (INNE/UTE användare)
-- **Frontend:** Radio buttons preselektas med sparade klassificeringar
-- **Database:** `SensorVisibility.zone` sparar INNE/UTE klassificeringar
-- **Version Display:** Visar v0.40.0 i header (läses från package.json)
-- **Validering:** Classifications arbetar korrekt med filtreringsfunktionen
-- **End-to-end:** Klassificeringar sparas i DB och hämtas vid nästa sidladdning
+✅ **v0.41 implementerad:**
+- **Backend endpoint:** `/api/history/energy-summary` - returnerar aktuell förbrukning + medelvärden för 1h/12h/24h
+- **API struktur:** `currentWatts`, `averageWatts1h`, `averageWatts12h`, `averageWatts24h`
+- **Frontend funktioner:** `getEnergySummary()` och `getEnergyHistory()` i `api.ts`
+- **Database:** Använder befintlig `EnergyLog` för historikdata
+- **Beräkningar:** Genomsnittsvärden beräknas baserat på alla datapunkter för aktuell tidsperiod
 
-**Key Features i v0.40:**
-- Separation av DTOs - zone och classification är separate fält
-- Klassificeringar persisteras korrekt i `SensorVisibility.zone`
-- Radio buttons visar rätt status när sidan laddas om
-- API returnerar båda värdena för flexibilitet
-
-**Test:** Gå till http://localhost:3000 → Settings → Temperatursensorer → kolla INNE/UTE → uppdatera → ladda om → verifieras
+**Nästa steg:**
+- Visa detta på Dashboard (nya widget för energiförbrukning)
+- UI för att visa senaste timmen, senaste 12 tim, senaste 24 tim
 
 ---
 
 **Versionshistorik:**
-- **v0.40** 🟢 NYTT – Dual API response (zone från Homey + classification från DB), klassificeringar sparas korrekt
-- **v0.39** ✅ – Energisensor-zoner från Homey i inställningar
+- **v0.41** 🟢 NYTT – Energisensor-historik API (aktuell + 1h/12h/24h medelvärden)
+- **v0.40** ✅ – Dual API response (zone från Homey + classification från DB), klassificeringar sparas korrekt
 - **v0.31** ✅ – Zone-funktionaliteten, backend-persistering av INNE/UTE klassificering
 - **v0.30** ✅ – Version-display på två ställen, databasen körs, infinite loop fixat
 - **v0.29** ✅ – Frontend production build, Tailwind CSS fixed

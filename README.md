@@ -5,7 +5,7 @@
 En komplett webbapplikation för att övervaka och styra **Krokgatan 7** via **Homey Pro**. Systemet samlar realtidsdata från smarthemenheten, lagrar historisk data i en databas och presenterar det i ett interaktivt dashboard med möjlighet till fjärråtkomst över lokalt nätverk.
 
 **Repo:** https://github.com/Norrfors/k7-energi  
-**Aktuell version:** v0.40  
+**Aktuell version:** v0.41  
 **Teknikstack:** TypeScript, Fastify, Next.js 14, PostgreSQL, Prisma ORM, Tailwind CSS  
 **Status:** ✅ Produktion-redo för lokal nätverk
 
