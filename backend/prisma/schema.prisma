@@ -30,6 +30,7 @@ model EnergyLog {
   deviceName String
   zone       String?
   watts      Float
+  meterPower Float?   // Ackumulerad förbrukning sedan midnatt (kWh) för Pulse
   createdAt  DateTime @default(now())
 
   @@index([deviceId, createdAt])

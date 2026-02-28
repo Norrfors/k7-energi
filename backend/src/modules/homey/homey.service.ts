@@ -239,6 +239,7 @@ export class HomeyService {
             deviceName: reading.deviceName,
             zone: reading.zone,
             watts: reading.watts,
+            meterPower: reading.meterPower || undefined,
           },
         });
       }

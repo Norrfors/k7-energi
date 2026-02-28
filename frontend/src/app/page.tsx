@@ -262,7 +262,8 @@ export default function Dashboard() {
   };
   
   // Beräkna förbrukning IDAG (från 00:00 till nu)
-  const calculateTodayConsumption = (history: Array<{deviceId: string; deviceName: string; watts: number; createdAt: string}>, deviceName: string): number | null => {
+  // Använder meterPower om tillgängligt (MAX för idag), annars fallback till watts-baserad beräkning
+  const calculateTodayConsumption = (history: Array<{deviceId: string; deviceName: string; watts: number; meterPower?: number; createdAt: string}>, deviceName: string): number | null => {
     const now = new Date();
     
     // Idag kl 00:00
@@ -274,14 +275,25 @@ export default function Dashboard() {
       new Date(h.createdAt).getTime() >= today.getTime()
     );
     if (readings.length === 0) return null;
-    // Beräkna genomsnittlig effekt × timmar som förflutit idag
+    
+    // Försök använd meterPower (Pulse-sensorns "consumption since midnight")
+    const meterReadings = readings.filter(r => r.meterPower !== undefined && r.meterPower !== null);
+    if (meterReadings.length > 0) {
+      // meterPower är redan totalförbrukning sedan midnatt – ta bara senaste värde
+      // Men multiplicera med 1000 för att konvertera från kWh till Wh
+      const latestReading = meterReadings[meterReadings.length - 1];
+      return Math.round((latestReading.meterPower || 0) * 1000 * 100) / 100;
+    }
+    
+    // Fallback: Beräkna baserat på watts (genomsnittlig effekt × timmar som förflutit idag)
     const avgWatts = readings.reduce((acc, r) => acc + r.watts, 0) / readings.length;
     const hoursElapsed = (now.getTime() - today.getTime()) / (60 * 60 * 1000);
     return Math.round(avgWatts * hoursElapsed * 100) / 100;
   };
   
   // Beräkna förbrukning för föregående KALENDERDYGN (från 00:00 till 23:59:59 igår)
-  const calculatePreviousDayConsumption = (history: Array<{deviceId: string; deviceName: string; watts: number; createdAt: string}>, deviceName: string): number | null => {
+  // Använder meterPower om tillgängligt (MAX - MIN), annars fallback till watts-baserad beräkning
+  const calculatePreviousDayConsumption = (history: Array<{deviceId: string; deviceName: string; watts: number; meterPower?: number; createdAt: string}>, deviceName: string): number | null => {
     const now = new Date();
     
     // Igårs start (00:00)
@@ -299,7 +311,19 @@ export default function Dashboard() {
       new Date(h.createdAt).getTime() <= yesterdayEnd.getTime()
     );
     if (readings.length === 0) return null;
-    // Beräkna genomsnittlig effekt × 24 timmar
+    
+    // Försök använd meterPower (Pulse-sensorns "consumption since midnight")
+    const meterReadings = readings.filter(r => r.meterPower !== undefined && r.meterPower !== null);
+    if (meterReadings.length > 0) {
+      // meterPower för igår = MAX - MIN (eftersom den återställs vid midnatt)
+      // Då MAX är vid slutet av dagen och MIN vid början
+      const maxMeter = Math.max(...meterReadings.map(r => r.meterPower || 0));
+      const minMeter = Math.min(...meterReadings.map(r => r.meterPower || 0));
+      // Resultat är i kWh, konvertera till Wh
+      return Math.round((maxMeter - minMeter) * 1000 * 100) / 100;
+    }
+    
+    // Fallback: Beräkna baserat på watts (genomsnittlig effekt × 24 timmar)
     const avgWatts = readings.reduce((acc, r) => acc + r.watts, 0) / readings.length;
     return Math.round(avgWatts * 24 * 100) / 100;
   };

@@ -83,6 +83,23 @@ export async function historyRoutes(app: FastifyInstance) {
       return Math.round(avgWatts * hoursSpan * 100) / 100; // Wh (watt-timmar)
     };
 
+    // Beräkna förbrukning för föregående dygn baserat på meterPower (ackumulerad kWh)
+    // meterPower = förbrukning sedan midnatt, så MAX - MIN = total förbrukning för dagen
+    const calculatePreviousDayConsumption = (logs: any[]) => {
+      if (logs.length === 0) return 0;
+      const meterPowerValues = logs
+        .filter(log => log.meterPower !== null && log.meterPower !== undefined)
+        .map(log => log.meterPower as number);
+      
+      if (meterPowerValues.length === 0) return 0;
+      
+      const maxMeterPower = Math.max(...meterPowerValues);
+      const minMeterPower = Math.min(...meterPowerValues);
+      
+      // Resultat är redan i kWh, konvertera till Wh
+      return Math.round((maxMeterPower - minMeterPower) * 1000 * 100) / 100;
+    };
+
     return {
       deviceId: deviceId || "all",
       currentWatts: currentReading?.watts || 0,
@@ -90,7 +107,7 @@ export async function historyRoutes(app: FastifyInstance) {
       consumption1h: calculateConsumption(oneHourLogs, 1),
       consumption12h: calculateConsumption(twelveHourLogs, 12),
       consumption24h: calculateConsumption(twentyFourHourLogs, 24),
-      consumptionPreviousDay: calculateConsumption(previousDayLogs, 24),
+      consumptionPreviousDay: calculatePreviousDayConsumption(previousDayLogs),
     };
   });
 }
