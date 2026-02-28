@@ -81,6 +81,10 @@ export default function Dashboard() {
   const [backupMessage, setBackupMessage] = useState<string>("");
   const [backupError, setBackupError] = useState<string>("");
 
+  // Sensor detail modal state
+  const [selectedSensor, setSelectedSensor] = useState<{ name: string; type: "temperature" | "energy" } | null>(null);
+  const [historicalData, setHistoricalData] = useState<Array<{ deviceName: string; temperature?: number; watts?: number; meterPower?: number; createdAt: string }>>([]);
+
   // Logga till console
   const log = (message: string, data?: unknown) => {
     console.log(`[Dashboard] ${message}`, data || "");
@@ -350,8 +354,8 @@ export default function Dashboard() {
         const [currentTemps, energyData, historyData, energyHistoryData] = await Promise.all([
           getTemperatures(),
           getEnergy(),
-          getTemperatureHistory(24),
-          getEnergyHistory(48), // Hämta 48h för att kunna beräkna föregående dygn
+          getTemperatureHistory(72), // Hämta 72h för detaljer
+          getEnergyHistory(72), // Hämta 72h för detaljer
         ]);
         
         const tempsWithAverages = currentTemps.map(t => ({
@@ -368,6 +372,9 @@ export default function Dashboard() {
           consumptionToday: calculateTodayConsumption(energyHistoryData, e.deviceName),
           consumptionPreviousDay: calculatePreviousDayConsumption(energyHistoryData, e.deviceName),
         }));
+        
+        // Spara all historik för modal-visning
+        setHistoricalData([...historyData, ...energyHistoryData]);
         
         setTemperatures(tempsWithAverages);
         setEnergy(energyWithConsumption);
@@ -747,9 +754,10 @@ export default function Dashboard() {
                   .map((t, index) => (
                   <div
                     key={t.deviceName}
+                    onClick={() => setSelectedSensor({ name: t.deviceName, type: "temperature" })}
                     className={`grid grid-cols-6 gap-1 p-2 ${
                       index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                    } border-b border-gray-200 last:border-b-0 hover:bg-blue-100 transition text-xs`}
+                    } border-b border-gray-200 last:border-b-0 hover:bg-blue-100 transition text-xs cursor-pointer`}
                   >
                     <div className="col-span-3 text-gray-800 font-medium truncate">
                       <div className="truncate">
@@ -806,9 +814,10 @@ export default function Dashboard() {
                     return (
                       <div
                         key={e.deviceName}
+                        onClick={() => setSelectedSensor({ name: e.deviceName, type: "energy" })}
                         className={`grid grid-cols-9 gap-1 p-2 ${
                           index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                        } border-b border-gray-200 last:border-b-0 hover:bg-yellow-100 transition text-xs`}
+                        } border-b border-gray-200 last:border-b-0 hover:bg-yellow-100 transition text-xs cursor-pointer`}
                       >
                         <div className="col-span-2 text-gray-800 font-medium truncate">
                           <div className="truncate">
@@ -1340,6 +1349,76 @@ export default function Dashboard() {
               )}
             </div>
           )}
+        </div>
+      )}
+      {/* Sensor Detail Modal */}
+      {selectedSensor && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="sticky top-0 bg-gray-100 border-b border-gray-300 p-4 flex justify-between items-center">
+              <h2 className="text-2xl font-bold text-gray-900">
+                {selectedSensor.type === "temperature" ? "🌡️" : "⚡"} {selectedSensor.name}
+              </h2>
+              <button
+                onClick={() => setSelectedSensor(null)}
+                className="text-gray-600 hover:text-gray-900 font-bold text-xl"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Historik-tabell */}
+            <div className="p-4">
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-gray-100 border-b border-gray-300">
+                      <th className="border border-gray-300 p-2 text-left">Tid</th>
+                      {selectedSensor.type === "temperature" ? (
+                        <th className="border border-gray-300 p-2 text-right">Temperatur (°C)</th>
+                      ) : (
+                        <>
+                          <th className="border border-gray-300 p-2 text-right">Effekt (W)</th>
+                          <th className="border border-gray-300 p-2 text-right">Mätare (kWh)</th>
+                        </>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {historicalData
+                      .filter(h => h.deviceName === selectedSensor.name)
+                      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                      .slice(0, 200) // Visa max 200 rader
+                      .map((h, index) => (
+                        <tr key={index} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                          <td className="border border-gray-300 p-2">
+                            {new Date(h.createdAt).toLocaleString("sv-SE")}
+                          </td>
+                          {selectedSensor.type === "temperature" ? (
+                            <td className="border border-gray-300 p-2 text-right">
+                              {h.temperature !== undefined ? h.temperature.toFixed(2) : "—"}
+                            </td>
+                          ) : (
+                            <>
+                              <td className="border border-gray-300 p-2 text-right">
+                                {h.watts !== undefined ? h.watts.toFixed(0) : "—"}
+                              </td>
+                              <td className="border border-gray-300 p-2 text-right">
+                                {h.meterPower !== undefined ? h.meterPower.toFixed(2) : "—"}
+                              </td>
+                            </>
+                          )}
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+              {historicalData.filter(h => h.deviceName === selectedSensor.name).length === 0 && (
+                <p className="text-gray-500 text-center py-4">Ingen historik tillgänglig för denna sensor</p>
+              )}
+            </div>
+          </div>
         </div>
       )}
     </div>
