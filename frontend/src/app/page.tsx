@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getHealth, getTemperatures, getEnergy, getMeterLatest, getMeterToday, getMeterLast24Hours, setManualMeterValue, getBackupSettings, saveBackupSettings, performManualBackup, BackupSettings, getTemperatureHistory, getTemperatureSensors, getEnergySensors, updateSensorVisibility, updateSensorZone, SensorInfo } from "@/lib/api";
+import { getHealth, getTemperatures, getEnergy, getMeterLatest, getMeterToday, getMeterLast24Hours, setManualMeterValue, getBackupSettings, saveBackupSettings, performManualBackup, BackupSettings, getTemperatureHistory, getEnergyHistory, getTemperatureSensors, getEnergySensors, updateSensorVisibility, updateSensorZone, SensorInfo } from "@/lib/api";
 import { StatusCard } from "@/components/StatusCard";
 
 interface Temperature {
@@ -16,6 +16,9 @@ interface Energy {
   deviceName: string;
   watts: number | null;
   zone?: string | null;
+  avg1h?: number | null;
+  avg12h?: number | null;
+  avg24h?: number | null;
 }
 
 interface Health {
@@ -241,6 +244,18 @@ export default function Dashboard() {
     return sum / readings.length;
   };
 
+  const calculateEnergyAverages = (history: Array<{deviceId: string; deviceName: string; watts: number; createdAt: string}>, deviceName: string, hoursBack: number): number | null => {
+    const now = Date.now();
+    const timeLimit = now - hoursBack * 60 * 60 * 1000;
+    const readings = history.filter(h => 
+      h.deviceName === deviceName && 
+      new Date(h.createdAt).getTime() >= timeLimit
+    );
+    if (readings.length === 0) return null;
+    const sum = readings.reduce((acc, r) => acc + r.watts, 0);
+    return sum / readings.length;
+  };
+
   // Ladda synliga sensorer och sensorplatsmarkeringar från localStorage vid start
   useEffect(() => {
     const visible = loadVisibleSensors();
@@ -260,10 +275,11 @@ export default function Dashboard() {
 
       // Ladda temperaturer, energi och historia
       try {
-        const [currentTemps, energyData, historyData] = await Promise.all([
+        const [currentTemps, energyData, historyData, energyHistoryData] = await Promise.all([
           getTemperatures(),
           getEnergy(),
           getTemperatureHistory(24),
+          getEnergyHistory(24),
         ]);
         
         const tempsWithAverages = currentTemps.map(t => ({
@@ -272,8 +288,15 @@ export default function Dashboard() {
           avg24h: calculateAverages(historyData, t.deviceName, 24),
         }));
         
+        const energyWithAverages = energyData.map(e => ({
+          ...e,
+          avg1h: calculateEnergyAverages(energyHistoryData, e.deviceName, 1),
+          avg12h: calculateEnergyAverages(energyHistoryData, e.deviceName, 12),
+          avg24h: calculateEnergyAverages(energyHistoryData, e.deviceName, 24),
+        }));
+        
         setTemperatures(tempsWithAverages);
-        setEnergy(energyData);
+        setEnergy(energyWithAverages);
         setHomeyConnected(true);
         log(`✅ Loaded ${currentTemps.length} temperatures, ${energyData.length} energy sensors`);
       } catch (err) {
@@ -685,8 +708,16 @@ export default function Dashboard() {
               <h2 className="text-2xl font-bold mb-4 text-gray-900 flex items-center gap-2">
                 ⚡ Energiförbrukning
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="border border-gray-300 rounded-lg overflow-hidden shadow-sm">
+                <div className="bg-yellow-50 p-2 border-b border-gray-300 grid grid-cols-7 gap-1 font-semibold text-gray-700 text-xs">
+                  <div className="col-span-3">Enhet / Zon</div>
+                  <div className="text-right">Aktuell</div>
+                  <div className="text-right">Snitt 1h</div>
+                  <div className="text-right">Snitt 12h</div>
+                  <div className="text-right">Snitt 24h</div>
+                </div>
                 {energy
+                  .sort((a, b) => a.deviceName.localeCompare(b.deviceName))
                   .filter(e => {
                     // Om ingen sensor-inställningar laddats ännu, visa alla (fallback)
                     if (energySensors.length === 0) return true;
@@ -694,16 +725,38 @@ export default function Dashboard() {
                     // Om inget setting hittas, visa sensorn per default
                     return sensorSetting ? sensorSetting.isVisible : true;
                   })
-                  .map((e) => {
+                  .map((e, index) => {
                     const location = getSensorLocation(e.deviceName);
                     return (
-                      <StatusCard
+                      <div
                         key={e.deviceName}
-                        title={e.zone ? `${e.deviceName} / ${e.zone}` : e.deviceName}
-                        value={e.watts !== null ? `${e.watts.toFixed(0)}W` : "N/A"}
-                        subtitle={location === "INNE" ? "🏠 INNE" : location === "UTE" ? "🌤️ UTE" : undefined}
-                        color="yellow"
-                      />
+                        className={`grid grid-cols-7 gap-1 p-2 ${
+                          index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                        } border-b border-gray-200 last:border-b-0 hover:bg-yellow-100 transition text-xs`}
+                      >
+                        <div className="col-span-3 text-gray-800 font-medium truncate">
+                          <div className="truncate">
+                            {e.zone ? `${e.deviceName} / ${e.zone}` : e.deviceName}
+                          </div>
+                          <span className="text-gray-600">
+                            {(() => {
+                              return location === "INNE" ? "🏠 INNE" : location === "UTE" ? "🌤️ UTE" : "";
+                            })()}
+                          </span>
+                        </div>
+                        <div className="text-right font-semibold text-yellow-600">
+                          {e.watts !== null ? `${e.watts.toFixed(0)}W` : "N/A"}
+                        </div>
+                        <div className="text-right text-gray-700">
+                          {e.avg1h !== null && e.avg1h !== undefined ? `${e.avg1h.toFixed(0)}W` : "N/A"}
+                        </div>
+                        <div className="text-right text-gray-700">
+                          {e.avg12h !== null && e.avg12h !== undefined ? `${e.avg12h.toFixed(0)}W` : "N/A"}
+                        </div>
+                        <div className="text-right text-gray-700">
+                          {e.avg24h !== null && e.avg24h !== undefined ? `${e.avg24h.toFixed(0)}W` : "N/A"}
+                        </div>
+                      </div>
                     );
                   })}
               </div>
