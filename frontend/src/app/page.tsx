@@ -836,7 +836,7 @@ export default function Dashboard() {
                           {e.consumptionToday !== null && e.consumptionToday !== undefined ? `${e.consumptionToday.toFixed(0)}Wh` : "N/A"}
                         </div>
                         <div className="text-right text-gray-700">
-                          {e.consumptionPreviousDay !== null && e.consumptionPreviousDay !== undefined ? `${e.consumptionPreviousDay.toFixed(0)}Wh` : "N/A"}
+                          {e.consumptionPreviousDay !== null && e.consumptionPreviousDay !== undefined ? `${e.consumptionPreviousDay.toFixed(0)}Wh` : "0 Wh"}
                         </div>
                       </div>
                     );
