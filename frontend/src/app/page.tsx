@@ -1397,15 +1397,15 @@ export default function Dashboard() {
                           </td>
                           {selectedSensor.type === "temperature" ? (
                             <td className="border border-gray-300 p-2 text-right">
-                              {h.temperature !== undefined ? h.temperature.toFixed(2) : "—"}
+                              {h.temperature != null ? h.temperature.toFixed(2) : "—"}
                             </td>
                           ) : (
                             <>
                               <td className="border border-gray-300 p-2 text-right">
-                                {h.watts !== undefined ? h.watts.toFixed(0) : "—"}
+                                {h.watts != null ? h.watts.toFixed(0) : "—"}
                               </td>
                               <td className="border border-gray-300 p-2 text-right">
-                                {h.meterPower !== undefined ? h.meterPower.toFixed(2) : "—"}
+                                {h.meterPower != null ? h.meterPower.toFixed(2) : "—"}
                               </td>
                             </>
                           )}
