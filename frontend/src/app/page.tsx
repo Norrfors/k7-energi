@@ -20,6 +20,7 @@ interface Energy {
   consumption1h?: number | null;
   consumption12h?: number | null;
   consumption24h?: number | null;
+  consumptionToday?: number | null;
   consumptionPreviousDay?: number | null;
 }
 
@@ -260,6 +261,25 @@ export default function Dashboard() {
     return Math.round(avgWatts * hoursBack * 100) / 100; // Wh-ekvivalent
   };
   
+  // Beräkna förbrukning IDAG (från 00:00 till nu)
+  const calculateTodayConsumption = (history: Array<{deviceId: string; deviceName: string; watts: number; createdAt: string}>, deviceName: string): number | null => {
+    const now = new Date();
+    
+    // Idag kl 00:00
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+    
+    const readings = history.filter(h => 
+      h.deviceName === deviceName && 
+      new Date(h.createdAt).getTime() >= today.getTime()
+    );
+    if (readings.length === 0) return null;
+    // Beräkna genomsnittlig effekt × timmar som förflutit idag
+    const avgWatts = readings.reduce((acc, r) => acc + r.watts, 0) / readings.length;
+    const hoursElapsed = (now.getTime() - today.getTime()) / (60 * 60 * 1000);
+    return Math.round(avgWatts * hoursElapsed * 100) / 100;
+  };
+  
   // Beräkna förbrukning för föregående KALENDERDYGN (från 00:00 till 23:59:59 igår)
   const calculatePreviousDayConsumption = (history: Array<{deviceId: string; deviceName: string; watts: number; createdAt: string}>, deviceName: string): number | null => {
     const now = new Date();
@@ -321,6 +341,7 @@ export default function Dashboard() {
           consumption1h: calculateConsumption(energyHistoryData, e.deviceName, 1),
           consumption12h: calculateConsumption(energyHistoryData, e.deviceName, 12),
           consumption24h: calculateConsumption(energyHistoryData, e.deviceName, 24),
+          consumptionToday: calculateTodayConsumption(energyHistoryData, e.deviceName),
           consumptionPreviousDay: calculatePreviousDayConsumption(energyHistoryData, e.deviceName),
         }));
         
@@ -738,12 +759,13 @@ export default function Dashboard() {
                 ⚡ Energiförbrukning
               </h2>
               <div className="border border-gray-300 rounded-lg overflow-hidden shadow-sm">
-                <div className="bg-yellow-50 p-2 border-b border-gray-300 grid grid-cols-8 gap-1 font-semibold text-gray-700 text-xs">
+                <div className="bg-yellow-50 p-2 border-b border-gray-300 grid grid-cols-9 gap-1 font-semibold text-gray-700 text-xs">
                   <div className="col-span-2">Enhet / Zon</div>
                   <div className="text-right">Aktuell</div>
                   <div className="text-right">Senaste 1h</div>
                   <div className="text-right">Senaste 12h</div>
                   <div className="text-right">Senaste 24h</div>
+                  <div className="text-right">Hittills idag</div>
                   <div className="text-right">Föregående dygn</div>
                 </div>
                 {energy
@@ -760,7 +782,7 @@ export default function Dashboard() {
                     return (
                       <div
                         key={e.deviceName}
-                        className={`grid grid-cols-8 gap-1 p-2 ${
+                        className={`grid grid-cols-9 gap-1 p-2 ${
                           index % 2 === 0 ? "bg-white" : "bg-gray-50"
                         } border-b border-gray-200 last:border-b-0 hover:bg-yellow-100 transition text-xs`}
                       >
@@ -787,11 +809,14 @@ export default function Dashboard() {
                           {e.consumption24h !== null && e.consumption24h !== undefined ? `${e.consumption24h.toFixed(0)}Wh` : "N/A"}
                         </div>
                         <div className="text-right text-gray-700">
+                          {e.consumptionToday !== null && e.consumptionToday !== undefined ? `${e.consumptionToday.toFixed(0)}Wh` : "N/A"}
+                        </div>
+                        <div className="text-right text-gray-700">
                           {e.consumptionPreviousDay !== null && e.consumptionPreviousDay !== undefined ? `${e.consumptionPreviousDay.toFixed(0)}Wh` : "N/A"}
                         </div>
                       </div>
                     );
-                  })}
+                  })}}
               </div>
             </section>
           )}
