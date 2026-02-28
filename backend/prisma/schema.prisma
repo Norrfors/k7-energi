@@ -25,13 +25,14 @@ model TemperatureLog {
 
 // Sparar energiavläsningar från Homey
 model EnergyLog {
-  id         Int      @id @default(autoincrement())
-  deviceId   String
-  deviceName String
-  zone       String?
-  watts      Float
-  meterPower Float?   // Ackumulerad förbrukning sedan midnatt (kWh) för Pulse
-  createdAt  DateTime @default(now())
+  id             Int      @id @default(autoincrement())
+  deviceId       String
+  deviceName     String
+  zone           String?
+  watts          Float
+  meterPower     Float?   // Ackumulerad förbrukning sedan midnatt (kWh) för Pulse
+  meterValue     Float?   // Total mätarställning (kWh) – beräknad vid kalibrering
+  createdAt      DateTime @default(now())
 
   @@index([deviceId, createdAt])
 }
@@ -59,6 +60,19 @@ model MeterReading {
   createdAt                       DateTime @default(now())
 
   @@index([deviceId, createdAt])
+}
+
+// Mätarkalibrering – referenspunkter för att räkna fram korrekta mätarvärden
+// Användare matar in manuell avläsning från elmätaren
+model MeterCalibration {
+  id                    Int      @id @default(autoincrement())
+  deviceId              String   @default("c2314e97-c95b-40d4-9393-dbc541d586d1") // Pulse Krokgatan 7
+  calibrationValue      Float    // Mätarställningen vid kalibreringen (kWh)
+  calibrationDateTime   DateTime // När denna avläsning gjordes
+  createdAt             DateTime @default(now())
+
+  @@index([deviceId, calibrationDateTime])
+  @@unique([deviceId, calibrationDateTime]) // En kalibrering per tidpunkt per enhet
 }
 
 // Backupinställningar

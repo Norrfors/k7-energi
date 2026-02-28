@@ -261,3 +261,39 @@ export function getEnergyHistory(hours: number = 24) {
     }>
   >(`/api/history/energy?hours=${hours}`);
 }
+
+// Mätarkalibrering
+
+export interface CalibrationResult {
+  success: boolean;
+  calibrationPoint: {
+    calibrationValue: number;
+    calibrationDateTime: string;
+  };
+  updatedRecords: number;
+  message: string;
+}
+
+export function calibrateMeter(
+  calibrationValue: number,
+  calibrationDateTime: string
+) {
+  return apiFetch<CalibrationResult>("/api/meter/calibrate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      calibrationValue,
+      calibrationDateTime,
+    }),
+  });
+}
+
+export function getCalibrationHistory() {
+  return apiFetch<
+    Array<{
+      calibrationValue: number;
+      calibrationDateTime: string;
+      savedAt: string;
+    }>
+  >("/api/meter/calibrations");
+}

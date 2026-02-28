@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getHealth, getTemperatures, getEnergy, getMeterLatest, getMeterToday, getMeterLast24Hours, setManualMeterValue, getBackupSettings, saveBackupSettings, performManualBackup, BackupSettings, getTemperatureHistory, getEnergyHistory, getTemperatureSensors, getEnergySensors, updateSensorVisibility, updateSensorZone, SensorInfo } from "@/lib/api";
+import { getHealth, getTemperatures, getEnergy, getMeterLatest, getMeterToday, getMeterLast24Hours, setManualMeterValue, getBackupSettings, saveBackupSettings, performManualBackup, BackupSettings, getTemperatureHistory, getEnergyHistory, getTemperatureSensors, getEnergySensors, updateSensorVisibility, updateSensorZone, SensorInfo, calibrateMeter } from "@/lib/api";
 import { StatusCard } from "@/components/StatusCard";
+import MeterCalibrationModal from "@/components/MeterCalibrationModal";
 
 interface Temperature {
   deviceName: string;
@@ -86,6 +87,9 @@ export default function Dashboard() {
   const [historicalData, setHistoricalData] = useState<Array<{ deviceName: string; temperature?: number; watts?: number; meterPower?: number; createdAt: string }>>([]);
   const [sensorModalPage, setSensorModalPage] = useState(1);
   const itemsPerPage = 100;
+
+  // Meter calibration modal state
+  const [showCalibrationModal, setShowCalibrationModal] = useState(false);
 
   // Logga till console
   const log = (message: string, data?: unknown) => {
@@ -526,6 +530,31 @@ export default function Dashboard() {
       log("Fel vid inställning av mätarställning", err);
     } finally {
       setSettingsMeterValue(false);
+    }
+  }
+
+  async function handleCalibrateMeter(
+    calibrationValue: number,
+    calibrationDateTime: string
+  ) {
+    try {
+      log(`Kalibrerar mätare: ${calibrationValue} kWh @ ${calibrationDateTime}`);
+      const result = await calibrateMeter(calibrationValue, calibrationDateTime);
+
+      if (result.success) {
+        log(`✓ Kalibrering lyckades: ${result.updatedRecords} poster uppdaterade`);
+        
+        // Uppdatera mätardata
+        const meterData = await getMeterLatest();
+        const meterHistoryData = await getMeterToday();
+        setMeter(meterData);
+        setMeterHistory(meterHistoryData);
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (err) {
+      log("Fel vid mätarkalibrering", err);
+      throw err;
     }
   }
 
@@ -972,9 +1001,26 @@ export default function Dashboard() {
                 <h3 className="text-xl font-bold mb-4 text-gray-900 flex items-center gap-2">
                   ⚙️ Mätardata
                 </h3>
+                
+                {/* Kalibrering med manuell avläsning */}
+                <div className="bg-blue-50 border border-blue-300 rounded-lg p-6 mb-4">
+                  <h4 className="text-md font-medium text-gray-800 mb-3">📊 Mätarkalibrering</h4>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Mata in mätarställningen från din elmätartavla för att kalibrera systemet. 
+                    Systemet räknar retroaktivt framåt och bakåt för att uppdatera alla värden.
+                  </p>
+                  <button
+                    onClick={() => setShowCalibrationModal(true)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                  >
+                    🔧 Kalibrera mätare
+                  </button>
+                </div>
+
+                {/* Gammal manuell mätarställning */}
                 <div className="bg-gray-50 border border-gray-300 rounded-lg p-6 max-w-md">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Manuell mätarställning (kWh)
+                    Snabb mätarställning (enkel)
                   </label>
                   <div className="flex gap-2">
                     <input
@@ -995,9 +1041,10 @@ export default function Dashboard() {
                   </div>
                   {settingsError && <p className="text-red-600 text-sm mt-2">{settingsError}</p>}
                   {settingsSuccess && <p className="text-green-600 text-sm mt-2">{settingsSuccess}</p>}
-                  <p className="text-xs text-gray-500 mt-4">Ställ in den totala mätarställningen för energimätaren.</p>
+                  <p className="text-xs text-gray-500 mt-4">Ställ in den totala mätarställningen för energimätaren (utan datum/tid).</p>
                 </div>
               </section>
+
 
               {/* Databas Backup */}
               <section>
@@ -1461,6 +1508,13 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* Meter Calibration Modal */}
+      <MeterCalibrationModal
+        isOpen={showCalibrationModal}
+        onClose={() => setShowCalibrationModal(false)}
+        onCalibrate={handleCalibrateMeter}
+      />
     </div>
   );
 }
