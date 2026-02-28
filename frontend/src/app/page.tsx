@@ -633,8 +633,8 @@ export default function Dashboard() {
                 🌡️ Temperaturer
               </h2>
               <div className="border border-gray-300 rounded-lg overflow-hidden shadow-sm">
-                <div className="bg-blue-50 p-4 border-b border-gray-300 grid grid-cols-4 gap-4 font-semibold text-gray-700 text-sm">
-                  <div>Enhet</div>
+                <div className="bg-blue-50 p-2 border-b border-gray-300 grid grid-cols-6 gap-1 font-semibold text-gray-700 text-xs">
+                  <div className="col-span-3">Enhet / Zon</div>
                   <div className="text-right">Aktuell</div>
                   <div className="text-right">Snitt 12h</div>
                   <div className="text-right">Snitt 24h</div>
@@ -650,13 +650,15 @@ export default function Dashboard() {
                   .map((t, index) => (
                   <div
                     key={t.deviceName}
-                    className={`grid grid-cols-4 gap-4 p-4 ${
+                    className={`grid grid-cols-6 gap-1 p-2 ${
                       index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                    } border-b border-gray-200 last:border-b-0 hover:bg-blue-100 transition`}
+                    } border-b border-gray-200 last:border-b-0 hover:bg-blue-100 transition text-xs`}
                   >
-                    <div className="text-gray-800 font-medium">
-                      {t.zone ? `${t.deviceName} / ${t.zone}` : t.deviceName}
-                      <span className="text-gray-600 ml-2">
+                    <div className="col-span-3 text-gray-800 font-medium truncate">
+                      <div className="truncate">
+                        {t.zone ? `${t.deviceName} / ${t.zone}` : t.deviceName}
+                      </div>
+                      <span className="text-gray-600">
                         {(() => {
                           const location = getSensorLocation(t.deviceName);
                           return location === "INNE" ? "🏠 INNE" : location === "UTE" ? "🌤️ UTE" : "";
@@ -664,13 +666,13 @@ export default function Dashboard() {
                       </span>
                     </div>
                     <div className="text-right font-semibold text-blue-600">
-                      {t.temperature !== null ? `${t.temperature.toFixed(1)}°C` : "N/A"}
+                      {t.temperature !== null ? `${t.temperature.toFixed(1)}°` : "N/A"}
                     </div>
                     <div className="text-right text-gray-700">
-                      {t.avg12h !== null && t.avg12h !== undefined ? `${t.avg12h.toFixed(1)}°C` : "N/A"}
+                      {t.avg12h !== null && t.avg12h !== undefined ? `${t.avg12h.toFixed(1)}°` : "N/A"}
                     </div>
                     <div className="text-right text-gray-700">
-                      {t.avg24h !== null && t.avg24h !== undefined ? `${t.avg24h.toFixed(1)}°C` : "N/A"}
+                      {t.avg24h !== null && t.avg24h !== undefined ? `${t.avg24h.toFixed(1)}°` : "N/A"}
                     </div>
                   </div>
                 ))}
@@ -1006,14 +1008,12 @@ export default function Dashboard() {
               {temperatures.length > 0 ? (
                 <div className="border border-gray-300 rounded-lg overflow-hidden max-h-96 overflow-y-auto">
                   {/* Table header */}
-                  <div className="grid grid-cols-12 gap-2 bg-blue-100 px-2 py-2 border-b border-gray-300 font-semibold text-xs text-gray-700 sticky top-0">
-                    <div className="col-span-4">Sensornamn</div>
-                    <div className="col-span-2 text-right">Aktuellt</div>
-                    <div className="col-span-1 text-center">Dashboard</div>
-                    <div className="col-span-3 flex gap-1 justify-center text-center">
-                      <span className="flex-1">INNE</span>
-                      <span className="flex-1">UTE</span>
-                    </div>
+                  <div className="grid grid-cols-10 gap-1 bg-blue-100 px-2 py-1 border-b border-gray-300 font-semibold text-xs text-gray-700 sticky top-0">
+                    <div className="col-span-5">Sensor / Zon</div>
+                    <div className="col-span-1 text-right">°C</div>
+                    <div className="col-span-1 text-center">Visa</div>
+                    <div className="col-span-1 text-center">INNE</div>
+                    <div className="col-span-1 text-center">UTE</div>
                   </div>
                   
                   {/* Table rows */}
@@ -1035,25 +1035,25 @@ export default function Dashboard() {
                     return (
                       <div
                         key={temp.deviceName}
-                        className={`grid grid-cols-12 gap-2 px-2 py-2 items-center text-xs bg-white border-b border-gray-200 last:border-b-0 hover:bg-blue-50 transition`}
+                        className={`grid grid-cols-10 gap-1 px-2 py-1 items-center text-xs bg-white border-b border-gray-200 last:border-b-0 hover:bg-blue-50 transition`}
                       >
                         {/* Sensornamn + ZONE + INNE/UTE */}
-                        <div className="col-span-4 font-medium text-gray-900">
-                          <div className="truncate">
+                        <div className="col-span-5 font-medium text-gray-900 truncate">
+                          <span className="block truncate">
                             {temp.zone ? `${temp.deviceName} / ${temp.zone}` : temp.deviceName}
-                          </div>
+                          </span>
                           <span className={`text-xs font-normal ${
                             location === "INNE" ? "text-green-600" :
                             location === "UTE" ? "text-orange-600" :
                             "text-gray-500"
                           }`}>
-                            {location === "INNE" ? "🏠 INNE" : location === "UTE" ? "🌤️ UTE" : "—"}
+                            {location === "INNE" ? "🏠" : location === "UTE" ? "🌤️" : "—"}
                           </span>
                         </div>
                         
                         {/* Aktuellt värde */}
-                        <div className="col-span-2 text-right font-semibold text-blue-600">
-                          {temp.temperature ? `${temp.temperature.toFixed(1)}°C` : "—"}
+                        <div className="col-span-1 text-right font-semibold text-blue-600">
+                          {temp.temperature ? `${temp.temperature.toFixed(1)}` : "—"}
                         </div>
                         
                         {/* Checkbox - Visa på dashboard */}
@@ -1063,13 +1063,13 @@ export default function Dashboard() {
                             id={`temp-${temp.deviceName}`}
                             checked={isVisible}
                             onChange={() => handleToggleTemperatureSensor(temp.deviceName)}
-                            className="w-4 h-4 rounded cursor-pointer"
+                            className="w-3 h-3 rounded cursor-pointer"
                           />
                         </div>
                         
                         {/* Radio buttons - INNE och UTE */}
-                        <div className="col-span-3 flex gap-1 justify-center">
-                          <label className="flex-1 flex justify-center opacity-75 hover:opacity-100 transition" title={zoneSavingDevices.has(temp.deviceName) ? "Sparar..." : ""}>
+                        <div className="col-span-1 flex justify-center">
+                          <label className="cursor-pointer opacity-75 hover:opacity-100 transition" title={zoneSavingDevices.has(temp.deviceName) ? "Sparar..." : ""}>
                             <input
                               type="radio"
                               name={`location-${temp.deviceName}`}
@@ -1077,10 +1077,13 @@ export default function Dashboard() {
                               checked={location === "INNE"}
                               onChange={() => setSensorLocation(temp.deviceName, "INNE")}
                               disabled={zoneSavingDevices.has(temp.deviceName)}
-                              className="w-4 h-4 cursor-pointer disabled:cursor-not-allowed"
+                              className="w-3 h-3 cursor-pointer disabled:cursor-not-allowed"
                             />
                           </label>
-                          <label className="flex-1 flex justify-center opacity-75 hover:opacity-100 transition" title={zoneSavingDevices.has(temp.deviceName) ? "Sparar..." : ""}>
+                        </div>
+                        
+                        <div className="col-span-1 flex justify-center">
+                          <label className="cursor-pointer opacity-75 hover:opacity-100 transition" title={zoneSavingDevices.has(temp.deviceName) ? "Sparar..." : ""}>
                             <input
                               type="radio"
                               name={`location-${temp.deviceName}`}
@@ -1088,15 +1091,16 @@ export default function Dashboard() {
                               checked={location === "UTE"}
                               onChange={() => setSensorLocation(temp.deviceName, "UTE")}
                               disabled={zoneSavingDevices.has(temp.deviceName)}
-                              className="w-4 h-4 cursor-pointer disabled:cursor-not-allowed"
+                              className="w-3 h-3 cursor-pointer disabled:cursor-not-allowed"
                             />
                           </label>
-                          {zoneSavingDevices.has(temp.deviceName) && (
-                            <div className="flex-1 flex justify-center">
-                              <span className="text-xs text-blue-600 font-semibold">Sparar...</span>
-                            </div>
-                          )}
                         </div>
+                        
+                        {zoneSavingDevices.has(temp.deviceName) && (
+                          <div className="col-span-10 flex justify-center">
+                            <span className="text-xs text-blue-600 font-semibold">Sparar...</span>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -1116,13 +1120,11 @@ export default function Dashboard() {
               ) : energySensors.length > 0 ? (
                 <div className="border border-gray-300 rounded-lg overflow-hidden max-h-96 overflow-y-auto">
                   {/* Table header */}
-                  <div className="grid grid-cols-12 gap-2 bg-yellow-100 px-2 py-2 border-b border-gray-300 font-semibold text-xs text-gray-700 sticky top-0">
-                    <div className="col-span-4">Sensornamn</div>
-                    <div className="col-span-3 text-center">Dashboard</div>
-                    <div className="col-span-3 flex gap-1 justify-center text-center">
-                      <span className="flex-1">INNE</span>
-                      <span className="flex-1">UTE</span>
-                    </div>
+                  <div className="grid grid-cols-10 gap-1 bg-yellow-100 px-2 py-1 border-b border-gray-300 font-semibold text-xs text-gray-700 sticky top-0">
+                    <div className="col-span-5">Sensor / Zon</div>
+                    <div className="col-span-2 text-center">Visa</div>
+                    <div className="col-span-1 text-center">INNE</div>
+                    <div className="col-span-1 text-center">UTE</div>
                   </div>
                   
                   {/* Table rows */}
@@ -1133,36 +1135,36 @@ export default function Dashboard() {
                       return (
                         <div
                           key={sensor.deviceId}
-                          className={`grid grid-cols-12 gap-2 px-2 py-2 items-center text-xs bg-white border-b border-gray-200 last:border-b-0 hover:bg-yellow-50 transition`}
+                          className={`grid grid-cols-10 gap-1 px-2 py-1 items-center text-xs bg-white border-b border-gray-200 last:border-b-0 hover:bg-yellow-50 transition`}
                         >
                           {/* Sensornamn + ZONE + INNE/UTE */}
-                          <div className="col-span-4 font-medium text-gray-900">
-                            <div className="truncate">
+                          <div className="col-span-5 font-medium text-gray-900 truncate">
+                            <span className="block truncate">
                               {sensor.zone ? `${sensor.deviceName} / ${sensor.zone}` : sensor.deviceName}
-                            </div>
+                            </span>
                             <span className={`text-xs font-normal ${
                               location === "INNE" ? "text-green-600" :
                               location === "UTE" ? "text-orange-600" :
                               "text-gray-500"
                             }`}>
-                              {location === "INNE" ? "🏠 INNE" : location === "UTE" ? "🌤️ UTE" : "—"}
+                              {location === "INNE" ? "🏠" : location === "UTE" ? "🌤️" : "—"}
                             </span>
                           </div>
                           
                           {/* Checkbox - Visa på dashboard */}
-                          <div className="col-span-3 flex justify-center">
+                          <div className="col-span-2 flex justify-center">
                             <input
                               type="checkbox"
                               id={`energy-${sensor.deviceId}`}
                               checked={sensor.isVisible}
                               onChange={() => handleToggleSensorVisibility(sensor.deviceId, sensor.isVisible)}
-                              className="w-4 h-4 rounded cursor-pointer"
+                              className="w-3 h-3 rounded cursor-pointer"
                             />
                           </div>
                           
                           {/* Radio buttons - INNE och UTE */}
-                          <div className="col-span-3 flex gap-1 justify-center">
-                            <label className="flex-1 flex justify-center opacity-75 hover:opacity-100 transition" title={zoneSavingDevices.has(sensor.deviceName) ? "Sparar..." : ""}>
+                          <div className="col-span-1 flex justify-center">
+                            <label className="cursor-pointer opacity-75 hover:opacity-100 transition" title={zoneSavingDevices.has(sensor.deviceName) ? "Sparar..." : ""}>
                               <input
                                 type="radio"
                                 name={`location-energy-${sensor.deviceId}`}
@@ -1170,10 +1172,13 @@ export default function Dashboard() {
                                 checked={location === "INNE"}
                                 onChange={() => setSensorLocation(sensor.deviceName, "INNE")}
                                 disabled={zoneSavingDevices.has(sensor.deviceName)}
-                                className="w-4 h-4 cursor-pointer disabled:cursor-not-allowed"
+                                className="w-3 h-3 cursor-pointer disabled:cursor-not-allowed"
                               />
                             </label>
-                            <label className="flex-1 flex justify-center opacity-75 hover:opacity-100 transition" title={zoneSavingDevices.has(sensor.deviceName) ? "Sparar..." : ""}>
+                          </div>
+                          
+                          <div className="col-span-1 flex justify-center">
+                            <label className="cursor-pointer opacity-75 hover:opacity-100 transition" title={zoneSavingDevices.has(sensor.deviceName) ? "Sparar..." : ""}>
                               <input
                                 type="radio"
                                 name={`location-energy-${sensor.deviceId}`}
@@ -1181,15 +1186,16 @@ export default function Dashboard() {
                                 checked={location === "UTE"}
                                 onChange={() => setSensorLocation(sensor.deviceName, "UTE")}
                                 disabled={zoneSavingDevices.has(sensor.deviceName)}
-                                className="w-4 h-4 cursor-pointer disabled:cursor-not-allowed"
+                                className="w-3 h-3 cursor-pointer disabled:cursor-not-allowed"
                               />
                             </label>
-                            {zoneSavingDevices.has(sensor.deviceName) && (
-                              <div className="flex-1 flex justify-center">
-                                <span className="text-xs text-blue-600 font-semibold">Sparar...</span>
-                              </div>
-                            )}
                           </div>
+                          
+                          {zoneSavingDevices.has(sensor.deviceName) && (
+                            <div className="col-span-10 flex justify-center">
+                              <span className="text-xs text-blue-600 font-semibold">Sparar...</span>
+                            </div>
+                          )}
                         </div>
                       );
                     })}
