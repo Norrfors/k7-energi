@@ -16,9 +16,11 @@ interface Energy {
   deviceName: string;
   watts: number | null;
   zone?: string | null;
-  avg1h?: number | null;
-  avg12h?: number | null;
-  avg24h?: number | null;
+  classification?: string | null;
+  consumption1h?: number | null;
+  consumption12h?: number | null;
+  consumption24h?: number | null;
+  consumptionPreviousDay?: number | null;
 }
 
 interface Health {
@@ -244,7 +246,8 @@ export default function Dashboard() {
     return sum / readings.length;
   };
 
-  const calculateEnergyAverages = (history: Array<{deviceId: string; deviceName: string; watts: number; createdAt: string}>, deviceName: string, hoursBack: number): number | null => {
+  // Beräkna förbrukningsmängd (Wh) från energihistorik
+  const calculateConsumption = (history: Array<{deviceId: string; deviceName: string; watts: number; createdAt: string}>, deviceName: string, hoursBack: number): number | null => {
     const now = Date.now();
     const timeLimit = now - hoursBack * 60 * 60 * 1000;
     const readings = history.filter(h => 
@@ -252,8 +255,25 @@ export default function Dashboard() {
       new Date(h.createdAt).getTime() >= timeLimit
     );
     if (readings.length === 0) return null;
-    const sum = readings.reduce((acc, r) => acc + r.watts, 0);
-    return sum / readings.length;
+    // Beräkna genomsnittlig effekt × antal timmar
+    const avgWatts = readings.reduce((acc, r) => acc + r.watts, 0) / readings.length;
+    return Math.round(avgWatts * hoursBack * 100) / 100; // Wh-ekvivalent
+  };
+  
+  // Beräkna förbrukning för föregående dygn (från -48h till -24h)
+  const calculatePreviousDayConsumption = (history: Array<{deviceId: string; deviceName: string; watts: number; createdAt: string}>, deviceName: string): number | null => {
+    const now = Date.now();
+    const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000;
+    const fortyEightHoursAgo = now - 48 * 60 * 60 * 1000;
+    const readings = history.filter(h => 
+      h.deviceName === deviceName && 
+      new Date(h.createdAt).getTime() >= fortyEightHoursAgo &&
+      new Date(h.createdAt).getTime() < twentyFourHoursAgo
+    );
+    if (readings.length === 0) return null;
+    // Beräkna genomsnittlig effekt × 24 timmar
+    const avgWatts = readings.reduce((acc, r) => acc + r.watts, 0) / readings.length;
+    return Math.round(avgWatts * 24 * 100) / 100;
   };
 
   // Ladda synliga sensorer och sensorplatsmarkeringar från localStorage vid start
@@ -288,15 +308,16 @@ export default function Dashboard() {
           avg24h: calculateAverages(historyData, t.deviceName, 24),
         }));
         
-        const energyWithAverages = energyData.map(e => ({
+        const energyWithConsumption = energyData.map(e => ({
           ...e,
-          avg1h: calculateEnergyAverages(energyHistoryData, e.deviceName, 1),
-          avg12h: calculateEnergyAverages(energyHistoryData, e.deviceName, 12),
-          avg24h: calculateEnergyAverages(energyHistoryData, e.deviceName, 24),
+          consumption1h: calculateConsumption(energyHistoryData, e.deviceName, 1),
+          consumption12h: calculateConsumption(energyHistoryData, e.deviceName, 12),
+          consumption24h: calculateConsumption(energyHistoryData, e.deviceName, 24),
+          consumptionPreviousDay: calculatePreviousDayConsumption(energyHistoryData, e.deviceName),
         }));
         
         setTemperatures(tempsWithAverages);
-        setEnergy(energyWithAverages);
+        setEnergy(energyWithConsumption);
         setHomeyConnected(true);
         log(`✅ Loaded ${currentTemps.length} temperatures, ${energyData.length} energy sensors`);
       } catch (err) {
@@ -709,12 +730,13 @@ export default function Dashboard() {
                 ⚡ Energiförbrukning
               </h2>
               <div className="border border-gray-300 rounded-lg overflow-hidden shadow-sm">
-                <div className="bg-yellow-50 p-2 border-b border-gray-300 grid grid-cols-7 gap-1 font-semibold text-gray-700 text-xs">
-                  <div className="col-span-3">Enhet / Zon</div>
+                <div className="bg-yellow-50 p-2 border-b border-gray-300 grid grid-cols-8 gap-1 font-semibold text-gray-700 text-xs">
+                  <div className="col-span-2">Enhet / Zon</div>
                   <div className="text-right">Aktuell</div>
-                  <div className="text-right">Snitt 1h</div>
-                  <div className="text-right">Snitt 12h</div>
-                  <div className="text-right">Snitt 24h</div>
+                  <div className="text-right">Senaste 1h</div>
+                  <div className="text-right">Senaste 12h</div>
+                  <div className="text-right">Senaste 24h</div>
+                  <div className="text-right">Föregående dygn</div>
                 </div>
                 {energy
                   .sort((a, b) => a.deviceName.localeCompare(b.deviceName))
@@ -730,11 +752,11 @@ export default function Dashboard() {
                     return (
                       <div
                         key={e.deviceName}
-                        className={`grid grid-cols-7 gap-1 p-2 ${
+                        className={`grid grid-cols-8 gap-1 p-2 ${
                           index % 2 === 0 ? "bg-white" : "bg-gray-50"
                         } border-b border-gray-200 last:border-b-0 hover:bg-yellow-100 transition text-xs`}
                       >
-                        <div className="col-span-3 text-gray-800 font-medium truncate">
+                        <div className="col-span-2 text-gray-800 font-medium truncate">
                           <div className="truncate">
                             {e.zone ? `${e.deviceName} / ${e.zone}` : e.deviceName}
                           </div>
@@ -748,13 +770,16 @@ export default function Dashboard() {
                           {e.watts !== null ? `${e.watts.toFixed(0)}W` : "N/A"}
                         </div>
                         <div className="text-right text-gray-700">
-                          {e.avg1h !== null && e.avg1h !== undefined ? `${e.avg1h.toFixed(0)}W` : "N/A"}
+                          {e.consumption1h !== null && e.consumption1h !== undefined ? `${e.consumption1h.toFixed(0)}Wh` : "N/A"}
                         </div>
                         <div className="text-right text-gray-700">
-                          {e.avg12h !== null && e.avg12h !== undefined ? `${e.avg12h.toFixed(0)}W` : "N/A"}
+                          {e.consumption12h !== null && e.consumption12h !== undefined ? `${e.consumption12h.toFixed(0)}Wh` : "N/A"}
                         </div>
                         <div className="text-right text-gray-700">
-                          {e.avg24h !== null && e.avg24h !== undefined ? `${e.avg24h.toFixed(0)}W` : "N/A"}
+                          {e.consumption24h !== null && e.consumption24h !== undefined ? `${e.consumption24h.toFixed(0)}Wh` : "N/A"}
+                        </div>
+                        <div className="text-right text-gray-700">
+                          {e.consumptionPreviousDay !== null && e.consumptionPreviousDay !== undefined ? `${e.consumptionPreviousDay.toFixed(0)}Wh` : "N/A"}
                         </div>
                       </div>
                     );

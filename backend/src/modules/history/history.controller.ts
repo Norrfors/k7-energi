@@ -32,7 +32,7 @@ export async function historyRoutes(app: FastifyInstance) {
   });
 
   // GET /api/history/energy-summary
-  // Returnerar energisammanfattning: aktuell + medelvärden för 1h/12h/24h
+  // Returnerar energisammanfattning: aktuell + totala förbrukningsmängder för 1h/12h/24h/föregäendedygn
   app.get("/api/history/energy-summary", async (request) => {
     const { deviceId } = request.query as { deviceId?: string };
 
@@ -43,16 +43,17 @@ export async function historyRoutes(app: FastifyInstance) {
       take: 1,
     });
 
-    // Beräkna medelvärden för olika tidsperioder
+    // Beräkna totala förbrukningsmängder för olika tidsperioder
     const now = new Date();
     const oneHourAgo = new Date(now.getTime() - 1 * 60 * 60 * 1000);
     const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
     const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
 
     // Hämta loggar för alla tidsperioder
     const baseWhere = deviceId ? { deviceId } : {};
 
-    const [oneHourLogs, twelveHourLogs, twentyFourHourLogs] = await Promise.all([
+    const [oneHourLogs, twelveHourLogs, twentyFourHourLogs, previousDayLogs] = await Promise.all([
       prisma.energyLog.findMany({
         where: { ...baseWhere, createdAt: { gte: oneHourAgo } },
       }),
@@ -62,25 +63,27 @@ export async function historyRoutes(app: FastifyInstance) {
       prisma.energyLog.findMany({
         where: { ...baseWhere, createdAt: { gte: twentyFourHoursAgo } },
       }),
+      prisma.energyLog.findMany({
+        where: { ...baseWhere, createdAt: { gte: fortyEightHoursAgo, lt: twentyFourHoursAgo } },
+      }),
     ]);
 
-    // Beräkna medelvärden
-    const calculateAverage = (logs: any[]) => {
+    // Beräkna totala förbrukningsmängder (Wh-ekvivalent genom att summera watts-värden och approximera tid)
+    // Eftersom vi får värden var ~5:e minut, approximeras energi genom att ta genomsnittet × tidsperioden
+    const calculateConsumption = (logs: any[], hoursSpan: number) => {
       if (logs.length === 0) return 0;
-      const sum = logs.reduce((acc, log) => acc + log.watts, 0);
-      return Math.round((sum / logs.length) * 100) / 100; // Avrunda till 2 decimaler
+      const avgWatts = logs.reduce((acc, log) => acc + log.watts, 0) / logs.length;
+      return Math.round(avgWatts * hoursSpan * 100) / 100; // Wh (watt-timmar)
     };
 
     return {
       deviceId: deviceId || "all",
       currentWatts: currentReading?.watts || 0,
       currentTime: currentReading?.createdAt || new Date(),
-      averageWatts1h: calculateAverage(oneHourLogs),
-      averageWatts12h: calculateAverage(twelveHourLogs),
-      averageWatts24h: calculateAverage(twentyFourHourLogs),
-      count1h: oneHourLogs.length,
-      count12h: twelveHourLogs.length,
-      count24h: twentyFourHourLogs.length,
+      consumption1h: calculateConsumption(oneHourLogs, 1),
+      consumption12h: calculateConsumption(twelveHourLogs, 12),
+      consumption24h: calculateConsumption(twentyFourHourLogs, 24),
+      consumptionPreviousDay: calculateConsumption(previousDayLogs, 24),
     };
   });
 }

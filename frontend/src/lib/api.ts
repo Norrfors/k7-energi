@@ -235,12 +235,10 @@ export interface EnergySummary {
   deviceId: string;
   currentWatts: number;
   currentTime: string;
-  averageWatts1h: number;
-  averageWatts12h: number;
-  averageWatts24h: number;
-  count1h: number;
-  count12h: number;
-  count24h: number;
+  consumption1h: number;
+  consumption12h: number;
+  consumption24h: number;
+  consumptionPreviousDay: number;
 }
 
 export function getEnergySummary(deviceId?: string) {
