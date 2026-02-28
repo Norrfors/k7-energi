@@ -260,15 +260,23 @@ export default function Dashboard() {
     return Math.round(avgWatts * hoursBack * 100) / 100; // Wh-ekvivalent
   };
   
-  // Beräkna förbrukning för föregående dygn (från -48h till -24h)
+  // Beräkna förbrukning för föregående KALENDERDYGN (från 00:00 till 23:59:59 igår)
   const calculatePreviousDayConsumption = (history: Array<{deviceId: string; deviceName: string; watts: number; createdAt: string}>, deviceName: string): number | null => {
-    const now = Date.now();
-    const twentyFourHoursAgo = now - 24 * 60 * 60 * 1000;
-    const fortyEightHoursAgo = now - 48 * 60 * 60 * 1000;
+    const now = new Date();
+    
+    // Igårs start (00:00)
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(0, 0, 0, 0);
+    
+    // Igårs slut (23:59:59)
+    const yesterdayEnd = new Date(yesterday);
+    yesterdayEnd.setHours(23, 59, 59, 999);
+    
     const readings = history.filter(h => 
       h.deviceName === deviceName && 
-      new Date(h.createdAt).getTime() >= fortyEightHoursAgo &&
-      new Date(h.createdAt).getTime() < twentyFourHoursAgo
+      new Date(h.createdAt).getTime() >= yesterday.getTime() &&
+      new Date(h.createdAt).getTime() <= yesterdayEnd.getTime()
     );
     if (readings.length === 0) return null;
     // Beräkna genomsnittlig effekt × 24 timmar
@@ -299,7 +307,7 @@ export default function Dashboard() {
           getTemperatures(),
           getEnergy(),
           getTemperatureHistory(24),
-          getEnergyHistory(24),
+          getEnergyHistory(48), // Hämta 48h för att kunna beräkna föregående dygn
         ]);
         
         const tempsWithAverages = currentTemps.map(t => ({

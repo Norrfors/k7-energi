@@ -48,7 +48,14 @@ export async function historyRoutes(app: FastifyInstance) {
     const oneHourAgo = new Date(now.getTime() - 1 * 60 * 60 * 1000);
     const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
     const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
+    
+    // Föregående KALENDERDYGN: från 00:00 till 23:59:59 igår
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(0, 0, 0, 0);
+    
+    const yesterdayEnd = new Date(yesterday);
+    yesterdayEnd.setHours(23, 59, 59, 999);
 
     // Hämta loggar för alla tidsperioder
     const baseWhere = deviceId ? { deviceId } : {};
@@ -64,7 +71,7 @@ export async function historyRoutes(app: FastifyInstance) {
         where: { ...baseWhere, createdAt: { gte: twentyFourHoursAgo } },
       }),
       prisma.energyLog.findMany({
-        where: { ...baseWhere, createdAt: { gte: fortyEightHoursAgo, lt: twentyFourHoursAgo } },
+        where: { ...baseWhere, createdAt: { gte: yesterday, lte: yesterdayEnd } },
       }),
     ]);
 
