@@ -228,3 +228,36 @@ export function updateSensorZone(deviceId: string, zone: string) {
     }
   );
 }
+
+// Energi historik och sammanfattning
+
+export interface EnergySummary {
+  deviceId: string;
+  currentWatts: number;
+  currentTime: string;
+  averageWatts1h: number;
+  averageWatts12h: number;
+  averageWatts24h: number;
+  count1h: number;
+  count12h: number;
+  count24h: number;
+}
+
+export function getEnergySummary(deviceId?: string) {
+  const url = deviceId 
+    ? `/api/history/energy-summary?deviceId=${deviceId}`
+    : "/api/history/energy-summary";
+  return apiFetch<EnergySummary>(url);
+}
+
+export function getEnergyHistory(hours: number = 24) {
+  return apiFetch<
+    Array<{
+      deviceId: string;
+      deviceName: string;
+      watts: number;
+      zone?: string;
+      createdAt: string;
+    }>
+  >(`/api/history/energy?hours=${hours}`);
+}
