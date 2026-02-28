@@ -116,28 +116,35 @@ Sparad i: `backend/.env` → `HOMEY_TOKEN`
 
 ---
 
-Aktuell version: **v0.31** (Zone-funktionaliteten implementerad)
+Aktuell version: **v0.40** (Dual API response med zone + classification)
 
 ---
 
-## 🟢 SESSION 2026-02-27 CONT. - v0.31 Zone-Funktionalitet
+## 🟢 SESSION 2026-02-28 - v0.40 Dual API Response för Zone-Funktionalitet
 
-✅ **v0.31 implementerad och pushad:**
-- Backend: `/api/settings/sensors/:deviceId/zone` (PUT) - sparar zone per sensor
-- Frontend: Zone-selector i Settings → Temperatursensorer
-- UI: Radio buttons för INNE/UTE per sensor med async save-feedback
-- Database: `SensorVisibility.zone` persisterar klassificering
-- Async loading: "Sparar..." visas när zone uppdateras
+✅ **v0.40 implementerad och pushad:**
+- **Backend:** Dual API response - `zone` från Homey (fysisk plats) + `classification` från DB (INNE/UTE användare)
+- **Frontend:** Radio buttons preselektas med sparade klassificeringar
+- **Database:** `SensorVisibility.zone` sparar INNE/UTE klassificeringar
+- **Version Display:** Visar v0.40.0 i header (läses från package.json)
+- **Validering:** Classifications arbetar korrekt med filtreringsfunktionen
+- **End-to-end:** Klassificeringar sparas i DB och hämtas vid nästa sidladdning
 
-**Commit:** `040825f` - "Implementera zone-funktionaliteten med backend-persistering"
+**Key Features i v0.40:**
+- Separation av DTOs - zone och classification är separate fält
+- Klassificeringar persisteras korrekt i `SensorVisibility.zone`
+- Radio buttons visar rätt status när sidan laddas om
+- API returnerar båda värdena för flexibilitet
 
-**Test:** Gå till http://localhost:3000 → Settings → Temperatursensorer → klicka INNE/UTE för vilken sensor
+**Test:** Gå till http://localhost:3000 → Settings → Temperatursensorer → kolla INNE/UTE → uppdatera → ladda om → verifieras
 
 ---
 
 **Versionshistorik:**
-- **v0.31** 🟢 NYTT – Zone-funktionaliteten, backend-persistering av INNE/UTE klassificering
-- **v0.30** ✅ STABILT – Version-display på två ställen, databasen körs, infinite loop fixat
+- **v0.40** 🟢 NYTT – Dual API response (zone från Homey + classification från DB), klassificeringar sparas korrekt
+- **v0.39** ✅ – Energisensor-zoner från Homey i inställningar
+- **v0.31** ✅ – Zone-funktionaliteten, backend-persistering av INNE/UTE klassificering
+- **v0.30** ✅ – Version-display på två ställen, databasen körs, infinite loop fixat
 - **v0.29** ✅ – Frontend production build, Tailwind CSS fixed
 - **v0.28** ✅ – Zone-struktur i databas (zone nullable)
 

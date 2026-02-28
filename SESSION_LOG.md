@@ -1,3 +1,28 @@
+# Session Log - 2026-02-28 (Latest)
+
+## v0.40 - Dual API Response för Zone-Funktionalitet ✅
+
+### Implementerat denna session:
+- ✅ **Backend dual API response:** `zone` (från live Homey data) + `classification` (från database för INNE/UTE)
+- ✅ **Frontend radio buttons:** Preselektas med sparade klassificeringar från database
+- ✅ **Database persistence:** `SensorVisibility.zone` sparar användarens INNE/UTE val
+- ✅ **Version management:** Läses från `package.json` via `next.config.js`
+- ✅ **Arkitektur:** Separation av DTOs - två separate fält för två separate concerns
+
+### Vad v0.40 löser:
+1. **Zone vs Classification:** Tydlig skilnad mellan fysisk plats (från Homey) och användarens klassificering
+2. **Persistering:** Klassificeringar sparas i DB och hämtas korrekt ved sidladdning
+3. **Version display:** Visar v0.40.0 automatiskt när build körs
+4. **Filterering:** "Visa bara INNE" fungerar korrekt
+
+### Testing:
+- Gå till Settings → Temperatursensorer
+- Klicka på INNE/UTE för en sensor
+- Ladda om sidan (Shift+Ctrl+R)
+- Verifiera att valet är sparad
+
+---
+
 # Session Log - 2026-02-25
 
 ## Vad var gjort denna session
