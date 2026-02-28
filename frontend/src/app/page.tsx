@@ -299,6 +299,12 @@ export default function Dashboard() {
             zonesFromDB.set(sensor.deviceName, sensor.zone as "INNE" | "UTE");
           }
         });
+        // Lägg också till energisensorer från databasen
+        engySensors.forEach(sensor => {
+          if (sensor.zone === "INNE" || sensor.zone === "UTE") {
+            zonesFromDB.set(sensor.deviceName, sensor.zone as "INNE" | "UTE");
+          }
+        });
         setSensorLocations(zonesFromDB);
         saveSensorLocations(zonesFromDB); // Spara också till localStorage
         
