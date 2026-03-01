@@ -14,7 +14,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const version = "0.55"; // TODO: Injicera från build-tid
+  const version = process.env.NEXT_PUBLIC_VERSION || "dev";
   
   return (
     <html lang="sv">

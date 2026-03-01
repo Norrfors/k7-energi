@@ -3,6 +3,8 @@
 
 FROM node:18-alpine
 
+ARG VERSION=dev
+
 WORKDIR /app
 
 # Installera OpenSSL för Prisma (Prisma kräver libssl.so.1.1)
@@ -20,12 +22,14 @@ RUN npx prisma generate
 COPY src ./src
 COPY tsconfig.json ./
 
-# Cache buster: 2026-03-01T13:50:00Z – force rebuild med costSinceMidnight fix
+# Version och cache buster: 2026-03-01T14:45:00Z – version injection
+RUN echo "Backend version: ${VERSION}"
 # Bygg och starta backend i production mode
 RUN npm run build
 
 ENV NODE_ENV=production
 ENV PORT=3001
+ENV VERSION=${VERSION}
 EXPOSE 3001
 
 CMD ["npm", "start"]

@@ -25,6 +25,8 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      args:
+        VERSION: ${VERSION:-dev}
     container_name: homey_backend
     ports:
       - "3001:3001"
@@ -43,14 +45,14 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VERSION: "0.54"
+        VERSION: ${VERSION:-dev}
     container_name: homey_frontend
     ports:
       - "3000:3000"
     environment:
       NODE_ENV: development
       NEXT_PUBLIC_API_URL: http://localhost:3001
-      NEXT_PUBLIC_VERSION: "0.53"
+      NEXT_PUBLIC_VERSION: ${VERSION:-dev}
     restart: unless-stopped
     networks:
       - homey_network
