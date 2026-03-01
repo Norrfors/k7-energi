@@ -7,6 +7,9 @@
 // OBS: homey-api paketet kan kräva lite anpassning.
 // Om importen inte fungerar direkt, se kommentaren längst ner.
 
+import https from "https";
+import http from "http";
+import { URL } from "url";
 import prisma from "../../shared/db";
 import { recalculateMeterValuesFromLatestCalibration } from "../meter/meter.calibration";
 
@@ -27,6 +30,7 @@ interface HomeyDevice {
 export class HomeyService {
   private address: string;
   private token: string;
+  private httpsAgent: https.Agent;
 
   // Manuell mappning av sensornamn till zoner (baserat på sensorernas namn)
   private deviceZoneMapping: Record<string, string> = {
@@ -78,6 +82,10 @@ export class HomeyService {
   constructor() {
     this.address = process.env.HOMEY_ADDRESS || "http://192.168.1.100";
     this.token = process.env.HOMEY_TOKEN || "";
+    // Skapa HTTPS-agent som accepterar självsignerade certifikat
+    this.httpsAgent = new https.Agent({
+      rejectUnauthorized: false,
+    });
     console.log(`[HomeyService] Initialiserad med address: ${this.address}`);
   }
 
@@ -133,19 +141,56 @@ export class HomeyService {
     return "Okänd";
   }
 
+  // Hjälpmetod för att göra HTTP/HTTPS anrop med SSL-hantering
+  private async makeRequest<T>(url: string): Promise<T> {
+    return new Promise((resolve, reject) => {
+      const parsedUrl = new URL(url);
+      const protocol = parsedUrl.protocol === 'https:' ? https : http;
+      const options = {
+        hostname: parsedUrl.hostname,
+        port: parsedUrl.port,
+        path: parsedUrl.pathname + parsedUrl.search,
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${this.token}`,
+        },
+        ...(protocol === https && {
+          rejectUnauthorized: false, // Acceptera självsignerade certifikat
+        }),
+      };
+
+      const req = protocol.request(options, (res) => {
+        let data = '';
+        res.on('data', (chunk) => {
+          data += chunk;
+        });
+        res.on('end', () => {
+          if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+            try {
+              resolve(JSON.parse(data));
+            } catch (e) {
+              reject(new Error(`Kunde inte tolka JSON från Homey: ${e}`));
+            }
+          } else {
+            reject(new Error(`Homey API svarade med statuskod ${res.statusCode}`));
+          }
+        });
+      });
+
+      req.on('error', (err) => {
+        reject(err);
+      });
+
+      req.end();
+    });
+  }
+
   // Hämta alla enheter direkt via HTTP (utan homey-api biblioteket)
   // Detta är enklare att komma igång med
   private async fetchDevices(): Promise<HomeyDevice[]> {
-    const response = await fetch(`${this.address}/api/manager/devices/device/`, {
-      headers: {
-        Authorization: `Bearer ${this.token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Homey API svarade med ${response.status}`);
-    }
-    const devices = await response.json() as Record<string, HomeyDevice>;
+    const url = `${this.address}/api/manager/devices/device/`;
+    console.log(`[HomeyService] Försöker hämta enheter från: ${url}`);
+    const devices = await this.makeRequest<Record<string, HomeyDevice>>(url);
     
     return Object.values(devices) as HomeyDevice[];
   }

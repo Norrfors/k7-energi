@@ -3,7 +3,7 @@
 # Build stage
 FROM node:18-alpine AS builder
 
-ARG VERSION=0.40.0
+ARG VERSION=0.53
 
 WORKDIR /app
 
@@ -23,6 +23,8 @@ RUN npm run build
 # Production stage
 FROM node:18-alpine
 
+ARG VERSION=0.53
+
 WORKDIR /app
 
 # Installera production dependencies
@@ -33,9 +35,10 @@ RUN npm ci --only=production
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 
-# Port för frontend
+# Port och miljövariabler för frontend
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV NEXT_PUBLIC_VERSION=${VERSION}
 EXPOSE 3000
 
 # Kör production server

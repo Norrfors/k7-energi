@@ -231,3 +231,21 @@ git push origin vX.XX
 - Dela typer via `shared/types.ts` – importeras av både front och back
 - Schemaläggaren (`scheduler.ts`) hanterar all bakgrundsloggning
 - Kommentera bort `startScheduler()` i `app.ts` om Homey inte är konfigurerad
+
+---
+
+## 🟢 Status-feedback till användaren
+
+**VIKTIGT:** När jag avslutar arbete och systemet är klart för testning ska jag skriva:
+
+```
+KLART vX.XX
+```
+
+Där `X.XX` är det versionsnummer som ska visas i dashboardrubrikens header.
+
+**Exempel:**
+- `KLART v0.53` – systemet är klar, användaren ska se v0.53 i rubriken
+- `KLART v0.54` – nya ändringar, v0.54 ska visas
+
+Detta är **TYDLIGHETEN** som krävs för att användaren vet att testning kan påbörjas.

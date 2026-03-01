@@ -30,7 +30,10 @@ services:
       - "3001:3001"
     environment:
       NODE_ENV: development
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
       DATABASE_URL: postgresql://postgres:postgres@db:5432/homey_db
+      HOMEY_ADDRESS: http://192.168.1.122
+      HOMEY_TOKEN: b4809290-ee33-47ec-a01e-709a79fef249:bff3730e-d41b-4647-b66c-5ba256c3769c:7d78b40e702dd6848f1e05abaedbb06a779a14bf
     restart: unless-stopped
     networks:
       - homey_network
@@ -40,14 +43,14 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VERSION: "0.40.0"
+        VERSION: "0.53"
     container_name: homey_frontend
     ports:
       - "3000:3000"
     environment:
       NODE_ENV: development
       NEXT_PUBLIC_API_URL: http://localhost:3001
-      NEXT_PUBLIC_VERSION: "0.40.0"
+      NEXT_PUBLIC_VERSION: "0.53"
     restart: unless-stopped
     networks:
       - homey_network
