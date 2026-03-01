@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "0.52.0",
+  "version": "0.56.0",
   "private": true,
   "scripts": {
     "dev": "node set-version.js && next dev -p 3000",

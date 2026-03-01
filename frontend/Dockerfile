@@ -3,7 +3,7 @@
 # Build stage
 FROM node:18-alpine AS builder
 
-ARG VERSION=0.55
+ARG VERSION=dev
 
 WORKDIR /app
 
@@ -18,13 +18,13 @@ COPY . .
 RUN echo "BUILDING FRONTEND v${VERSION}" && echo "NEXT_PUBLIC_VERSION=${VERSION}" > .env.local
 
 # Bygg Next.js app
-# Cache buster: 2026-03-01T14:36:00Z
+# Cache buster: 2026-03-01T14:50:00Z
 RUN npm run build
 
 # Production stage
 FROM node:18-alpine
 
-ARG VERSION=0.55
+ARG VERSION=dev
 
 WORKDIR /app
 
