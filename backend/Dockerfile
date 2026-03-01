@@ -20,6 +20,7 @@ RUN npx prisma generate
 COPY src ./src
 COPY tsconfig.json ./
 
+# Cache buster: 2026-03-01T13:50:00Z – force rebuild med costSinceMidnight fix
 # Bygg och starta backend i production mode
 RUN npm run build
 

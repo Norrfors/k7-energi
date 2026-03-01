@@ -23,6 +23,7 @@ export async function meterRoutes(app: FastifyInstance) {
         consumptionSinceMidnight: reading.consumptionSinceMidnight,
         consumptionSincePreviousReading: reading.consumptionSincePreviousReading,
         totalMeterValue: reading.totalMeterValue,
+        costSinceMidnight: reading.costSinceMidnight,
         lastUpdated: reading.createdAt,
       };
     } catch (error) {
@@ -42,6 +43,7 @@ export async function meterRoutes(app: FastifyInstance) {
         consumptionSinceMidnight: r.consumptionSinceMidnight,
         consumptionSincePreviousReading: r.consumptionSincePreviousReading,
         totalMeterValue: r.totalMeterValue,
+        costSinceMidnight: r.costSinceMidnight,
         time: r.createdAt,
       }));
     } catch (error) {
@@ -61,6 +63,7 @@ export async function meterRoutes(app: FastifyInstance) {
         consumptionSinceMidnight: r.consumptionSinceMidnight,
         consumptionSincePreviousReading: r.consumptionSincePreviousReading,
         totalMeterValue: r.totalMeterValue,
+        costSinceMidnight: r.costSinceMidnight,
         time: r.createdAt,
       }));
     } catch (error) {
