@@ -153,9 +153,11 @@ export default function CapabilitiesModal({
 function getCapabilityDescription(capability: string): string {
   const descriptions: Record<string, string> = {
     measure_power: "Aktuell effekt (W)",
-    meter_power: "Mätare (kWh)",
+    meter_power: "Energi sedan midnatt (kWh)",
     meter_value: "Total mätarställning (kWh)",
     accumulatedCost: "Kostnad sedan midnatt (kr)",
+    measure_current: "Strömstyrka (A)",
+    measure_voltage: "Spänning (V)",
     measure_temperature: "Temperatur (°C)",
     outdoorTemperature: "Utetemperatur (°C)",
     measure_humidity: "Luftfuktighet (%)",

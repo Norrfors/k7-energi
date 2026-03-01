@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import prisma from "../../shared/db";
+import { homeyService } from "../homey/homey.service";
 
 // Historik-endpoints – hämtar sparad data från databasen
 
@@ -164,25 +165,30 @@ export async function historyRoutes(app: FastifyInstance) {
         capabilitiesToLog = [];
       }
 
+      // Hämta faktiska capabilities från Homey enhet
+      const actualCapabilities = await homeyService.getDeviceCapabilities(deviceId);
+
       return {
         deviceId,
         deviceName: settings.deviceName,
         sensorType: settings.sensorType,
         capabilitiesToLog,
-        // Visa alla möjliga capabilities baserat på sensortyp
+        // Visa alla möjliga capabilities från Homey (eller fallback till defaults om Homey är nere)
         availableCapabilities:
-          settings.sensorType === "energy"
-            ? [
-                "measure_power",
-                "meter_power",
-                "meter_value",
-                "accumulatedCost",
-              ]
-            : [
-                "measure_temperature",
-                "outdoorTemperature",
-                "measure_humidity",
-              ],
+          actualCapabilities.length > 0
+            ? actualCapabilities
+            : (settings.sensorType === "energy"
+                ? [
+                    "measure_power",
+                    "meter_power",
+                    "meter_value",
+                    "accumulatedCost",
+                  ]
+                : [
+                    "measure_temperature",
+                    "outdoorTemperature",
+                    "measure_humidity",
+                  ]),
       };
     }
   );

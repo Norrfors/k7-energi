@@ -195,6 +195,27 @@ export class HomeyService {
     return Object.values(devices) as HomeyDevice[];
   }
 
+  // Hämta capabilities för en specifik enhet från Homey
+  async getDeviceCapabilities(deviceId: string): Promise<string[]> {
+    try {
+      const devices = await this.fetchDevices();
+      const device = devices.find((d) => d.id === deviceId);
+      if (device && device.capabilities) {
+        // Filtrera bort capability-ID:n som inte är användbara (t.ex. button capabilities)
+        return device.capabilities.filter(cap => 
+          cap.startsWith('measure_') || 
+          cap.startsWith('meter_') ||
+          cap === 'accumulatedCost' || 
+          cap === 'accumulator'
+        );
+      }
+      return [];
+    } catch (error) {
+      console.error(`[HomeyService] Kunde inte hämta capabilities för ${deviceId}:`, error);
+      return [];
+    }
+  }
+
   // Hämta alla temperaturer just nu
   async getTemperatures() {
     const devices = await this.fetchDevices();
