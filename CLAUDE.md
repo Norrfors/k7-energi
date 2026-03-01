@@ -154,7 +154,10 @@ Aktuell version: **v0.41** (Energisensor-historik med aktuell förbrukning)
 ---
 
 **Versionshistorik:**
-- **v0.41** 🟢 NYTT – Energisensor-historik API (aktuell + 1h/12h/24h medelvärden)
+- **v0.60** 🟢 NYTT – Zonmappning för energisensorer, ryst versionsvisning (endast rubrik visar version)
+- **v0.59** ✅ – Zonmappning från sensorer.txt: Soldäck, Altan norr, Kök, Tvätt/Pann/Bad
+- **v0.58** ✅ – Hårdkoda version i layout.tsx, ta bort miljövariabler för version
+- **v0.41** ✅ – Energisensor-historik API (aktuell + 1h/12h/24h medelvärden)
 - **v0.40** ✅ – Dual API response (zone från Homey + classification från DB), klassificeringar sparas korrekt
 - **v0.31** ✅ – Zone-funktionaliteten, backend-persistering av INNE/UTE klassificering
 - **v0.30** ✅ – Version-display på två ställen, databasen körs, infinite loop fixat
