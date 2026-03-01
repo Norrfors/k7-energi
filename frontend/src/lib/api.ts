@@ -256,6 +256,7 @@ export function getEnergyHistory(hours: number = 24) {
       deviceName: string;
       watts: number;
       meterPower?: number;
+      accumulatedCost?: number;
       zone?: string;
       createdAt: string;
     }>

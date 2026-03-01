@@ -1460,6 +1460,7 @@ export default function Dashboard() {
                         <>
                           <th className="border border-gray-300 p-2 text-right">Effekt (W)</th>
                           <th className="border border-gray-300 p-2 text-right">Mätare (kWh)</th>
+                          <th className="border border-gray-300 p-2 text-right">Kostnad (kr)</th>
                         </>
                       )}
                     </tr>
@@ -1491,6 +1492,9 @@ export default function Dashboard() {
                               </td>
                               <td className="border border-gray-300 p-2 text-right">
                                 {h.meterPower != null ? h.meterPower.toFixed(2) : "—"}
+                              </td>
+                              <td className="border border-gray-300 p-2 text-right">
+                                {h.accumulatedCost != null ? h.accumulatedCost.toFixed(2) : "—"}
                               </td>
                             </>
                           )}

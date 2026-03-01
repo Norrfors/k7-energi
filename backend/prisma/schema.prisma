@@ -32,6 +32,7 @@ model EnergyLog {
   watts          Float
   meterPower     Float?   // Ackumulerad förbrukning sedan midnatt (kWh) för Pulse
   meterValue     Float?   // Total mätarställning (kWh) – beräknad vid kalibrering
+  accumulatedCost Float?  // Ackumulerad kostnad sedan midnatt (kr)
   createdAt      DateTime @default(now())
 
   @@index([deviceId, createdAt])

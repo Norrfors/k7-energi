@@ -1,11 +1,11 @@
-# START-ALL.ps1
+# START-ALL-FIXED.ps1
 # Startar hela stacken i ratt ordning med health checks
 
-Write-Host "Startar Hem Dashboard (v0.31)" -ForegroundColor Cyan
+Write-Host "Startar Hem Dashboard..." -ForegroundColor Cyan
 Write-Host "================================" -ForegroundColor Cyan
 
 # 1. Starta databasen
-Write-Host "`n📦 Starta PostgreSQL..." -ForegroundColor Yellow
+Write-Host "`n[1/5] Starta PostgreSQL..." -ForegroundColor Yellow
 docker start homey_db 2>&1 | Out-Null
 Start-Sleep -Seconds 2
 
@@ -16,22 +16,22 @@ for ($i = 0; $i -lt 15; $i++) {
         $result = docker exec homey_db pg_isready -U postgres 2>&1
         if ($result -like "*accepting*") {
             $dbReady = $true
-            Write-Host "✅ Database klar" -ForegroundColor Green
+            Write-Host "[OK] Database klar" -ForegroundColor Green
             break
         }
     }
     catch {}
-    Write-Host "   Väntar på database... ($($i+1)/15)" -ForegroundColor Gray
+    Write-Host "     Vantar pa database... ($($i+1)/15)" -ForegroundColor Gray
     Start-Sleep -Seconds 1
 }
 
 if (-not $dbReady) {
-    Write-Host "❌ Database startade inte" -ForegroundColor Red
+    Write-Host "[FAIL] Database startade inte" -ForegroundColor Red
     exit 1
 }
 
 # 2. Starta Backend i ny terminal
-Write-Host "`n🔧 Startar Backend..." -ForegroundColor Yellow
+Write-Host "`n[2/5] Startar Backend..." -ForegroundColor Yellow
 $backendScript = @"
 cd "$PSScriptRoot\backend"
 npm run dev
@@ -41,28 +41,28 @@ Start-Process powershell -ArgumentList "-NoExit -File $env:TEMP\start-backend.ps
 Start-Sleep -Seconds 3
 
 # 3. Vänta på backend hälsokontroll
-Write-Host "`n🏥 Väntar på Backend health check..." -ForegroundColor Yellow
+Write-Host "`n[3/5] Vantar pa Backend health check..." -ForegroundColor Yellow
 $backendReady = $false
 for ($i = 0; $i -lt 20; $i++) {
     try {
         $response = Invoke-RestMethod -Uri "http://localhost:3001/api/health" -TimeoutSec 2
         if ($response) {
-            Write-Host "✅ Backend svarar på port 3001" -ForegroundColor Green
+            Write-Host "[OK] Backend svarar pa port 3001" -ForegroundColor Green
             $backendReady = $true
             break
         }
     }
     catch {}
-    Write-Host "   Väntar på backend... ($($i+1)/20)" -ForegroundColor Gray
+    Write-Host "     Vantar pa backend... ($($i+1)/20)" -ForegroundColor Gray
     Start-Sleep -Seconds 1
 }
 
 if (-not $backendReady) {
-    Write-Host "⚠️  Backend svarar inte ännu (debug i Backend-terminal)" -ForegroundColor Yellow
+    Write-Host "[WARN] Backend svarar inte annu (debug i Backend-terminal)" -ForegroundColor Yellow
 }
 
 # 4. Starta Frontend i ny terminal
-Write-Host "`n🎨 Startar Frontend..." -ForegroundColor Yellow
+Write-Host "`n[4/5] Startar Frontend..." -ForegroundColor Yellow
 $frontendScript = @"
 cd "$PSScriptRoot\frontend"
 npm run dev
@@ -72,35 +72,41 @@ Start-Process powershell -ArgumentList "-NoExit -File $env:TEMP\start-frontend.p
 Start-Sleep -Seconds 3
 
 # 5. Vänta på frontend
-Write-Host "`n🏥 Väntar på Frontend..." -ForegroundColor Yellow
+Write-Host "`n[5/5] Vantar pa Frontend..." -ForegroundColor Yellow
 $frontendReady = $false
 for ($i = 0; $i -lt 20; $i++) {
     try {
         $response = Invoke-WebRequest -Uri "http://localhost:3000" -TimeoutSec 2
         if ($response.StatusCode -eq 200) {
-            Write-Host "✅ Frontend körs på port 3000" -ForegroundColor Green
+            Write-Host "[OK] Frontend kors pa port 3000" -ForegroundColor Green
             $frontendReady = $true
             break
         }
     }
     catch {}
-    Write-Host "   Väntar på frontend... ($($i+1)/20)" -ForegroundColor Gray
+    Write-Host "     Vantar pa frontend... ($($i+1)/20)" -ForegroundColor Gray
     Start-Sleep -Seconds 1
 }
 
 # Slutresultat
 Write-Host "`n================================" -ForegroundColor Cyan
 if ($backendReady -and $frontendReady) {
-    Write-Host "✅ ALLT ÄR IGÅNG!" -ForegroundColor Green
-    Write-Host "🌐 Öppna: http://localhost:3000" -ForegroundColor Green
+    Write-Host "[SUCCESS] ALLT ÄR IGÅNG!" -ForegroundColor Green
+    Write-Host "Öppna: http://localhost:3000" -ForegroundColor Green
 } else {
-    Write-Host "⚠️  Någonting startar ännu..." -ForegroundColor Yellow
-    $backendStatus = if ($backendReady) { '✅' } else { '⏱️ ' }
-    $frontendStatus = if ($frontendReady) { '✅' } else { '⏱️ ' }
-    Write-Host "Backend: $backendStatus" -ForegroundColor Gray
-    Write-Host "Frontend: $frontendStatus" -ForegroundColor Gray
+    Write-Host "[INFO] Nagonting startar ännu..." -ForegroundColor Yellow
+    if ($backendReady) {
+        Write-Host "Backend: [OK]" -ForegroundColor Gray
+    } else {
+        Write-Host "Backend: [WAITING]" -ForegroundColor Gray
+    }
+    if ($frontendReady) {
+        Write-Host "Frontend: [OK]" -ForegroundColor Gray
+    } else {
+        Write-Host "Frontend: [WAITING]" -ForegroundColor Gray
+    }
     Write-Host "Se terminal-fönstren för detaljer" -ForegroundColor Yellow
 }
 
-Write-Host "`nTryck Enter för att hålla denna terminal öppen..." -ForegroundColor Gray
+Write-Host "`nTryck Enter for att stänga denna terminal..." -ForegroundColor Gray
 Read-Host
