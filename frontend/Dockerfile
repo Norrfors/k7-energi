@@ -18,6 +18,7 @@ COPY . .
 RUN echo "BUILDING FRONTEND v${VERSION}" && echo "NEXT_PUBLIC_VERSION=${VERSION}" > .env.local
 
 # Bygg Next.js app
+# Cache buster: 2026-03-01T13:40:00Z
 RUN npm run build
 
 # Production stage
