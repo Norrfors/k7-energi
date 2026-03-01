@@ -43,7 +43,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VERSION: "0.53"
+        VERSION: "0.54"
     container_name: homey_frontend
     ports:
       - "3000:3000"

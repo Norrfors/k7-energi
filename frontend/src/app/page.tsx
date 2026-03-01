@@ -53,7 +53,7 @@ export default function Dashboard() {
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [homeyConnected, setHomeyConnected] = useState(false);
-  const version = "0.53";
+  const version = "0.54";
   
   // Sensor visibility state (localStorage-based)
   const [temperatureSensors, setTemperatureSensors] = useState<SensorInfo[]>([]);
@@ -160,6 +160,17 @@ export default function Dashboard() {
 
   const getSensorLocation = (deviceName: string): "INNE" | "UTE" | null => {
     return sensorLocations.get(deviceName) || null;
+  };
+
+  // Get sensor location with fallback to temperature-based classification
+  const getEffectiveSensorLocation = (deviceName: string, temperature: number | null): "INNE" | "UTE" | null => {
+    const stored = getSensorLocation(deviceName);
+    if (stored) return stored;
+    // Fallback: classify based on temperature
+    if (temperature !== null) {
+      return temperature < 10 ? "UTE" : "INNE";
+    }
+    return null;
   };
 
   // Toggle temperature sensor visibility
@@ -796,7 +807,7 @@ export default function Dashboard() {
                       </div>
                       <span className="text-gray-600">
                         {(() => {
-                          const location = getSensorLocation(t.deviceName);
+                          const location = getEffectiveSensorLocation(t.deviceName, t.temperature);
                           return location === "INNE" ? "🏠 INNE" : location === "UTE" ? "🌤️ UTE" : "";
                         })()}
                       </span>
@@ -841,7 +852,7 @@ export default function Dashboard() {
                     return sensorSetting ? sensorSetting.isVisible : true;
                   })
                   .map((e, index) => {
-                    const location = getSensorLocation(e.deviceName);
+                    const location = getEffectiveSensorLocation(e.deviceName, e.watts);
                     return (
                       <div
                         key={e.deviceName}
@@ -1224,7 +1235,7 @@ export default function Dashboard() {
                     })
                     .map((temp, idx) => {
                     const isVisible = visibleTemperatures.size === 0 || visibleTemperatures.has(temp.deviceName);
-                    const location = getSensorLocation(temp.deviceName);
+                    const location = getEffectiveSensorLocation(temp.deviceName, temp.temperature);
                     return (
                       <div
                         key={temp.deviceName}
@@ -1324,7 +1335,7 @@ export default function Dashboard() {
                   {energySensors
                     .sort((a, b) => a.deviceName.localeCompare(b.deviceName))
                     .map((sensor, idx) => {
-                      const location = getSensorLocation(sensor.deviceName);
+                      const location = getEffectiveSensorLocation(sensor.deviceName, null);
                       return (
                         <div
                           key={sensor.deviceId}

@@ -14,7 +14,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const version = "0.53"; // TODO: Injicera från build-tid
+  const version = "0.54"; // TODO: Injicera från build-tid
   
   return (
     <html lang="sv">
