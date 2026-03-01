@@ -36,6 +36,7 @@ interface MeterReading {
   consumptionSinceMidnight: number;
   consumptionSincePreviousReading?: number;
   totalMeterValue: number;
+  costSinceMidnight?: number;
   lastUpdated?: string;
   time?: string;
 }
@@ -937,9 +938,9 @@ export default function Dashboard() {
                   <thead className="bg-gray-100">
                     <tr>
                       <th className="px-4 py-2 text-left">Tid</th>
-                      <th className="px-4 py-2 text-left">Förbrukning sedan midnatt</th>
-                      <th className="px-4 py-2 text-left">Förbrukning sedan föregående</th>
-                      <th className="px-4 py-2 text-left">Total mätarställning</th>
+                      <th className="px-4 py-2 text-left">Effekt (W)</th>
+                      <th className="px-4 py-2 text-left">Mätare (kWh)</th>
+                      <th className="px-4 py-2 text-left">Kostnad sedan midnatt (kr)</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -949,13 +950,13 @@ export default function Dashboard() {
                           {new Date(reading.time || "").toLocaleTimeString("sv-SE")}
                         </td>
                         <td className="px-4 py-2 text-sm">
-                          {reading.consumptionSinceMidnight.toFixed(2)} kWh
+                          {reading.consumptionSinceMidnight.toFixed(2)}
                         </td>
                         <td className="px-4 py-2 text-sm">
-                          {(reading.consumptionSincePreviousReading || 0).toFixed(2)} kWh
+                          {reading.totalMeterValue.toFixed(2)}
                         </td>
-                        <td className="px-4 py-2 text-sm">
-                          {reading.totalMeterValue.toFixed(2)} kWh
+                        <td className="px-4 py-2 text-sm font-semibold text-green-600">
+                          {(reading.costSinceMidnight || 0).toFixed(2)} kr
                         </td>
                       </tr>
                     ))}
