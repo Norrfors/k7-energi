@@ -77,6 +77,12 @@ export class HomeyService {
     "Namron Multisensor 4512734": "Multisensor",
     "T01": "T01",
     "WH2 x OUT": "UTE",
+    
+    // Energisensorer (legger til för att kunna matche de som Homey inte assignerar zone til)
+    "VU-A6Z-Nous": "VU",
+    "VU-Effektmät": "Effektmätare",
+    "VUz-01Plug-in Switch Mini": "Uttag",
+    "Pulse Krokgatan 7": "Huvudmeter",
   };
 
   constructor() {
@@ -231,8 +237,8 @@ export class HomeyService {
           ? d.capabilitiesObj?.outdoorTemperature?.lastUpdated || ""
           : d.capabilitiesObj?.measure_temperature?.lastUpdated || "";
 
-        // Hämta zone från sensornamnet
-        const zone = this.getZoneForDevice(d.name);
+        // Hämta zone - använd först Homey's tilldelning, annars försök extrahera från namn
+        const zone = d.zone ? d.zone : this.getZoneForDevice(d.name);
 
         results.push({
           deviceId: d.id,
@@ -254,7 +260,8 @@ export class HomeyService {
     const results = [];
     for (const d of devices) {
       if (d.capabilities.includes("measure_power")) {
-        const zone = this.getZoneForDevice(d.name);
+        // Hämta zone - använd först Homey's tilldelning, annars försök extrahera från namn
+        const zone = d.zone ? d.zone : this.getZoneForDevice(d.name);
 
         // Hämta accumulated cost om den finns (för Pulse)
         const costSinceMidnight = d.capabilitiesObj?.accumulatedCost?.value as number | null;
