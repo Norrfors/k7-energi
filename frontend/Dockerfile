@@ -3,7 +3,7 @@
 # Build stage
 FROM node:18-alpine AS builder
 
-ARG VERSION=0.53
+ARG VERSION=0.54
 
 WORKDIR /app
 
@@ -23,7 +23,7 @@ RUN npm run build
 # Production stage
 FROM node:18-alpine
 
-ARG VERSION=0.53
+ARG VERSION=0.54
 
 WORKDIR /app
 
