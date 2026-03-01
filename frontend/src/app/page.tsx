@@ -55,7 +55,7 @@ export default function Dashboard() {
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [homeyConnected, setHomeyConnected] = useState(false);
-  const version = "0.54";
+  const version = "0.55";
   
   // Sensor visibility state (localStorage-based)
   const [temperatureSensors, setTemperatureSensors] = useState<SensorInfo[]>([]);
