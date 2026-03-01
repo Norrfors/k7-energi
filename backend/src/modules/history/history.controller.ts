@@ -134,4 +134,95 @@ export async function historyRoutes(app: FastifyInstance) {
       consumptionPreviousDay: calculatePreviousDayConsumption(previousDayLogs),
     };
   });
+
+  // GET /api/sensor/:deviceId/capabilities
+  // Hämta vilka capabilities en sensor har och vilka som är inställda att loggas
+  app.get<{ Params: { deviceId: string } }>(
+    "/api/sensor/:deviceId/capabilities",
+    async (request) => {
+      const { deviceId } = request.params;
+
+      // Hämta sensor-inställningar från databasen
+      const settings = await prisma.sensorVisibility.findUnique({
+        where: { deviceId },
+      });
+
+      if (!settings) {
+        return {
+          error: "Sensorn hittades inte",
+          deviceId,
+        };
+      }
+
+      // Parse capabilitiesToLog från JSON
+      let capabilitiesToLog: string[] = [];
+      try {
+        capabilitiesToLog = JSON.parse(
+          JSON.stringify(settings.capabilitiesToLog)
+        ) as string[];
+      } catch {
+        capabilitiesToLog = [];
+      }
+
+      return {
+        deviceId,
+        deviceName: settings.deviceName,
+        sensorType: settings.sensorType,
+        capabilitiesToLog,
+        // Visa alla möjliga capabilities baserat på sensortyp
+        availableCapabilities:
+          settings.sensorType === "energy"
+            ? [
+                "measure_power",
+                "meter_power",
+                "meter_value",
+                "accumulatedCost",
+              ]
+            : [
+                "measure_temperature",
+                "outdoorTemperature",
+                "measure_humidity",
+              ],
+      };
+    }
+  );
+
+  // PUT /api/sensor/:deviceId/capabilities
+  // Uppdatera vilka capabilities som ska loggas för en sensor
+  app.put<{
+    Params: { deviceId: string };
+    Body: { capabilitiesToLog: string[] };
+  }>("/api/sensor/:deviceId/capabilities", async (request, reply) => {
+    const { deviceId } = request.params;
+    const { capabilitiesToLog } = request.body;
+
+    if (!Array.isArray(capabilitiesToLog)) {
+      reply.status(400);
+      return { error: "capabilitiesToLog måste vara en array" };
+    }
+
+    try {
+      // Uppdatera databasen
+      const updated = await prisma.sensorVisibility.update({
+        where: { deviceId },
+        data: {
+          capabilitiesToLog: capabilitiesToLog, // Prisma hanterar JSON automatiskt
+        },
+      });
+
+      return {
+        success: true,
+        deviceId,
+        capabilitiesToLog,
+        message: `Loggning uppdaterad för ${updated.deviceName}`,
+      };
+    } catch (error) {
+      reply.status(500);
+      return {
+        error: "Kunde inte uppdatera capabilities",
+        details: String(error),
+      };
+    }
+  });
 }
+

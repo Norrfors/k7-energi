@@ -89,6 +89,7 @@ model BackupSettings {
 }
 
 // Sensorsynlighet – lagrar vilka sensorer som ska visas på Dashboard
+// Utökat: capabilitiesToLog sparar vilka data-fält som ska loggas för sensorn
 model SensorVisibility {
   id          Int      @id @default(autoincrement())
   deviceId    String   @unique // Unik ID från Homey
@@ -96,6 +97,7 @@ model SensorVisibility {
   sensorType  String   // "temperature" eller "energy"
   isVisible   Boolean  @default(true) // Ska sensorn visas på Dashboard?
   zone        String   @default("") // Zon: "INNE", "UTE" eller ""
+  capabilitiesToLog Json  @default("[]") // Array av capabilities att logga: ["measure_power", "meter_power", "accumulatedCost"]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

@@ -297,3 +297,33 @@ export function getCalibrationHistory() {
     }>
   >("/api/meter/calibrations");
 }
+
+// Capabilities API
+
+export interface SensorCapabilities {
+  deviceId: string;
+  deviceName: string;
+  sensorType: string;
+  capabilitiesToLog: string[];
+  availableCapabilities: string[];
+}
+
+export function getSensorCapabilities(deviceId: string) {
+  return apiFetch<SensorCapabilities>(`/api/sensor/${deviceId}/capabilities`);
+}
+
+export function updateSensorCapabilities(
+  deviceId: string,
+  capabilitiesToLog: string[]
+) {
+  return apiFetch<{
+    success: boolean;
+    deviceId: string;
+    capabilitiesToLog: string[];
+    message: string;
+  }>(`/api/sensor/${deviceId}/capabilities`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ capabilitiesToLog }),
+  });
+}

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getHealth, getTemperatures, getEnergy, getMeterLatest, getMeterToday, getMeterLast24Hours, setManualMeterValue, getBackupSettings, saveBackupSettings, performManualBackup, BackupSettings, getTemperatureHistory, getEnergyHistory, getTemperatureSensors, getEnergySensors, updateSensorVisibility, updateSensorZone, SensorInfo, calibrateMeter } from "@/lib/api";
 import { StatusCard } from "@/components/StatusCard";
 import MeterCalibrationModal from "@/components/MeterCalibrationModal";
+import CapabilitiesModal from "@/components/CapabilitiesModal";
 
 interface Temperature {
   deviceName: string;
@@ -90,6 +91,9 @@ export default function Dashboard() {
 
   // Meter calibration modal state
   const [showCalibrationModal, setShowCalibrationModal] = useState(false);
+
+  // Capabilities modal state
+  const [capabilitiesModal, setCapabilitiesModal] = useState<{ isOpen: boolean; deviceId: string; deviceName: string } | null>(null);
 
   // Logga till console
   const log = (message: string, data?: unknown) => {
@@ -1324,11 +1328,12 @@ export default function Dashboard() {
               ) : energySensors.length > 0 ? (
                 <div className="border border-gray-300 rounded-lg overflow-hidden max-h-96 overflow-y-auto">
                   {/* Table header */}
-                  <div className="grid grid-cols-10 gap-1 bg-yellow-100 px-2 py-1 border-b border-gray-300 font-semibold text-xs text-gray-700 sticky top-0">
-                    <div className="col-span-5">Sensor / Zon</div>
+                  <div className="grid grid-cols-12 gap-1 bg-yellow-100 px-2 py-1 border-b border-gray-300 font-semibold text-xs text-gray-700 sticky top-0">
+                    <div className="col-span-4">Sensor / Zon</div>
                     <div className="col-span-2 text-center">Visa</div>
                     <div className="col-span-1 text-center">INNE</div>
                     <div className="col-span-1 text-center">UTE</div>
+                    <div className="col-span-2 text-center">Inställningar</div>
                   </div>
                   
                   {/* Table rows */}
@@ -1339,10 +1344,10 @@ export default function Dashboard() {
                       return (
                         <div
                           key={sensor.deviceId}
-                          className={`grid grid-cols-10 gap-1 px-2 py-1 items-center text-xs bg-white border-b border-gray-200 last:border-b-0 hover:bg-yellow-50 transition`}
+                          className={`grid grid-cols-12 gap-1 px-2 py-1 items-center text-xs bg-white border-b border-gray-200 last:border-b-0 hover:bg-yellow-50 transition`}
                         >
                           {/* Sensornamn + ZONE + INNE/UTE */}
-                          <div className="col-span-5 font-medium text-gray-900 truncate">
+                          <div className="col-span-4 font-medium text-gray-900 truncate">
                             <span className="block truncate">
                               {sensor.zone ? `${sensor.deviceName} / ${sensor.zone}` : sensor.deviceName}
                             </span>
@@ -1366,7 +1371,7 @@ export default function Dashboard() {
                             />
                           </div>
                           
-                          {/* Radio buttons - INNE och UTE */}
+                          {/* Radio buttons - INNE og UTE */}
                           <div className="col-span-1 flex justify-center">
                             <label className="cursor-pointer opacity-75 hover:opacity-100 transition" title={zoneSavingDevices.has(sensor.deviceName) ? "Sparar..." : ""}>
                               <input
@@ -1394,9 +1399,20 @@ export default function Dashboard() {
                               />
                             </label>
                           </div>
+
+                          {/* Settings button */}
+                          <div className="col-span-2 flex justify-center">
+                            <button
+                              onClick={() => setCapabilitiesModal({ isOpen: true, deviceId: sensor.deviceId, deviceName: sensor.deviceName })}
+                              className="px-2 py-1 text-xs bg-gray-200 hover:bg-gray-300 rounded transition"
+                              title="Konfigurerar vilka värden Som ska loggas"
+                            >
+                              ⚙️ Datalogg
+                            </button>
+                          </div>
                           
                           {zoneSavingDevices.has(sensor.deviceName) && (
-                            <div className="col-span-10 flex justify-center">
+                            <div className="col-span-12 flex justify-center">
                               <span className="text-xs text-blue-600 font-semibold">Sparar...</span>
                             </div>
                           )}
@@ -1526,6 +1542,17 @@ export default function Dashboard() {
         onClose={() => setShowCalibrationModal(false)}
         onCalibrate={handleCalibrateMeter}
       />
+
+      {/* Capabilities Modal */}
+      {capabilitiesModal && (
+        <CapabilitiesModal
+          isOpen={true}
+          deviceId={capabilitiesModal.deviceId}
+          deviceName={capabilitiesModal.deviceName}
+          onClose={() => setCapabilitiesModal(null)}
+          onSave={() => setCapabilitiesModal(null)}
+        />
+      )}
     </div>
   );
 }
