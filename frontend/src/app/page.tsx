@@ -45,6 +45,9 @@ type TabType = "dashboard" | "meter" | "settings";
 type SettingsTabType = "backup" | "temperature" | "energy";
 
 export default function Dashboard() {
+  // Läs version från miljövariabler (sätts vid docker build)
+  const version = process.env.NEXT_PUBLIC_VERSION || "dev";
+  
   const [activeTab, setActiveTab] = useState<TabType>("dashboard");
   const [activeSettingsTab, setActiveSettingsTab] = useState<SettingsTabType>("backup");
   const [health, setHealth] = useState<Health | null>(null);

@@ -14,11 +14,12 @@ RUN npm ci
 # Kopiera alla filer
 COPY . .
 
-# Visa version under build
-RUN echo "BUILDING FRONTEND v${VERSION}" && echo "NEXT_PUBLIC_VERSION=${VERSION}" > .env.local
+# Skapa .env.local med VERSION-variabeln FÖR NEXT.JS BUILT PROCESS
+RUN echo "NEXT_PUBLIC_VERSION=${VERSION}" > .env.local
+RUN echo "Building frontend with VERSION=${VERSION}"
+RUN cat .env.local
 
-# Bygg Next.js app
-# Cache buster: 2026-03-01T14:50:00Z
+# Bygg Next.js app - VERSION injiceras från .env.local
 RUN npm run build
 
 # Production stage
