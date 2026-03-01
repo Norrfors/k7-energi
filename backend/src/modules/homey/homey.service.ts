@@ -78,11 +78,11 @@ export class HomeyService {
     "T01": "T01",
     "WH2 x OUT": "UTE",
     
-    // Energisensorer (legger til för att kunna matche de som Homey inte assignerar zone til)
-    "VU-A6Z-Nous": "VU",
-    "VU-Effektmät": "Effektmätare",
-    "VUz-01Plug-in Switch Mini": "Uttag",
-    "Pulse Krokgatan 7": "Huvudmeter",
+    // Energisensorer
+    "VU-A6Z-Nous": "Soldäck",
+    "VU-Effektmät": "Altan norr",
+    "VUz-01Plug-in Switch Mini": "Kök",
+    "Pulse Krokgatan 7": "Tvätt/Pann/Bad",
   };
 
   constructor() {
