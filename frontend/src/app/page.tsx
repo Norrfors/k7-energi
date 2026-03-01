@@ -88,7 +88,7 @@ export default function Dashboard() {
 
   // Sensor detail modal state
   const [selectedSensor, setSelectedSensor] = useState<{ name: string; type: "temperature" | "energy" } | null>(null);
-  const [historicalData, setHistoricalData] = useState<Array<{ deviceName: string; temperature?: number; watts?: number; meterPower?: number; createdAt: string }>>([]);
+  const [historicalData, setHistoricalData] = useState<Array<{ deviceName: string; temperature?: number; watts?: number; meterPower?: number; accumulatedCost?: number; createdAt: string }>>([]);
   const [sensorModalPage, setSensorModalPage] = useState(1);
   const itemsPerPage = 100;
 
