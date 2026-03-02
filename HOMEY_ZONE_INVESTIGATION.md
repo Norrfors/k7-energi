@@ -1,3 +1,4 @@
+är det klart
 # Homey Zone Investigation - 2026-02-27 Kväll
 
 ## Utgångspunkt

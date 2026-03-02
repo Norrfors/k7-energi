@@ -1,6 +1,7 @@
 import "dotenv/config"; // Laddar .env-filen automatiskt
 import Fastify from "fastify";
 import cors from "@fastify/cors";
+import { execSync } from "child_process";
 import prisma from "./shared/db";
 import { homeyRoutes } from "./modules/homey/homey.controller";
 import { historyRoutes } from "./modules/history/history.controller";
@@ -26,7 +27,20 @@ const app = Fastify({
   logger: true, // Skriver ut alla requests i terminalen – bra under utveckling
 });
 
+async function runMigrations() {
+  try {
+    console.log("[App] Kör Prisma-migrationer...");
+    execSync("npx prisma migrate deploy", { stdio: "inherit" });
+    console.log("[App] ✅ Migrationer slutförda");
+  } catch (error) {
+    console.error("[App] ❌ Migration misslyckades:", error);
+    process.exit(1);
+  }
+}
+
 async function start() {
+  // Kör migrationer först innan allt annat
+  await runMigrations();
   // CORS – tillåter frontend (port 3000) att anropa backend (port 3001)
   // Utan detta blockerar webbläsaren anropen av säkerhetsskäl
   await app.register(cors, {
