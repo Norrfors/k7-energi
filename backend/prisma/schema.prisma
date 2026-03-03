@@ -52,6 +52,22 @@ model EnergyLog {
   @@index([deviceId, createdAt])
 }
 
+// Sparar elpriser från Tibber (via Homey)
+// Loggas var 5:e minut – priset ändras i praktiken en gång per timme
+model PriceLog {
+  id           Int      @id @default(autoincrement())
+  deviceId     String
+  deviceName   String
+  zoneId       String?                    // Homey zon-UUID
+  priceTotal   Float?                     // Aktuellt elpris SEK/kWh (inkl. skatt)
+  priceLevel   String?                    // Prisnivå: CHEAP, NORMAL, EXPENSIVE, VERY_EXPENSIVE
+  priceLowest  Float?                     // Dagens lägsta pris SEK/kWh
+  priceHighest Float?                     // Dagens högsta pris SEK/kWh
+  createdAt    DateTime @default(now())
+
+  @@index([deviceId, createdAt])
+}
+
 // Sparar data från externa API:er
 model ExternalData {
   id        Int      @id @default(autoincrement())

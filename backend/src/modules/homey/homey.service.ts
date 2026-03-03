@@ -375,6 +375,55 @@ export class HomeyService {
     console.log(`Loggade ${readings.length} temperaturavläsningar`);
   }
 
+  // Hämta aktuella elpriser från Tibber-enheter i Homey
+  async getPrices() {
+    const devices = await this.fetchDevices();
+
+    const results = [];
+    for (const d of devices) {
+      if (d.capabilities.includes("measure_price_total")) {
+        const zoneInfo = await this.resolveZoneInfo(d.zone);
+
+        results.push({
+          deviceId: d.id,
+          deviceName: d.name,
+          zoneId: d.zone || null,
+          priceTotal: d.capabilitiesObj?.measure_price_total?.value as number | null,
+          priceLevel: d.capabilitiesObj?.price_level?.value as string | null,
+          priceLowest: d.capabilitiesObj?.measure_price_lowest?.value as number | null,
+          priceHighest: d.capabilitiesObj?.measure_price_highest?.value as number | null,
+        });
+      }
+    }
+
+    return results;
+  }
+
+  // Spara en snapshot av elpriser till databasen
+  async logPrices() {
+    const readings = await this.getPrices();
+
+    for (const reading of readings) {
+      if (reading.priceTotal !== null) {
+        await prisma.priceLog.create({
+          data: {
+            deviceId: reading.deviceId,
+            deviceName: reading.deviceName,
+            zoneId: reading.zoneId || undefined,
+            priceTotal: reading.priceTotal ?? undefined,
+            priceLevel: reading.priceLevel || undefined,
+            priceLowest: reading.priceLowest ?? undefined,
+            priceHighest: reading.priceHighest ?? undefined,
+          },
+        });
+      }
+    }
+
+    if (readings.length > 0) {
+      console.log(`Loggade ${readings.length} prisavläsningar`);
+    }
+  }
+
   // Spara en snapshot av energidata till databasen
   async logEnergy() {
     const readings = await this.getEnergy();

@@ -52,6 +52,15 @@ export function startScheduler() {
     }
   });
 
+  // Logga elpriser från Tibber var 5:e minut
+  cron.schedule("*/5 * * * *", async () => {
+    try {
+      await homeyService.logPrices();
+    } catch (error) {
+      logger.error("Schemalagd prisloggning misslyckades", error);
+    }
+  });
+
   // Kontrollera och kör automatisk backup varje 5:e minut
   cron.schedule("*/5 * * * *", async () => {
     try {
