@@ -4,9 +4,6 @@
 // 1. Vid schemalagda intervall (cron) för att spara data till databasen
 // 2. Direkt från en controller för att visa realtidsdata
 
-// OBS: homey-api paketet kan kräva lite anpassning.
-// Om importen inte fungerar direkt, se kommentaren längst ner.
-
 import https from "https";
 import http from "http";
 import { URL } from "url";
@@ -22,46 +19,54 @@ interface HomeyDeviceCapability {
 interface HomeyDevice {
   id: string;
   name: string;
-  zone: string | null; // Zone ID från Homey
+  zone: string | null; // Zone ID (UUID) från Homey
   capabilities: string[];
   capabilitiesObj: Record<string, HomeyDeviceCapability>;
+}
+
+// Zon-info med fullständig sökvägsinformation
+interface ZoneInfo {
+  name: string;       // Direkt zonnamn (t.ex. "Altan norr")
+  parentId: string | null;
+  path: string;       // Full stig (t.ex. "Hem / Bottenvåningen / Altan norr")
 }
 
 export class HomeyService {
   private address: string;
   private token: string;
   private httpsAgent: https.Agent;
-  private zoneCache: Record<string, string> | null = null;
+  // Cache: UUID -> ZoneInfo (hämtas en gång per instans)
+  private zoneCache: Record<string, ZoneInfo> | null = null;
 
-  // Manuell mappning av sensornamn till zoner (baserat på sensorernas namn)
+  // Manuell mappning av sensornamn till zoner (fallback om Homey saknar zon-tilldelning)
   private deviceZoneMapping: Record<string, string> = {
     // Occupancy sensorer
     "Outdoor Occupancy Sensor GARAGE": "Garage",
     "Outdoor Occupancy Sensor HUVUDENTRE": "Huvudentre",
-    
+
     // k7 sensorer - ÖV (Övervåning)
     "k7 – ÖV Huvudsovrum": "Huvudsovrum",
     "k7 – ÖV Sovrum Norr": "Sovrum Norr",
     "k7 – ÖV Sovrum Syd": "Sovrum Syd",
     "k7 – ÖV Hall": "ÖV Hall",
     "k7 – ÖV Kontor": "Kontor",
-    
+
     // k7 sensorer - BV (Bottenvåning)
     "k7 BV  – Vardagsrum": "Vardagsrum",
     "k7 – BV Hall": "BV Hall",
     "k7 – BV Matsal": "Matsal",
-    
+
     // Termostater
     "ÖV Badrum termostat  4512744/45": "Badrum",
-    
+
     // Hybrid/annat
     "k7 (K7-INNE) – K7-INNE": "K7-INNE",
     "k7 (K7-INNE) – K7-UTE": "K7-INNE",
-    
+
     // Altherma
     "Altherma Hotwatertank": "Värmepump",
-    
-    // WH2 sensorer  
+
+    // WH2 sensorer
     "WH2 Inne Gatuplan": "Gatuplan",
     "WH2 UTE Norr Inglas ": "UTE Norr",
     "WH2 ÖV  xx IN": "ÖV",
@@ -69,16 +74,16 @@ export class HomeyService {
     "WH2 ÖV UTE ": "ÖV UTE",
     "WH2 kanske skyddsrum eller garage": "Garage/Skyddsrum",
     "WH2 -- kanske garage el skyddsrum": "Garage/Skyddsrum",
-    
+
     // Oregon sensorer
     "Oregon INNE": "INNE",
     "Oregon Temp THGN800": "UTE",
-    
+
     // Övriga
     "Namron Multisensor 4512734": "Multisensor",
     "T01": "T01",
     "WH2 x OUT": "UTE",
-    
+
     // Energisensorer
     "VU-A6Z-Nous": "Soldäck",
     "VU-Effektmät": "Altan norr",
@@ -89,62 +94,47 @@ export class HomeyService {
   constructor() {
     this.address = process.env.HOMEY_ADDRESS || "http://192.168.1.100";
     this.token = process.env.HOMEY_TOKEN || "";
-    // Skapa HTTPS-agent som accepterar självsignerade certifikat
     this.httpsAgent = new https.Agent({
       rejectUnauthorized: false,
     });
     console.log(`[HomeyService] Initialiserad med address: ${this.address}`);
   }
 
-  // Extrahera och mappa enhets-zon från sensornamnet
+  // Extrahera och mappa enhets-zon från sensornamnet (fallback)
   private getZoneForDevice(deviceName: string): string {
-    // Först: Kolla om den finns i manuell mappning
     if (this.deviceZoneMapping[deviceName]) {
       return this.deviceZoneMapping[deviceName];
     }
 
-    // Sedan: Försök automatiskt extrahera från namn
-    // För sensorer som "k7 – BV Vardagsrum" eller "k7 — ÖV Sovrum Norr"
-    // Försök matcher för olika bindestreckvariationer
-    
-    // Matcher för "k7 – ÖV Sovrum Norr" pattern
     let match = deviceName.match(/k7\s*[-–—]\s*[ÖÆ]V\s+(.+)/);
     if (match) return match[1].trim();
-    
-    // Matcher för "k7 – BV Vardagsrum" pattern  
+
     match = deviceName.match(/k7\s*[-–—]\s*BV\s+(.+)/);
     if (match) return match[1].trim();
-    
-    // Matcher för "k7 BV – Vardagsrum" pattern (två ord innan tankestreck)
+
     match = deviceName.match(/k7\s+BV\s*[-–—]\s*(.+)/);
     if (match) return match[1].trim();
-    
-    // Matcher för "k7 (X) – Y" pattern
+
     match = deviceName.match(/k7\s*\([^)]*\)\s*[-–—]\s*(.+)/);
     if (match) return match[1].trim();
-    
-    // Matcher för sensornamn med mellanslag
+
     match = deviceName.match(/(.+?)\s+[-–—]\s+/);
     if (match) return match[1].trim();
 
-    // Matcher för WH2 sensorer
     match = deviceName.match(/WH2\s+(.+)/);
     if (match) {
-      let zone = match[1].trim();
-      // Rensa upp lite
+      const zone = match[1].trim();
       if (zone.includes("UTE")) return "UTE";
       if (zone.includes("INNE") || zone.includes("Inne")) return "INNE";
       return zone;
     }
-    
-    // Matcher för Oregon sensorer
+
     if (deviceName.includes("Oregon")) {
       if (deviceName.includes("INNE") || deviceName.includes("Inne")) return "INNE";
       if (deviceName.includes("THGN")) return "UTE";
       return "Oregon";
     }
 
-    // Fallback
     return "Okänd";
   }
 
@@ -162,7 +152,7 @@ export class HomeyService {
           Authorization: `Bearer ${this.token}`,
         },
         ...(protocol === https && {
-          rejectUnauthorized: false, // Acceptera självsignerade certifikat
+          rejectUnauthorized: false,
         }),
       };
 
@@ -192,15 +182,38 @@ export class HomeyService {
     });
   }
 
-  // Hämta och cacha zon-mappning UUID -> zonnamn från Homey
-  private async fetchZones(): Promise<Record<string, string>> {
+  // Hämta och cacha zon-mappning UUID -> ZoneInfo (med full sökvägsinformation)
+  private async fetchZones(): Promise<Record<string, ZoneInfo>> {
     if (this.zoneCache) return this.zoneCache;
     try {
       const url = `${this.address}/api/manager/zones/zone/`;
-      const raw = await this.makeRequest<Record<string, { id: string; name: string }>>(url);
-      this.zoneCache = {};
+      const raw = await this.makeRequest<Record<string, { id: string; name: string; parent?: string }>>(url);
+
+      // Bygg namn- och föräldrakartor
+      const names: Record<string, string> = {};
+      const parentIds: Record<string, string | null> = {};
       for (const z of Object.values(raw)) {
-        if (z.id && z.name) this.zoneCache[z.id] = z.name;
+        if (z.id && z.name) {
+          names[z.id] = z.name;
+          parentIds[z.id] = z.parent || null;
+        }
+      }
+
+      // Bygg full zonestig rekursivt (skydd mot cyklar via djupbegränsning)
+      const buildPath = (id: string, depth = 0): string => {
+        if (depth > 10 || !names[id]) return names[id] || '';
+        const parentId = parentIds[id];
+        if (!parentId || !names[parentId]) return names[id];
+        return `${buildPath(parentId, depth + 1)} / ${names[id]}`;
+      };
+
+      this.zoneCache = {};
+      for (const id of Object.keys(names)) {
+        this.zoneCache[id] = {
+          name: names[id],
+          parentId: parentIds[id],
+          path: buildPath(id),
+        };
       }
     } catch (e) {
       console.warn('[HomeyService] Kunde inte hämta zoner, fallback till namnmappning:', e);
@@ -209,24 +222,54 @@ export class HomeyService {
     return this.zoneCache;
   }
 
-  // Löser ett Homey zon-UUID till läsbart zonnamn
-  // Om UUID saknas eller inte hittas, fallback till getZoneForDevice(deviceName)
-  private async resolveZoneName(zoneId: string | null, deviceName: string): Promise<string> {
-    if (zoneId) {
-      const zones = await this.fetchZones();
-      if (zones[zoneId]) return zones[zoneId];
-    }
-    return this.getZoneForDevice(deviceName);
+  // Löser ett Homey zon-UUID till ZoneInfo
+  // Returnerar null om UUID saknas eller inte hittas i Homey
+  private async resolveZoneInfo(zoneId: string | null): Promise<ZoneInfo | null> {
+    if (!zoneId) return null;
+    const zones = await this.fetchZones();
+    return zones[zoneId] || null;
   }
 
-  // Hämta alla enheter direkt via HTTP (utan homey-api biblioteket)
-  // Detta är enklare att komma igång med
+  // Hämta alla enheter direkt via HTTP
   private async fetchDevices(): Promise<HomeyDevice[]> {
     const url = `${this.address}/api/manager/devices/device/`;
     console.log(`[HomeyService] Försöker hämta enheter från: ${url}`);
     const devices = await this.makeRequest<Record<string, HomeyDevice>>(url);
-    
     return Object.values(devices) as HomeyDevice[];
+  }
+
+  // Synka alla Homey-enheter till Device-tabellen (upsert)
+  // Anropas varje poll-cykel så att namn och zon alltid är aktuella
+  async syncDevices(): Promise<void> {
+    try {
+      const devices = await this.fetchDevices();
+      const zones = await this.fetchZones();
+
+      for (const d of devices) {
+        const zoneInfo = d.zone ? zones[d.zone] || null : null;
+
+        await prisma.device.upsert({
+          where: { id: d.id },
+          update: {
+            name: d.name,
+            zoneId: d.zone || null,
+            zoneName: zoneInfo?.name || this.getZoneForDevice(d.name),
+            zonePath: zoneInfo?.path || this.getZoneForDevice(d.name),
+          },
+          create: {
+            id: d.id,
+            name: d.name,
+            zoneId: d.zone || null,
+            zoneName: zoneInfo?.name || this.getZoneForDevice(d.name),
+            zonePath: zoneInfo?.path || this.getZoneForDevice(d.name),
+          },
+        });
+      }
+
+      console.log(`[HomeyService] Synkade ${devices.length} enheter till Device-tabellen`);
+    } catch (error) {
+      console.error('[HomeyService] Fel vid enhetssynkning:', error);
+    }
   }
 
   // Hämta capabilities för en specifik enhet från Homey
@@ -235,11 +278,10 @@ export class HomeyService {
       const devices = await this.fetchDevices();
       const device = devices.find((d) => d.id === deviceId);
       if (device && device.capabilities) {
-        // Filtrera bort capability-ID:n som inte är användbara (t.ex. button capabilities)
-        return device.capabilities.filter(cap => 
-          cap.startsWith('measure_') || 
+        return device.capabilities.filter(cap =>
+          cap.startsWith('measure_') ||
           cap.startsWith('meter_') ||
-          cap === 'accumulatedCost' || 
+          cap === 'accumulatedCost' ||
           cap === 'accumulator'
         );
       }
@@ -258,20 +300,21 @@ export class HomeyService {
     for (const d of devices) {
       if (d.capabilities.includes("measure_temperature") || d.capabilities.includes("outdoorTemperature")) {
         const hasOutdoorTemp = d.capabilities.includes("outdoorTemperature");
-        const tempValue = hasOutdoorTemp 
+        const tempValue = hasOutdoorTemp
           ? d.capabilitiesObj?.outdoorTemperature?.value as number | null
           : d.capabilitiesObj?.measure_temperature?.value as number | null;
         const lastUpdated = hasOutdoorTemp
           ? d.capabilitiesObj?.outdoorTemperature?.lastUpdated || ""
           : d.capabilitiesObj?.measure_temperature?.lastUpdated || "";
 
-        // Hämta zone - använd först Homey's tilldelning, annars försök extrahera från namn
-        const zone = await this.resolveZoneName(d.zone, d.name);
+        const zoneInfo = await this.resolveZoneInfo(d.zone);
+        const zoneName = zoneInfo?.name || this.getZoneForDevice(d.name);
 
         results.push({
           deviceId: d.id,
           deviceName: d.name,
-          zone: zone,
+          zone: zoneName,
+          zoneId: d.zone || null,
           temperature: tempValue,
           lastUpdated,
         });
@@ -288,16 +331,16 @@ export class HomeyService {
     const results = [];
     for (const d of devices) {
       if (d.capabilities.includes("measure_power")) {
-        // Hämta zone - använd först Homey's tilldelning, annars försök extrahera från namn
-        const zone = await this.resolveZoneName(d.zone, d.name);
+        const zoneInfo = await this.resolveZoneInfo(d.zone);
+        const zoneName = zoneInfo?.name || this.getZoneForDevice(d.name);
 
-        // Hämta accumulated cost om den finns (för Pulse)
         const costSinceMidnight = d.capabilitiesObj?.accumulatedCost?.value as number | null;
 
         results.push({
           deviceId: d.id,
           deviceName: d.name,
-          zone: zone,
+          zone: zoneName,
+          zoneId: d.zone || null,
           watts: d.capabilitiesObj?.measure_power?.value as number | null,
           meterPower: d.capabilitiesObj?.meter_power?.value as number | null,
           costSinceMidnight: costSinceMidnight || null,
@@ -311,6 +354,8 @@ export class HomeyService {
 
   // Spara en snapshot av temperaturer till databasen
   async logTemperatures() {
+    // Synka enheter varje cykel så Device-tabellen alltid är aktuell
+    await this.syncDevices();
     const readings = await this.getTemperatures();
 
     for (const reading of readings) {
@@ -320,6 +365,7 @@ export class HomeyService {
             deviceId: reading.deviceId,
             deviceName: reading.deviceName,
             zone: reading.zone,
+            zoneId: reading.zoneId || undefined,
             temperature: reading.temperature,
           },
         });
@@ -340,6 +386,7 @@ export class HomeyService {
             deviceId: reading.deviceId,
             deviceName: reading.deviceName,
             zone: reading.zone,
+            zoneId: reading.zoneId || undefined,
             watts: reading.watts,
             meterPower: reading.meterPower || undefined,
             accumulatedCost: reading.costSinceMidnight || undefined,
@@ -350,7 +397,7 @@ export class HomeyService {
 
     console.log(`Loggade ${readings.length} energiavläsningar`);
 
-    // 🔄 Beräkna mätarvärden retroaktivt från senaste kalibreringspunkt
+    // Beräkna mätarvärden retroaktivt från senaste kalibreringspunkt
     await recalculateMeterValuesFromLatestCalibration();
   }
 }

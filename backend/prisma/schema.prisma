@@ -11,12 +11,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Live-karta över alla Homey-enheter – upsertas varje poll-cykel
+// Ger alltid aktuellt namn och zon oavsett om Homey bytt namn sedan loggning
+model Device {
+  id        String   @id                   // Homey UUID (aldrig ändras)
+  name      String                         // Aktuellt enhetsnamn i Homey
+  zoneId    String?                        // Homey zon-UUID
+  zoneName  String?                        // Direkt zonnamn (t.ex. "Altan norr")
+  zonePath  String?                        // Full stig (t.ex. "Hem / BV / Altan norr")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 // Sparar temperaturavläsningar från Homey
 model TemperatureLog {
   id          Int      @id @default(autoincrement())
   deviceId    String
-  deviceName  String
-  zone        String?
+  deviceName  String                       // Snapshot: namn vid loggning
+  zone        String?                      // Snapshot: zonnamn vid loggning
+  zoneId      String?                      // Homey zon-UUID (stabil referens)
   temperature Float
   createdAt   DateTime @default(now())
 
@@ -27,12 +40,13 @@ model TemperatureLog {
 model EnergyLog {
   id             Int      @id @default(autoincrement())
   deviceId       String
-  deviceName     String
-  zone           String?
+  deviceName     String                   // Snapshot: namn vid loggning
+  zone           String?                  // Snapshot: zonnamn vid loggning
+  zoneId         String?                  // Homey zon-UUID (stabil referens)
   watts          Float
-  meterPower     Float?   // Ackumulerad förbrukning sedan midnatt (kWh) för Pulse
-  meterValue     Float?   // Total mätarställning (kWh) – beräknad vid kalibrering
-  accumulatedCost Float?  // Ackumulerad kostnad sedan midnatt (kr)
+  meterPower     Float?                   // Ackumulerad förbrukning sedan midnatt (kWh) för Pulse
+  meterValue     Float?                   // Total mätarställning (kWh) – beräknad vid kalibrering
+  accumulatedCost Float?                  // Ackumulerad kostnad sedan midnatt (kr)
   createdAt      DateTime @default(now())
 
   @@index([deviceId, createdAt])

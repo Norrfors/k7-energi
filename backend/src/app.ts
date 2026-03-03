@@ -8,6 +8,7 @@ import { historyRoutes } from "./modules/history/history.controller";
 import { meterRoutes } from "./modules/meter/meter.controller";
 import { backupRoutes } from "./modules/backup/backup.controller";
 import { startScheduler } from "./shared/scheduler";
+import { homeyService } from "./modules/homey/homey.service";
 import {
   getAllTemperatureSensors,
   getAllEnergySensors,
@@ -38,9 +39,43 @@ async function runMigrations() {
   }
 }
 
+// Backfill: kopiera zoneId från Device-tabellen till befintliga logg-rader
+// Körs vid startup, säker att köra om (uppdaterar bara NULL-rader)
+async function backfillZoneIds() {
+  try {
+    const updated1 = await prisma.$executeRaw`
+      UPDATE "TemperatureLog" tl
+      SET "zoneId" = d."zoneId"
+      FROM "Device" d
+      WHERE tl."deviceId" = d."id"
+        AND tl."zoneId" IS NULL
+        AND d."zoneId" IS NOT NULL
+    `;
+    const updated2 = await prisma.$executeRaw`
+      UPDATE "EnergyLog" el
+      SET "zoneId" = d."zoneId"
+      FROM "Device" d
+      WHERE el."deviceId" = d."id"
+        AND el."zoneId" IS NULL
+        AND d."zoneId" IS NOT NULL
+    `;
+    if (Number(updated1) > 0 || Number(updated2) > 0) {
+      console.log(`[App] ✅ Backfill zoneId: ${updated1} TemperatureLog + ${updated2} EnergyLog poster`);
+    }
+  } catch (e) {
+    console.warn("[App] ⚠️ Backfill zoneId misslyckades:", e);
+  }
+}
+
 async function start() {
   // Kör migrationer först innan allt annat
   await runMigrations();
+
+  // Synka Homey-enheter till Device-tabellen och backfilla zoneId i befintliga loggar
+  await homeyService.syncDevices().catch((e) =>
+    console.warn("[App] ⚠️ syncDevices misslyckades vid startup (Homey nåbar?):", e)
+  );
+  await backfillZoneIds();
   // CORS – tillåter frontend (port 3000) att anropa backend (port 3001)
   // Utan detta blockerar webbläsaren anropen av säkerhetsskäl
   await app.register(cors, {
