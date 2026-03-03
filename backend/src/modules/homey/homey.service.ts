@@ -31,6 +31,7 @@ export class HomeyService {
   private address: string;
   private token: string;
   private httpsAgent: https.Agent;
+  private zoneCache: Record<string, string> | null = null;
 
   // Manuell mappning av sensornamn till zoner (baserat på sensorernas namn)
   private deviceZoneMapping: Record<string, string> = {
@@ -191,6 +192,33 @@ export class HomeyService {
     });
   }
 
+  // Hämta och cacha zon-mappning UUID -> zonnamn från Homey
+  private async fetchZones(): Promise<Record<string, string>> {
+    if (this.zoneCache) return this.zoneCache;
+    try {
+      const url = `${this.address}/api/manager/zones/zone/`;
+      const raw = await this.makeRequest<Record<string, { id: string; name: string }>>(url);
+      this.zoneCache = {};
+      for (const z of Object.values(raw)) {
+        if (z.id && z.name) this.zoneCache[z.id] = z.name;
+      }
+    } catch (e) {
+      console.warn('[HomeyService] Kunde inte hämta zoner, fallback till namnmappning:', e);
+      this.zoneCache = {};
+    }
+    return this.zoneCache;
+  }
+
+  // Löser ett Homey zon-UUID till läsbart zonnamn
+  // Om UUID saknas eller inte hittas, fallback till getZoneForDevice(deviceName)
+  private async resolveZoneName(zoneId: string | null, deviceName: string): Promise<string> {
+    if (zoneId) {
+      const zones = await this.fetchZones();
+      if (zones[zoneId]) return zones[zoneId];
+    }
+    return this.getZoneForDevice(deviceName);
+  }
+
   // Hämta alla enheter direkt via HTTP (utan homey-api biblioteket)
   // Detta är enklare att komma igång med
   private async fetchDevices(): Promise<HomeyDevice[]> {
@@ -238,7 +266,7 @@ export class HomeyService {
           : d.capabilitiesObj?.measure_temperature?.lastUpdated || "";
 
         // Hämta zone - använd först Homey's tilldelning, annars försök extrahera från namn
-        const zone = d.zone ? d.zone : this.getZoneForDevice(d.name);
+        const zone = await this.resolveZoneName(d.zone, d.name);
 
         results.push({
           deviceId: d.id,
@@ -261,7 +289,7 @@ export class HomeyService {
     for (const d of devices) {
       if (d.capabilities.includes("measure_power")) {
         // Hämta zone - använd först Homey's tilldelning, annars försök extrahera från namn
-        const zone = d.zone ? d.zone : this.getZoneForDevice(d.name);
+        const zone = await this.resolveZoneName(d.zone, d.name);
 
         // Hämta accumulated cost om den finns (för Pulse)
         const costSinceMidnight = d.capabilitiesObj?.accumulatedCost?.value as number | null;
