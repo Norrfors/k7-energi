@@ -46,14 +46,27 @@ model EnergyLog {
   watts          Float
   meterPower     Float?                   // Ackumulerad förbrukning sedan midnatt (kWh) för Pulse
   meterValue     Float?                   // Total mätarställning (kWh) – beräknad vid kalibrering
+  meterImported  Float?                   // meter_power.imported från Homey – kumulativ total import (kWh), exakt absolut mätarställning
   accumulatedCost Float?                  // Ackumulerad kostnad sedan midnatt (kr)
   createdAt      DateTime @default(now())
 
   @@index([deviceId, createdAt])
 }
 
+// Elnätsinställningar – nätavgift och relaterad information
+// Används för att beräkna total elkostnad (Tibber-pris + nätavgift)
+model EnergySettings {
+  id                Int      @id @default(autoincrement())
+  gridProvider      String   @default("Sundsvalls Elnät") // Nätleverantör
+  gridFeePerKwh     Float    @default(1.20)               // Nätavgift inkl. energiskatt och moms (kr/kWh)
+  fuse              Int      @default(20)                 // Säkringsstorlek (Ampere)
+  annualConsumption Int      @default(20000)              // Årsförbrukning (kWh) – grund för tariffen
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
 // Sparar elpriser från Tibber (via Homey)
-// Loggas var 5:e minut – priset ändras i praktiken en gång per timme
+// Loggas enbart när priset ändras (normalt en gång per timme)
 model PriceLog {
   id           Int      @id @default(autoincrement())
   deviceId     String
@@ -104,6 +117,58 @@ model MeterCalibration {
 
   @@index([deviceId, calibrationDateTime])
   @@unique([deviceId, calibrationDateTime]) // En kalibrering per tidpunkt per enhet
+}
+
+// Daglig aggregering av hela husets elmätardata (Pulse)
+// En rad per dag – ersätter rådata för historisk analys
+model DailyMeterAggregate {
+  id             Int      @id @default(autoincrement())
+  date           DateTime @db.Date              // Kalenderdatum (UTC)
+  consumptionKwh Float                          // Förbrukning under dagen (kWh)
+  meterStart     Float                          // Mätarställning vid dagens start (kWh)
+  meterEnd       Float                          // Mätarställning vid dagens slut (kWh)
+  avgWatts       Float                          // Genomsnittlig effekt (W)
+  peakWatts      Float                          // Toppeffekt under dagen (W)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([date])
+  @@index([date])
+}
+
+// Daglig aggregering av energidata per enhet
+model DailyEnergyAggregate {
+  id         Int      @id @default(autoincrement())
+  date       DateTime @db.Date
+  deviceId   String
+  deviceName String
+  zone       String?
+  totalKwh   Float                              // Uppskattad förbrukning (kWh) via watts × tidsintervall
+  avgWatts   Float
+  peakWatts  Float
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([date, deviceId])
+  @@index([date])
+}
+
+// Daglig aggregering av temperaturdata per sensor
+model DailyTemperatureAggregate {
+  id         Int      @id @default(autoincrement())
+  date       DateTime @db.Date
+  deviceId   String
+  deviceName String
+  zone       String?
+  minTemp    Float
+  maxTemp    Float
+  avgTemp    Float
+  readings   Int                                // Antal avläsningar under dagen
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([date, deviceId])
+  @@index([date])
 }
 
 // Backupinställningar

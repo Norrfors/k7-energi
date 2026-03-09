@@ -3,11 +3,11 @@
 
 const getApiBase = () => {
   if (typeof window === "undefined") {
-    return "http://localhost:3001"; // SSR fallback
+    // SSR: anrop sker server-till-server inom Docker-nätverket
+    return process.env.BACKEND_URL || "http://backend:3001";
   }
-  const protocol = window.location.protocol;
-  const hostname = window.location.hostname;
-  return `${protocol}//${hostname}:3001`;
+  // Klientanrop: relativ URL → Next.js proxy-rewrite → backend
+  return "";
 };
 
 const API_BASE = getApiBase();
@@ -67,6 +67,7 @@ export function getTemperatures() {
       deviceName: string;
       temperature: number | null;
       zone: string | null;
+      zonePath: string | null;
       lastUpdated: string;
     }>
   >("/api/homey/temperatures");
@@ -89,6 +90,7 @@ export function getEnergy() {
       deviceName: string;
       watts: number | null;
       zone: string | null;
+      zonePath: string | null;
       lastUpdated: string;
     }>
   >("/api/homey/energy");
@@ -299,6 +301,35 @@ export function getCalibrationHistory() {
   >("/api/meter/calibrations");
 }
 
+// Elnätsinställningar
+
+export interface EnergySettings {
+  id: number;
+  gridProvider: string;
+  gridFeePerKwh: number;
+  fuse: number;
+  annualConsumption: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export function getEnergySettings() {
+  return apiFetch<EnergySettings>("/api/settings/energy");
+}
+
+export function saveEnergySettings(settings: {
+  gridProvider?: string;
+  gridFeePerKwh?: number;
+  fuse?: number;
+  annualConsumption?: number;
+}) {
+  return apiFetch<EnergySettings>("/api/settings/energy", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(settings),
+  });
+}
+
 // Capabilities API
 
 export interface SensorCapabilities {
@@ -327,4 +358,60 @@ export function updateSensorCapabilities(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ capabilitiesToLog }),
   });
+}
+
+// Aggregerad historik
+
+export interface DailyMeter {
+  id: number;
+  date: string;
+  consumptionKwh: number;
+  meterStart: number;
+  meterEnd: number;
+  avgWatts: number;
+  peakWatts: number;
+}
+
+export interface WeeklyMeter {
+  year: number;
+  week: number;
+  consumptionKwh: number;
+  avgWatts: number;
+  peakWatts: number;
+}
+
+export interface MonthlyMeter {
+  year: number;
+  month: number;
+  consumptionKwh: number;
+  avgWatts: number;
+  peakWatts: number;
+}
+
+export interface DailyTemperature {
+  id: number;
+  date: string;
+  deviceId: string;
+  deviceName: string;
+  zone: string | null;
+  minTemp: number;
+  maxTemp: number;
+  avgTemp: number;
+  readings: number;
+}
+
+export function getDailyMeter(days: number = 30) {
+  return apiFetch<DailyMeter[]>(`/api/aggregate/daily-meter?days=${days}`);
+}
+
+export function getWeeklyMeter(weeks: number = 12) {
+  return apiFetch<WeeklyMeter[]>(`/api/aggregate/weekly-meter?weeks=${weeks}`);
+}
+
+export function getMonthlyMeter(months: number = 24) {
+  return apiFetch<MonthlyMeter[]>(`/api/aggregate/monthly-meter?months=${months}`);
+}
+
+export function getDailyTemperatures(days: number = 30) {
+  return apiFetch<DailyTemperature[]>(`/api/aggregate/daily-temperatures?days=${days}`);
 }

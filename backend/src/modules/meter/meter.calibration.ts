@@ -174,19 +174,19 @@ function calculateMeterValuesForward(
     // Beräkna tidsintervall i minuter
     const timeInterval = (current.createdAt.getTime() - previous.createdAt.getTime()) / (1000 * 60);
     
-    // Beräkna förbrukning: watts * tidsintervall / 60 = kWh
-    const consumption = (current.watts * timeInterval) / 60;
-    
+    // Beräkna förbrukning: watts * tidsintervall(min) / 60 / 1000 = kWh
+    const consumption = (current.watts * timeInterval) / 60 / 1000;
+
     currentMeterValue += consumption;
 
     results.push({
       logDateTime: current.createdAt,
-      meterValue: Math.min(currentMeterValue, 999999.99), // Max 6 siffror innan decimal
+      meterValue: Math.min(currentMeterValue, 999999.99),
     });
 
     logger.debug(
       `⚡ Framåt: ${previous.createdAt.toISOString()} → ${current.createdAt.toISOString()} | ` +
-      `${timeInterval.toFixed(1)}min @ ${current.watts}W = +${consumption.toFixed(3)}kWh → ${currentMeterValue.toFixed(2)}kWh`
+      `${timeInterval.toFixed(1)}min @ ${current.watts}W = +${consumption.toFixed(4)}kWh → ${currentMeterValue.toFixed(2)}kWh`
     );
   }
 
@@ -216,9 +216,9 @@ function calculateMeterValuesBackward(
     // Beräkna tidsintervall i minuter
     const timeInterval = (next.createdAt.getTime() - current.createdAt.getTime()) / (1000 * 60);
 
-    // Beräkna förbrukning: watts * tidsintervall / 60 = kWh
+    // Beräkna förbrukning: watts * tidsintervall(min) / 60 / 1000 = kWh
     // Vi subtraherar detta värde när vi går bakåt
-    const consumption = (next.watts * timeInterval) / 60;
+    const consumption = (next.watts * timeInterval) / 60 / 1000;
 
     currentMeterValue -= consumption;
     currentMeterValue = Math.max(currentMeterValue, 0); // Kan inte vara negativ
@@ -323,7 +323,7 @@ export async function recalculateMeterValuesFromLatestCalibration() {
       // För övriga poster: beräkna förbrukning sedan föregående post
       if (previous) {
         const timeInterval = (current.createdAt.getTime() - previous.createdAt.getTime()) / (1000 * 60);
-        const consumption = (current.watts * timeInterval) / 60;
+        const consumption = (current.watts * timeInterval) / 60 / 1000;
         currentMeterValue += consumption;
 
         await prisma.energyLog.update({

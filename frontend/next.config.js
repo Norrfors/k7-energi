@@ -16,6 +16,17 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_VERSION: version,
   },
+  // Proxy: alla /api/-anrop från webbläsaren går via Next.js-servern till backend-containern.
+  // Gör att en enda URL (Tailscale eller localhost:3000) räcker – ingen separat port 3001 behövs.
+  async rewrites() {
+    const backendUrl = process.env.BACKEND_URL || 'http://backend:3001';
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getHealth, getTemperatures, getEnergy, getMeterLatest, getMeterToday, getMeterLast24Hours, setManualMeterValue, getBackupSettings, saveBackupSettings, performManualBackup, BackupSettings, getTemperatureHistory, getEnergyHistory, getTemperatureSensors, getEnergySensors, updateSensorVisibility, updateSensorZone, SensorInfo, calibrateMeter } from "@/lib/api";
+import { getHealth, getTemperatures, getEnergy, getMeterLatest, getMeterToday, getMeterLast24Hours, setManualMeterValue, getBackupSettings, saveBackupSettings, performManualBackup, BackupSettings, getTemperatureHistory, getEnergyHistory, getTemperatureSensors, getEnergySensors, updateSensorVisibility, updateSensorZone, SensorInfo, calibrateMeter, getCalibrationHistory, getEnergySettings, saveEnergySettings, EnergySettings, getDailyMeter, getWeeklyMeter, getMonthlyMeter, DailyMeter, WeeklyMeter, MonthlyMeter } from "@/lib/api";
 import { StatusCard } from "@/components/StatusCard";
-import MeterCalibrationModal from "@/components/MeterCalibrationModal";
 import CapabilitiesModal from "@/components/CapabilitiesModal";
 
 interface Temperature {
   deviceName: string;
   temperature: number | null;
   zone?: string | null;
+  zonePath?: string | null;
   avg12h?: number | null;
   avg24h?: number | null;
 }
@@ -18,6 +18,7 @@ interface Energy {
   deviceName: string;
   watts: number | null;
   zone?: string | null;
+  zonePath?: string | null;
   classification?: string | null;
   consumption1h?: number | null;
   consumption12h?: number | null;
@@ -41,7 +42,7 @@ interface MeterReading {
   time?: string;
 }
 
-type TabType = "dashboard" | "meter" | "settings";
+type TabType = "dashboard" | "meter" | "historik" | "settings";
 type SettingsTabType = "backup" | "temperature" | "energy";
 
 export default function Dashboard() {
@@ -72,6 +73,22 @@ export default function Dashboard() {
   const [settingsSuccess, setSettingsSuccess] = useState<string>("");
   const [settingsError, setSettingsError] = useState<string>("");
 
+  // Elnätsinställningar state
+  const [energySettings, setEnergySettings] = useState<EnergySettings | null>(null);
+  const [energySettingsSaving, setEnergySettingsSaving] = useState(false);
+  const [energySettingsMessage, setEnergySettingsMessage] = useState("");
+  const [gridProvider, setGridProvider] = useState("Sundsvalls Elnät");
+  const [gridFeePerKwh, setGridFeePerKwh] = useState("1.20");
+  const [fuse, setFuse] = useState("20");
+  const [annualConsumption, setAnnualConsumption] = useState("20000");
+
+  // Historik state
+  const [dailyMeter, setDailyMeter] = useState<DailyMeter[]>([]);
+  const [weeklyMeter, setWeeklyMeter] = useState<WeeklyMeter[]>([]);
+  const [monthlyMeter, setMonthlyMeter] = useState<MonthlyMeter[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [activeHistoryTab, setActiveHistoryTab] = useState<"dagar" | "veckor" | "manader">("dagar");
+
   // Backup state
   const [backupSettings, setBackupSettingsState] = useState<BackupSettings | null>(null);
   const [backupLoading, setBackupLoading] = useState(false);
@@ -89,8 +106,13 @@ export default function Dashboard() {
   const [sensorModalPage, setSensorModalPage] = useState(1);
   const itemsPerPage = 100;
 
-  // Meter calibration modal state
-  const [showCalibrationModal, setShowCalibrationModal] = useState(false);
+  // Mätarkalibrering – inline formulär
+  const [calibValue, setCalibValue] = useState("");
+  const [calibDate, setCalibDate] = useState(new Date().toLocaleDateString("sv-SE"));
+  const [calibTime, setCalibTime] = useState(new Date().toTimeString().slice(0, 5));
+  const [calibLoading, setCalibLoading] = useState(false);
+  const [calibMessage, setCalibMessage] = useState("");
+  const [calibHistory, setCalibHistory] = useState<{ calibrationValue: number; calibrationDateTime: string; savedAt: string }[]>([]);
 
   // Capabilities modal state
   const [capabilitiesModal, setCapabilitiesModal] = useState<{ isOpen: boolean; deviceId: string; deviceName: string } | null>(null);
@@ -361,11 +383,13 @@ export default function Dashboard() {
     setSensorLocations(locations);
   }, []);
 
-  async function loadData() {
+  async function loadData(initialLoad = false) {
     try {
       log("📡 Laddar data från backend (with auto-retry per API call)...");
-      setLoading(true);
-      setError("");
+      if (initialLoad) {
+        setLoading(true);
+        setError("");
+      }
       const healthData = await getHealth();
       setHealth(healthData);
       log("✅ Health check passed");
@@ -402,8 +426,10 @@ export default function Dashboard() {
         setHomeyConnected(true);
         log(`✅ Loaded ${currentTemps.length} temperatures, ${energyData.length} energy sensors`);
       } catch (err) {
-        setTemperatures([]);
-        setEnergy([]);
+        if (initialLoad) {
+          setTemperatures([]);
+          setEnergy([]);
+        }
         setHomeyConnected(false);
         log("⚠️ Temperature/Energy failed (continuing)", err);
       }
@@ -443,8 +469,10 @@ export default function Dashboard() {
         log("✅ Meter data loaded");
       } catch (err) {
         log("⚠️ Meter failed", err);
-        setMeter(null);
-        setMeterHistory([]);
+        if (initialLoad) {
+          setMeter(null);
+          setMeterHistory([]);
+        }
       }
     } catch (err) {
       log("🔴 FAILED TO CONNECT - all retries exhausted", err);
@@ -463,12 +491,12 @@ export default function Dashboard() {
 
   // Ladda data vid mount och auto-refresh var 60:e sekund (men INTE när man är i settings)
   useEffect(() => {
-    loadData();
-    
+    loadData(true);
+
     // Uppdatera data var 60:e sekund, MEN BARA när man är INTE i inställningar
     if (activeTab === "settings") return;
-    
-    const interval = setInterval(loadData, 60000);
+
+    const interval = setInterval(() => loadData(false), 60000);
     return () => clearInterval(interval);
   }, [activeTab]);
 
@@ -491,7 +519,7 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, [activeTab]);
 
-  // Ladda backup-inställningar när Settings-tabben blir aktiv
+  // Ladda backup- och energiinställningar när Settings-tabben blir aktiv
   useEffect(() => {
     if (activeTab !== "settings") return;
 
@@ -512,7 +540,31 @@ export default function Dashboard() {
       }
     };
 
+    const loadEnergySettings = async () => {
+      try {
+        const settings = await getEnergySettings();
+        setEnergySettings(settings);
+        setGridProvider(settings.gridProvider);
+        setGridFeePerKwh(String(settings.gridFeePerKwh));
+        setFuse(String(settings.fuse));
+        setAnnualConsumption(String(settings.annualConsumption));
+      } catch (err) {
+        log("Fel vid hämtning av elnätsinställningar", err);
+      }
+    };
+
+    const loadCalibHistory = async () => {
+      try {
+        const history = await getCalibrationHistory();
+        setCalibHistory(history);
+      } catch (err) {
+        log("Fel vid hämtning av kalibreringshistorik", err);
+      }
+    };
+
     loadBackupSettings();
+    loadEnergySettings();
+    loadCalibHistory();
   }, [activeTab]);
 
   async function handleSetManualMeter() {
@@ -548,28 +600,56 @@ export default function Dashboard() {
     }
   }
 
-  async function handleCalibrateMeter(
-    calibrationValue: number,
-    calibrationDateTime: string
-  ) {
+  async function handleSaveEnergySettings() {
     try {
-      log(`Kalibrerar mätare: ${calibrationValue} kWh @ ${calibrationDateTime}`);
-      const result = await calibrateMeter(calibrationValue, calibrationDateTime);
+      setEnergySettingsSaving(true);
+      setEnergySettingsMessage("");
+      const updated = await saveEnergySettings({
+        gridProvider,
+        gridFeePerKwh: parseFloat(gridFeePerKwh),
+        fuse: parseInt(fuse),
+        annualConsumption: parseInt(annualConsumption),
+      });
+      setEnergySettings(updated);
+      setEnergySettingsMessage("✅ Inställningar sparade");
+      setTimeout(() => setEnergySettingsMessage(""), 3000);
+    } catch {
+      setEnergySettingsMessage("❌ Kunde inte spara inställningar");
+    } finally {
+      setEnergySettingsSaving(false);
+    }
+  }
 
+  async function handleCalibrateMeterInline() {
+    const value = parseFloat(calibValue);
+    if (isNaN(value) || value <= 0) {
+      setCalibMessage("❌ Ogiltigt mätarvärde");
+      return;
+    }
+    try {
+      setCalibLoading(true);
+      setCalibMessage("");
+      // Konvertera lokal tid → UTC korrekt
+      const dateUTC = new Date(`${calibDate}T${calibTime}:00`).toISOString();
+      log(`Kalibrerar mätare: ${value} kWh @ ${dateUTC}`);
+      const result = await calibrateMeter(value, dateUTC);
       if (result.success) {
-        log(`✓ Kalibrering lyckades: ${result.updatedRecords} poster uppdaterade`);
-        
-        // Uppdatera mätardata
-        const meterData = await getMeterLatest();
-        const meterHistoryData = await getMeterToday();
+        setCalibMessage(`✅ Kalibrering klar – ${result.updatedRecords} poster uppdaterade`);
+        setCalibValue("");
+        const [history, meterData] = await Promise.all([
+          getCalibrationHistory(),
+          getMeterLatest(),
+        ]);
+        setCalibHistory(history);
         setMeter(meterData);
-        setMeterHistory(meterHistoryData);
       } else {
-        throw new Error(result.message);
+        setCalibMessage("❌ " + result.message);
       }
     } catch (err) {
+      setCalibMessage("❌ Kalibrering misslyckades");
       log("Fel vid mätarkalibrering", err);
-      throw err;
+    } finally {
+      setCalibLoading(false);
     }
   }
 
@@ -630,6 +710,21 @@ export default function Dashboard() {
       setBackupPerforming(false);
     }
   }
+
+  // Ladda historikdata när Historik-tabben blir aktiv
+  useEffect(() => {
+    if (activeTab !== "historik") return;
+    setHistoryLoading(true);
+    Promise.all([
+      getDailyMeter(60),
+      getWeeklyMeter(24),
+      getMonthlyMeter(36),
+    ]).then(([daily, weekly, monthly]) => {
+      setDailyMeter(daily);
+      setWeeklyMeter(weekly);
+      setMonthlyMeter(monthly);
+    }).catch(() => {}).finally(() => setHistoryLoading(false));
+  }, [activeTab]);
 
   // Ladda sensorer när Settings-tabben och rätt underflik blir aktiv
   useEffect(() => {
@@ -705,13 +800,16 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Header med titel */}
-      <div className="flex items-center justify-between pb-4 border-b-2 border-gray-200">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">K7 Energi Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-1">Realtidsövervakning av hem och energiförbrukning</p>
+      {/* Blinkande felruta – visas bara när något inte är anslutet */}
+      {(health?.status !== "ok" || health?.database !== "ansluten" || !homeyConnected) && (
+        <div className="animate-pulse bg-red-600 text-white font-bold text-center py-3 px-4 rounded-lg tracking-widest">
+          {[
+            health?.status !== "ok" && "BACKEND EJ ANSLUTET",
+            health?.database !== "ansluten" && "DATABAS EJ ANSLUTET",
+            !homeyConnected && "HOMEY PRO EJ ANSLUTET",
+          ].filter(Boolean).join(" · ")}
         </div>
-      </div>
+      )}
 
       {/* Tabs */}
       <div className="flex items-center gap-1 border-b border-gray-300 bg-gray-50 px-2 py-1 rounded-t-lg">
@@ -736,6 +834,16 @@ export default function Dashboard() {
           ⚡ Mätardata
         </button>
         <button
+          onClick={() => setActiveTab("historik")}
+          className={`px-4 py-2 font-semibold transition rounded-t-lg ${
+            activeTab === "historik"
+              ? "bg-white text-blue-600 border-b-2 border-blue-600"
+              : "text-gray-600 hover:text-gray-900 hover:bg-white"
+          }`}
+        >
+          📅 Historik
+        </button>
+        <button
           onClick={() => setActiveTab("settings")}
           className={`px-4 py-2 font-semibold transition rounded-t-lg ml-auto flex items-center gap-2 ${
             activeTab === "settings"
@@ -750,37 +858,15 @@ export default function Dashboard() {
       {/* Dashboard Tab */}
       {activeTab === "dashboard" && (
         <div className="space-y-8">
-          <section>
-            <h2 className="text-2xl font-bold mb-4 text-gray-900 flex items-center gap-2">
-              📱 System Status
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <StatusCard
-                title="Backend"
-                value={health?.status === "ok" ? "Online" : "Offline"}
-                color={health?.status === "ok" ? "green" : "red"}
-              />
-              <StatusCard
-                title="Databas"
-                value={health?.database || "Okänd"}
-                color={health?.database === "ansluten" ? "green" : "red"}
-              />
-              <StatusCard
-                title="Homey Pro"
-                value={homeyConnected ? "Ansluten" : "Ej ansluten"}
-                color={homeyConnected ? "green" : "gray"}
-              />
-            </div>
-          </section>
-
           {temperatures.length > 0 && (
             <section>
               <h2 className="text-2xl font-bold mb-4 text-gray-900 flex items-center gap-2">
                 🌡️ Temperaturer
               </h2>
               <div className="border border-gray-300 rounded-lg overflow-hidden shadow-sm">
-                <div className="bg-blue-50 p-2 border-b border-gray-300 grid grid-cols-6 gap-1 font-semibold text-gray-700 text-xs">
-                  <div className="col-span-3">Enhet / Zon</div>
+                <div className="bg-blue-50 p-2 border-b border-gray-300 grid grid-cols-7 gap-1 font-semibold text-gray-700 text-xs">
+                  <div className="col-span-2">Enhet</div>
+                  <div className="col-span-2">Zonestig</div>
                   <div className="text-right">Aktuell</div>
                   <div className="text-right">Snitt 12h</div>
                   <div className="text-right">Snitt 24h</div>
@@ -797,20 +883,21 @@ export default function Dashboard() {
                   <div
                     key={t.deviceName}
                     onClick={() => { setSelectedSensor({ name: t.deviceName, type: "temperature" }); setSensorModalPage(1); }}
-                    className={`grid grid-cols-6 gap-1 p-2 ${
+                    className={`grid grid-cols-7 gap-1 p-2 ${
                       index % 2 === 0 ? "bg-white" : "bg-gray-50"
                     } border-b border-gray-200 last:border-b-0 hover:bg-blue-100 transition text-xs cursor-pointer`}
                   >
-                    <div className="col-span-3 text-gray-800 font-medium truncate">
-                      <div className="truncate">
-                        {t.zone ? `${t.deviceName} / ${t.zone}` : t.deviceName}
-                      </div>
+                    <div className="col-span-2 text-gray-800 font-medium truncate">
+                      <div className="truncate">{t.deviceName}</div>
                       <span className="text-gray-600">
                         {(() => {
                           const location = getEffectiveSensorLocation(t.deviceName, t.temperature);
                           return location === "INNE" ? "🏠 INNE" : location === "UTE" ? "🌤️ UTE" : "";
                         })()}
                       </span>
+                    </div>
+                    <div className="col-span-2 text-gray-500 truncate self-center">
+                      {t.zonePath || t.zone || ""}
                     </div>
                     <div className="text-right font-semibold text-blue-600">
                       {t.temperature !== null ? `${t.temperature.toFixed(1)}°` : "N/A"}
@@ -833,8 +920,9 @@ export default function Dashboard() {
                 ⚡ Energiförbrukning
               </h2>
               <div className="border border-gray-300 rounded-lg overflow-hidden shadow-sm">
-                <div className="bg-yellow-50 p-2 border-b border-gray-300 grid grid-cols-9 gap-1 font-semibold text-gray-700 text-xs">
-                  <div className="col-span-2">Enhet / Zon</div>
+                <div className="bg-yellow-50 p-2 border-b border-gray-300 grid grid-cols-10 gap-1 font-semibold text-gray-700 text-xs">
+                  <div className="col-span-2">Enhet</div>
+                  <div className="col-span-2">Zonestig</div>
                   <div className="text-right">Aktuell</div>
                   <div className="text-right">Senaste 1h</div>
                   <div className="text-right">Senaste 12h</div>
@@ -857,19 +945,20 @@ export default function Dashboard() {
                       <div
                         key={e.deviceName}
                         onClick={() => { setSelectedSensor({ name: e.deviceName, type: "energy" }); setSensorModalPage(1); }}
-                        className={`grid grid-cols-9 gap-1 p-2 ${
+                        className={`grid grid-cols-10 gap-1 p-2 ${
                           index % 2 === 0 ? "bg-white" : "bg-gray-50"
                         } border-b border-gray-200 last:border-b-0 hover:bg-yellow-100 transition text-xs cursor-pointer`}
                       >
                         <div className="col-span-2 text-gray-800 font-medium truncate">
-                          <div className="truncate">
-                            {e.zone ? `${e.deviceName} / ${e.zone}` : e.deviceName}
-                          </div>
+                          <div className="truncate">{e.deviceName}</div>
                           <span className="text-gray-600">
                             {(() => {
                               return location === "INNE" ? "🏠 INNE" : location === "UTE" ? "🌤️ UTE" : "";
                             })()}
                           </span>
+                        </div>
+                        <div className="col-span-2 text-gray-500 truncate self-center">
+                          {e.zonePath || e.zone || ""}
                         </div>
                         <div className="text-right font-semibold text-yellow-600">
                           {e.watts !== null ? `${e.watts.toFixed(0)}W` : "N/A"}
@@ -933,9 +1022,9 @@ export default function Dashboard() {
                   <thead className="bg-gray-100">
                     <tr>
                       <th className="px-4 py-2 text-left">Tid</th>
-                      <th className="px-4 py-2 text-left">Effekt (W)</th>
-                      <th className="px-4 py-2 text-left">Mätare (kWh)</th>
-                      <th className="px-4 py-2 text-left">Kostnad sedan midnatt (kr)</th>
+                      <th className="px-4 py-2 text-left">Förbrukn. idag (kWh)</th>
+                      <th className="px-4 py-2 text-left">Δ sedan föreg. (kWh)</th>
+                      <th className="px-4 py-2 text-left">Kostnad idag (kr)</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -948,7 +1037,7 @@ export default function Dashboard() {
                           {reading.consumptionSinceMidnight.toFixed(2)}
                         </td>
                         <td className="px-4 py-2 text-sm">
-                          {reading.totalMeterValue.toFixed(2)}
+                          {(reading.consumptionSincePreviousReading || 0).toFixed(3)}
                         </td>
                         <td className="px-4 py-2 text-sm font-semibold text-green-600">
                           {(reading.costSinceMidnight || 0).toFixed(2)} kr
@@ -959,6 +1048,145 @@ export default function Dashboard() {
                 </table>
               </div>
             </section>
+          )}
+        </div>
+      )}
+
+      {/* Historik Tab */}
+      {activeTab === "historik" && (
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-gray-900">📅 Historik – Elförbrukning</h2>
+          <p className="text-sm text-gray-500">Aggregerat dygn för dygn. Rådatan sparas 45 dagar, dagliga sammanfattningar sparas för alltid.</p>
+
+          {/* Underfliktnavigering */}
+          <div className="flex gap-1 border-b border-gray-300">
+            {(["dagar", "veckor", "manader"] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveHistoryTab(tab)}
+                className={`px-4 py-2 text-sm font-semibold transition rounded-t-lg ${
+                  activeHistoryTab === tab
+                    ? "bg-white text-blue-600 border-b-2 border-blue-600"
+                    : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                {tab === "dagar" ? "Dagar (60d)" : tab === "veckor" ? "Veckor (24v)" : "Månader"}
+              </button>
+            ))}
+          </div>
+
+          {historyLoading ? (
+            <p className="text-gray-500 py-4">Laddar historikdata...</p>
+          ) : (
+            <>
+              {/* DAGAR */}
+              {activeHistoryTab === "dagar" && (
+                <div className="border border-gray-300 rounded-lg overflow-hidden">
+                  <table className="w-full text-xs">
+                    <thead className="bg-blue-50 text-gray-700 font-semibold">
+                      <tr>
+                        <th className="text-left px-3 py-2">Datum</th>
+                        <th className="text-right px-3 py-2">Förbrukning kWh</th>
+                        <th className="text-right px-3 py-2">Snitt W</th>
+                        <th className="text-right px-3 py-2">Topp W</th>
+                        <th className="text-right px-3 py-2">Mätare start</th>
+                        <th className="text-right px-3 py-2">Mätare slut</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {dailyMeter.length === 0 ? (
+                        <tr><td colSpan={6} className="text-center py-6 text-gray-400">Ingen data ännu – aggregeras kl 01:00 varje natt</td></tr>
+                      ) : (
+                        [...dailyMeter].reverse().map((row, i) => (
+                          <tr key={row.id} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                            <td className="px-3 py-1.5 font-medium">{new Date(row.date).toLocaleDateString("sv-SE", { weekday: "short", month: "short", day: "numeric" })}</td>
+                            <td className="px-3 py-1.5 text-right font-bold text-blue-700">{row.consumptionKwh.toFixed(2)}</td>
+                            <td className="px-3 py-1.5 text-right">{Math.round(row.avgWatts)}</td>
+                            <td className="px-3 py-1.5 text-right text-orange-600">{Math.round(row.peakWatts)}</td>
+                            <td className="px-3 py-1.5 text-right text-gray-400">{row.meterStart.toFixed(0)}</td>
+                            <td className="px-3 py-1.5 text-right text-gray-400">{row.meterEnd.toFixed(0)}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                    {dailyMeter.length > 0 && (
+                      <tfoot className="bg-gray-100 font-semibold text-xs border-t border-gray-300">
+                        <tr>
+                          <td className="px-3 py-2">Totalt ({dailyMeter.length} dagar)</td>
+                          <td className="px-3 py-2 text-right text-blue-700">
+                            {dailyMeter.reduce((s, r) => s + r.consumptionKwh, 0).toFixed(2)} kWh
+                          </td>
+                          <td colSpan={4}></td>
+                        </tr>
+                      </tfoot>
+                    )}
+                  </table>
+                </div>
+              )}
+
+              {/* VECKOR */}
+              {activeHistoryTab === "veckor" && (
+                <div className="border border-gray-300 rounded-lg overflow-hidden">
+                  <table className="w-full text-xs">
+                    <thead className="bg-green-50 text-gray-700 font-semibold">
+                      <tr>
+                        <th className="text-left px-3 py-2">Vecka</th>
+                        <th className="text-right px-3 py-2">Förbrukning kWh</th>
+                        <th className="text-right px-3 py-2">Snitt W</th>
+                        <th className="text-right px-3 py-2">Topp W</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {weeklyMeter.length === 0 ? (
+                        <tr><td colSpan={4} className="text-center py-6 text-gray-400">Ingen veckodata ännu</td></tr>
+                      ) : (
+                        [...weeklyMeter].reverse().map((row, i) => (
+                          <tr key={`${row.year}-${row.week}`} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                            <td className="px-3 py-1.5 font-medium">v.{String(row.week).padStart(2, "0")} {row.year}</td>
+                            <td className="px-3 py-1.5 text-right font-bold text-green-700">{Number(row.consumptionKwh).toFixed(2)}</td>
+                            <td className="px-3 py-1.5 text-right">{Math.round(Number(row.avgWatts))}</td>
+                            <td className="px-3 py-1.5 text-right text-orange-600">{Math.round(Number(row.peakWatts))}</td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {/* MÅNADER */}
+              {activeHistoryTab === "manader" && (
+                <div className="border border-gray-300 rounded-lg overflow-hidden">
+                  <table className="w-full text-xs">
+                    <thead className="bg-purple-50 text-gray-700 font-semibold">
+                      <tr>
+                        <th className="text-left px-3 py-2">Månad</th>
+                        <th className="text-right px-3 py-2">Förbrukning kWh</th>
+                        <th className="text-right px-3 py-2">Snitt W</th>
+                        <th className="text-right px-3 py-2">Topp W</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {monthlyMeter.length === 0 ? (
+                        <tr><td colSpan={4} className="text-center py-6 text-gray-400">Ingen månadsdata ännu</td></tr>
+                      ) : (
+                        [...monthlyMeter].reverse().map((row, i) => {
+                          const monthName = new Date(row.year, row.month - 1, 1).toLocaleDateString("sv-SE", { month: "long", year: "numeric" });
+                          return (
+                            <tr key={`${row.year}-${row.month}`} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                              <td className="px-3 py-1.5 font-medium capitalize">{monthName}</td>
+                              <td className="px-3 py-1.5 text-right font-bold text-purple-700">{Number(row.consumptionKwh).toFixed(2)}</td>
+                              <td className="px-3 py-1.5 text-right">{Math.round(Number(row.avgWatts))}</td>
+                              <td className="px-3 py-1.5 text-right text-orange-600">{Math.round(Number(row.peakWatts))}</td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}
@@ -1007,56 +1235,6 @@ export default function Dashboard() {
           {/* BACKUP Tab */}
           {activeSettingsTab === "backup" && (
             <div className="space-y-6">
-              {/* Manuell mätarställning */}
-              <section>
-                <h3 className="text-xl font-bold mb-4 text-gray-900 flex items-center gap-2">
-                  ⚙️ Mätardata
-                </h3>
-                
-                {/* Kalibrering med manuell avläsning */}
-                <div className="bg-blue-50 border border-blue-300 rounded-lg p-6 mb-4">
-                  <h4 className="text-md font-medium text-gray-800 mb-3">📊 Mätarkalibrering</h4>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Mata in mätarställningen från din elmätartavla för att kalibrera systemet. 
-                    Systemet räknar retroaktivt framåt och bakåt för att uppdatera alla värden.
-                  </p>
-                  <button
-                    onClick={() => setShowCalibrationModal(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
-                  >
-                    🔧 Kalibrera mätare
-                  </button>
-                </div>
-
-                {/* Gammal manuell mätarställning */}
-                <div className="bg-gray-50 border border-gray-300 rounded-lg p-6 max-w-md">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Snabb mätarställning (enkel)
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="number"
-                      value={manualMeterValue}
-                      onChange={(e) => setManualMeterValueInput(e.target.value)}
-                      placeholder="T.ex. 64161.21"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      disabled={settingsMeterValue}
-                    />
-                    <button
-                      onClick={handleSetManualMeter}
-                      disabled={settingsMeterValue || !manualMeterValue}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition"
-                    >
-                      {settingsMeterValue ? "Sparar..." : "Spara"}
-                    </button>
-                  </div>
-                  {settingsError && <p className="text-red-600 text-sm mt-2">{settingsError}</p>}
-                  {settingsSuccess && <p className="text-green-600 text-sm mt-2">{settingsSuccess}</p>}
-                  <p className="text-xs text-gray-500 mt-4">Ställ in den totala mätarställningen för energimätaren (utan datum/tid).</p>
-                </div>
-              </section>
-
-
               {/* Databas Backup */}
               <section>
                 <h3 className="text-xl font-bold mb-4 text-gray-900 flex items-center gap-2">
@@ -1317,7 +1495,153 @@ export default function Dashboard() {
 
           {/* ENERGY Tab */}
           {activeSettingsTab === "energy" && (
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* Manuell elmätaravläsning */}
+              <section>
+                <h3 className="text-xl font-bold mb-4 text-gray-900 flex items-center gap-2">
+                  ⚙️ Mätardata
+                </h3>
+                <div className="bg-blue-50 border border-blue-300 rounded-lg p-6 mb-4">
+                  <h4 className="text-md font-medium text-gray-800 mb-1">📊 Manuell elmätaravläsning</h4>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Läs av din elmätartavla och ange värdet med datum och tid. Alla historiska beräknade värden räknas om automatiskt.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Mätarställning (kWh)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={calibValue}
+                        onChange={(e) => setCalibValue(e.target.value)}
+                        placeholder="T.ex. 65099"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                        disabled={calibLoading}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Datum</label>
+                      <input
+                        type="date"
+                        value={calibDate}
+                        onChange={(e) => setCalibDate(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                        disabled={calibLoading}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Tid (lokal tid)</label>
+                      <input
+                        type="time"
+                        value={calibTime}
+                        onChange={(e) => setCalibTime(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                        disabled={calibLoading}
+                      />
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleCalibrateMeterInline}
+                    disabled={calibLoading || !calibValue}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition font-medium"
+                  >
+                    {calibLoading ? "Räknar om..." : "🔧 Spara avläsning"}
+                  </button>
+                  {calibMessage && (
+                    <p className={`text-sm mt-3 ${calibMessage.startsWith("✅") ? "text-green-700" : "text-red-600"}`}>
+                      {calibMessage}
+                    </p>
+                  )}
+                  {calibHistory.length > 0 && (
+                    <div className="mt-5 border-t border-blue-200 pt-4">
+                      <h5 className="text-sm font-medium text-gray-700 mb-2">Tidigare avläsningar</h5>
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="text-left text-xs text-gray-500 border-b border-blue-200">
+                            <th className="pb-1 pr-4">Datum & tid</th>
+                            <th className="pb-1 text-right">Mätarställning</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {calibHistory
+                            .slice()
+                            .sort((a, b) => new Date(b.calibrationDateTime).getTime() - new Date(a.calibrationDateTime).getTime())
+                            .map((c) => (
+                              <tr key={c.calibrationDateTime} className="border-b border-blue-100 last:border-0">
+                                <td className="py-1 pr-4 text-gray-700">
+                                  {new Date(c.calibrationDateTime).toLocaleString("sv-SE", {
+                                    year: "numeric", month: "2-digit", day: "2-digit",
+                                    hour: "2-digit", minute: "2-digit",
+                                  })}
+                                </td>
+                                <td className="py-1 text-right font-mono text-gray-800">
+                                  {c.calibrationValue.toLocaleString("sv-SE", { minimumFractionDigits: 0, maximumFractionDigits: 2 })} kWh
+                                </td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              {/* Elnätsinställningar */}
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">⚡ Elnätsinställningar</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Nätleverantör</label>
+                    <input
+                      type="text"
+                      value={gridProvider}
+                      onChange={(e) => setGridProvider(e.target.value)}
+                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Nätavgift kr/kWh</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={gridFeePerKwh}
+                      onChange={(e) => setGridFeePerKwh(e.target.value)}
+                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Säkring (A)</label>
+                    <input
+                      type="number"
+                      value={fuse}
+                      onChange={(e) => setFuse(e.target.value)}
+                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Årsförbrukning (kWh)</label>
+                    <input
+                      type="number"
+                      value={annualConsumption}
+                      onChange={(e) => setAnnualConsumption(e.target.value)}
+                      className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 mt-3">
+                  <button
+                    onClick={handleSaveEnergySettings}
+                    disabled={energySettingsSaving}
+                    className="bg-blue-600 text-white px-4 py-2 rounded text-sm font-semibold hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {energySettingsSaving ? "Sparar..." : "Spara inställningar"}
+                  </button>
+                  {energySettingsMessage && (
+                    <span className="text-sm">{energySettingsMessage}</span>
+                  )}
+                </div>
+              </div>
+
               <h3 className="text-lg font-semibold text-gray-900">Välj elförbrukningssensorer att visa på Dashboard</h3>
               {sensorsLoading ? (
                 <p className="text-gray-500">Laddar sensorer...</p>
@@ -1535,13 +1859,6 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-
-      {/* Meter Calibration Modal */}
-      <MeterCalibrationModal
-        isOpen={showCalibrationModal}
-        onClose={() => setShowCalibrationModal(false)}
-        onCalibrate={handleCalibrateMeter}
-      />
 
       {/* Capabilities Modal */}
       {capabilitiesModal && (

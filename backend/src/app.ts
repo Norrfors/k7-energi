@@ -14,6 +14,7 @@ import {
   getAllEnergySensors,
   updateSensorVisibility,
 } from "./modules/settings/settings.service";
+import { backfillAggregates } from "./modules/aggregate/aggregation.service";
 
 // Debug: Visa Homey-konfiguration som laddades
 console.log(`[App] HOMEY_ADDRESS från env: ${process.env.HOMEY_ADDRESS}`);
@@ -76,6 +77,12 @@ async function start() {
     console.warn("[App] ⚠️ syncDevices misslyckades vid startup (Homey nåbar?):", e)
   );
   await backfillZoneIds();
+
+  // Backfilla dagliga aggregat för eventuellt saknade dagar (asynkront, blockerar inte startup)
+  backfillAggregates().catch((e) =>
+    console.warn("[App] ⚠️ Backfill aggregat misslyckades:", e)
+  );
+
   // CORS – tillåter frontend (port 3000) att anropa backend (port 3001)
   // Utan detta blockerar webbläsaren anropen av säkerhetsskäl
   await app.register(cors, {
@@ -126,6 +133,34 @@ async function start() {
   // TEST: Inline test-route för att verifiera plugin-issue
   app.get("/api/test/settings", async () => {
     return { message: "Inline settings test works!" };
+  });
+
+  // Elnätsinställningar – GET hämtar (eller skapar) inställningar, POST uppdaterar
+  app.get("/api/settings/energy", async (req, reply) => {
+    let settings = await prisma.energySettings.findFirst();
+    if (!settings) {
+      settings = await prisma.energySettings.create({ data: {} });
+    }
+    reply.send(settings);
+  });
+
+  app.post("/api/settings/energy", async (req, reply) => {
+    const body = req.body as {
+      gridProvider?: string;
+      gridFeePerKwh?: number;
+      fuse?: number;
+      annualConsumption?: number;
+    };
+    let settings = await prisma.energySettings.findFirst();
+    if (!settings) {
+      settings = await prisma.energySettings.create({ data: body });
+    } else {
+      settings = await prisma.energySettings.update({
+        where: { id: settings.id },
+        data: body,
+      });
+    }
+    reply.send(settings);
   });
 
   // Starta schemaläggaren (uppdaterar mätardata varje minut, loggar temp/energi var 5:e minut)

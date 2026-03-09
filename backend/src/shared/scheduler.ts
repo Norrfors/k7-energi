@@ -2,6 +2,7 @@ import cron from "node-cron";
 import { homeyService } from "../modules/homey/homey.service";
 import { meterService } from "../modules/meter/meter.service";
 import { BackupService } from "../modules/backup/backup.service";
+import { aggregateYesterday, pruneOldData } from "../modules/aggregate/aggregation.service";
 import { Logger } from "./logger";
 
 const backupService = new BackupService();
@@ -79,5 +80,19 @@ export function startScheduler() {
     }
   });
 
-  logger.info("Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut, backup konfigurerad");
+  // Daglig aggregering och rensning kl 01:00
+  // Aggregerar igårets rådata → dagliga sammanfattningstabeller
+  // Rensar sedan rådata äldre än 45 dagar
+  cron.schedule("0 1 * * *", async () => {
+    try {
+      logger.info("Nattlig aggregering startar...");
+      await aggregateYesterday();
+      await pruneOldData(45);
+      logger.info("Nattlig aggregering klar");
+    } catch (error) {
+      logger.error("Nattlig aggregering misslyckades", error);
+    }
+  });
+
+  logger.info("Schemaläggare startad – loggar data var 5:e minut, mätardata varje minut, aggregering kl 01:00, backup konfigurerad");
 }

@@ -15,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   // ⭐ HÅRDKODAD VERSION - uppdateras vid varje release
-  const version = "v0.63";
+  const version = "v0.71";
   
   return (
     <html lang="sv">

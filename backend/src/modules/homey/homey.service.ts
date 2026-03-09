@@ -314,6 +314,7 @@ export class HomeyService {
           deviceId: d.id,
           deviceName: d.name,
           zone: zoneName,
+          zonePath: zoneInfo?.path || zoneName,
           zoneId: d.zone || null,
           temperature: tempValue,
           lastUpdated,
@@ -340,9 +341,11 @@ export class HomeyService {
           deviceId: d.id,
           deviceName: d.name,
           zone: zoneName,
+          zonePath: zoneInfo?.path || zoneName,
           zoneId: d.zone || null,
           watts: d.capabilitiesObj?.measure_power?.value as number | null,
           meterPower: d.capabilitiesObj?.meter_power?.value as number | null,
+          meterImported: (d.capabilitiesObj as any)?.['meter_power.imported']?.value as number | null,
           costSinceMidnight: costSinceMidnight || null,
           lastUpdated: d.capabilitiesObj?.measure_power?.lastUpdated || "",
         });
@@ -399,28 +402,44 @@ export class HomeyService {
     return results;
   }
 
-  // Spara en snapshot av elpriser till databasen
+  // Spara elpriser till databasen – loggar bara när priset faktiskt ändras
+  // Normalt en gång per timme (Tibber uppdaterar timpriset vid varje heltimme)
   async logPrices() {
     const readings = await this.getPrices();
+    let logged = 0;
 
     for (const reading of readings) {
-      if (reading.priceTotal !== null) {
+      if (reading.priceTotal === null) continue;
+
+      // Hämta senaste loggade pris för denna enhet
+      const lastLog = await prisma.priceLog.findFirst({
+        where: { deviceId: reading.deviceId },
+        orderBy: { createdAt: "desc" },
+      });
+
+      // Logga bara om priset eller nivån ändrats (tolerans 0,0001 kr för floating point)
+      const priceChanged = !lastLog ||
+        Math.abs((lastLog.priceTotal ?? 0) - reading.priceTotal) > 0.0001 ||
+        lastLog.priceLevel !== reading.priceLevel;
+
+      if (priceChanged) {
         await prisma.priceLog.create({
           data: {
             deviceId: reading.deviceId,
             deviceName: reading.deviceName,
             zoneId: reading.zoneId || undefined,
-            priceTotal: reading.priceTotal ?? undefined,
+            priceTotal: reading.priceTotal,
             priceLevel: reading.priceLevel || undefined,
             priceLowest: reading.priceLowest ?? undefined,
             priceHighest: reading.priceHighest ?? undefined,
           },
         });
+        logged++;
       }
     }
 
-    if (readings.length > 0) {
-      console.log(`Loggade ${readings.length} prisavläsningar`);
+    if (logged > 0) {
+      console.log(`Loggade ${logged} prisändring(ar)`);
     }
   }
 
@@ -438,6 +457,7 @@ export class HomeyService {
             zoneId: reading.zoneId || undefined,
             watts: reading.watts,
             meterPower: reading.meterPower || undefined,
+            meterImported: reading.meterImported || undefined,
             accumulatedCost: reading.costSinceMidnight || undefined,
           },
         });

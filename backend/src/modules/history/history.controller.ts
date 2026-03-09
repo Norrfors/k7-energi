@@ -54,86 +54,131 @@ export async function historyRoutes(app: FastifyInstance) {
       });
     }
 
-    // Beräkna totala förbrukningsmängder för olika tidsperioder
+    // Alla perioder för delta-beräkning via meterImported (max - min = exakt förbrukning)
     const now = new Date();
-    const oneHourAgo = new Date(now.getTime() - 1 * 60 * 60 * 1000);
-    const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
-    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-    
-    // Föregående KALENDERDYGN: från 00:00 till 23:59:59 igår
+
+    // Dagens start (lokal tid midnatt)
+    const todayStart = new Date(now);
+    todayStart.setHours(0, 0, 0, 0);
+
+    // Föregående kalenderdygn
     const yesterday = new Date(now);
     yesterday.setDate(yesterday.getDate() - 1);
     yesterday.setHours(0, 0, 0, 0);
-    
     const yesterdayEnd = new Date(yesterday);
     yesterdayEnd.setHours(23, 59, 59, 999);
 
-    // Hämta loggar för alla tidsperioder - filtrera på deviceId eller Pulse för "all"
-    const baseWhere = deviceId 
-      ? { deviceId } 
+    const baseWhere = deviceId
+      ? { deviceId }
       : { deviceName: { contains: "Pulse" } };
 
-    const [oneHourLogs, twelveHourLogs, twentyFourHourLogs, previousDayLogs] = await Promise.all([
-      prisma.energyLog.findMany({
-        where: { ...baseWhere, createdAt: { gte: oneHourAgo } },
-      }),
-      prisma.energyLog.findMany({
-        where: { ...baseWhere, createdAt: { gte: twelveHoursAgo } },
-      }),
-      prisma.energyLog.findMany({
-        where: { ...baseWhere, createdAt: { gte: twentyFourHoursAgo } },
-      }),
-      prisma.energyLog.findMany({
-        where: { ...baseWhere, createdAt: { gte: yesterday, lte: yesterdayEnd } },
-      }),
+    // Hämta endast meterImported-kolumnen för alla perioder parallellt
+    const [logs1h, logs12h, logs24h, logsToday, logsYesterday] = await Promise.all([
+      prisma.energyLog.findMany({ where: { ...baseWhere, meterImported: { not: null }, createdAt: { gte: new Date(now.getTime() - 3600_000) } }, select: { meterImported: true } }),
+      prisma.energyLog.findMany({ where: { ...baseWhere, meterImported: { not: null }, createdAt: { gte: new Date(now.getTime() - 43200_000) } }, select: { meterImported: true } }),
+      prisma.energyLog.findMany({ where: { ...baseWhere, meterImported: { not: null }, createdAt: { gte: new Date(now.getTime() - 86400_000) } }, select: { meterImported: true } }),
+      prisma.energyLog.findMany({ where: { ...baseWhere, meterImported: { not: null }, createdAt: { gte: todayStart } }, select: { meterImported: true } }),
+      prisma.energyLog.findMany({ where: { ...baseWhere, meterImported: { not: null }, createdAt: { gte: yesterday, lte: yesterdayEnd } }, select: { meterImported: true } }),
     ]);
 
-    // Beräkna totala förbrukningsmängder (Wh-ekvivalent genom att summera watts-värden och approximera tid)
-    // Eftersom vi får värden var ~5:e minut, approximeras energi genom att ta genomsnittet × tidsperioden
-    const calculateConsumption = (logs: any[], hoursSpan: number) => {
-      if (logs.length === 0) return 0;
-      const avgWatts = logs.reduce((acc, log) => acc + log.watts, 0) / logs.length;
-      return Math.round(avgWatts * hoursSpan * 100) / 100; // Wh (watt-timmar)
-    };
-
-    // Beräkna TODAYS förbrukning från senaste meterPower (den har varit igång sedan midnatt)
-    // meterPower = kumulativ förbrukning sedan midnatt
-    const calculateTodyConsumption = () => {
-      if (!currentReading?.meterPower) return 0;
-      // meterPower är i kWh, konvertera till Wh
-      return Math.round(currentReading.meterPower * 1000 * 100) / 100;
-    };
-
-    // Beräkna förbrukning för föregående dygn (behöver MAX-MIN från två olika dagar)
-    // Vi kan bara visa detta när vi har meterPower-loggar från igår
-    const calculatePreviousDayConsumption = (logs: any[]) => {
-      const meterPowerValues = logs
-        .filter(log => log.meterPower !== null && log.meterPower !== undefined)
-        .map(log => log.meterPower as number);
-      
-      // Om vi saknar data från igår kan vi inte räkna
-      if (meterPowerValues.length === 0) {
-        console.log("[History] Ingen meterPower-data från Pulse igår ännu - kan inte räkna föregående dag");
-        return 0;
-      }
-      
-      const maxMeterPower = Math.max(...meterPowerValues);
-      const minMeterPower = Math.min(...meterPowerValues);
-      
-      // Resultat är redan i kWh, konvertera till Wh
-      return Math.round((maxMeterPower - minMeterPower) * 1000 * 100) / 100;
+    // Delta = max - min av meterImported inom perioden (Wh-konverterat × 1000)
+    const deltaWh = (logs: { meterImported: number | null }[]) => {
+      const vals = logs.map(l => l.meterImported!).filter(v => v > 0);
+      if (vals.length < 2) return 0;
+      return Math.round((Math.max(...vals) - Math.min(...vals)) * 1000 * 100) / 100;
     };
 
     return {
       deviceId: deviceId || "all",
       currentWatts: currentReading?.watts || 0,
       currentTime: currentReading?.createdAt || new Date(),
-      consumption1h: calculateConsumption(oneHourLogs, 1),
-      consumption12h: calculateConsumption(twelveHourLogs, 12),
-      consumption24h: calculateConsumption(twentyFourHourLogs, 24),
-      consumptionToday: calculateTodyConsumption(),
-      consumptionPreviousDay: calculatePreviousDayConsumption(previousDayLogs),
+      totalMeterValue: currentReading?.meterImported ?? null,
+      consumption1h: deltaWh(logs1h),
+      consumption12h: deltaWh(logs12h),
+      consumption24h: deltaWh(logs24h),
+      consumptionToday: deltaWh(logsToday),
+      consumptionPreviousDay: deltaWh(logsYesterday),
     };
+  });
+
+  // ─────────────────────────────────────────
+  // Aggregerade historik-endpoints
+  // ─────────────────────────────────────────
+
+  // GET /api/aggregate/daily-meter?days=30
+  // Daglig mätardata (hela huset) – senaste N dagar
+  app.get("/api/aggregate/daily-meter", async (request) => {
+    const { days = "30" } = request.query as { days?: string };
+    const since = new Date();
+    since.setUTCDate(since.getUTCDate() - parseInt(days));
+    since.setUTCHours(0, 0, 0, 0);
+
+    return prisma.dailyMeterAggregate.findMany({
+      where: { date: { gte: since } },
+      orderBy: { date: "asc" },
+    });
+  });
+
+  // GET /api/aggregate/weekly-meter?weeks=12
+  // Veckovis förbrukning – beräknas från dagliga aggregat
+  app.get("/api/aggregate/weekly-meter", async (request) => {
+    const { weeks = "12" } = request.query as { weeks?: string };
+    const since = new Date();
+    since.setUTCDate(since.getUTCDate() - parseInt(weeks) * 7);
+
+    const rows = await prisma.$queryRaw<
+      Array<{ year: number; week: number; consumptionKwh: number; avgWatts: number; peakWatts: number }>
+    >`
+      SELECT
+        EXTRACT(ISOYEAR FROM date)::int AS year,
+        EXTRACT(WEEK FROM date)::int    AS week,
+        SUM("consumptionKwh")           AS "consumptionKwh",
+        AVG("avgWatts")                 AS "avgWatts",
+        MAX("peakWatts")                AS "peakWatts"
+      FROM "DailyMeterAggregate"
+      WHERE date >= ${since}
+      GROUP BY year, week
+      ORDER BY year, week
+    `;
+    return rows;
+  });
+
+  // GET /api/aggregate/monthly-meter?months=24
+  // Månadsvis förbrukning – beräknas från dagliga aggregat
+  app.get("/api/aggregate/monthly-meter", async (request) => {
+    const { months = "24" } = request.query as { months?: string };
+    const since = new Date();
+    since.setUTCMonth(since.getUTCMonth() - parseInt(months));
+
+    const rows = await prisma.$queryRaw<
+      Array<{ year: number; month: number; consumptionKwh: number; avgWatts: number; peakWatts: number }>
+    >`
+      SELECT
+        EXTRACT(YEAR FROM date)::int  AS year,
+        EXTRACT(MONTH FROM date)::int AS month,
+        SUM("consumptionKwh")         AS "consumptionKwh",
+        AVG("avgWatts")               AS "avgWatts",
+        MAX("peakWatts")              AS "peakWatts"
+      FROM "DailyMeterAggregate"
+      WHERE date >= ${since}
+      GROUP BY year, month
+      ORDER BY year, month
+    `;
+    return rows;
+  });
+
+  // GET /api/aggregate/daily-temperatures?days=30
+  // Daglig temperatursammanfattning per sensor
+  app.get("/api/aggregate/daily-temperatures", async (request) => {
+    const { days = "30" } = request.query as { days?: string };
+    const since = new Date();
+    since.setUTCDate(since.getUTCDate() - parseInt(days));
+    since.setUTCHours(0, 0, 0, 0);
+
+    return prisma.dailyTemperatureAggregate.findMany({
+      where: { date: { gte: since } },
+      orderBy: [{ date: "asc" }, { deviceName: "asc" }],
+    });
   });
 
   // GET /api/sensor/:deviceId/capabilities

@@ -4,6 +4,9 @@ import { FastifyInstance } from "fastify";
 import { meterService } from "./meter.service";
 import { calibrateMeterReading, getCalibrationHistory } from "./meter.calibration";
 import { Logger } from "../../shared/logger";
+import prisma from "../../shared/db";
+
+const PULSE_ID = "c2314e97-c95b-40d4-9393-dbc541d586d1";
 
 const logger = new Logger("MeterController");
 
@@ -19,10 +22,16 @@ export async function meterRoutes(app: FastifyInstance) {
         return { message: "Ingen data ännu" };
       }
 
+      // Hämta absolut mätarställning: föredrar meterImported (direkt från Homey) framför meterValue (beräknat)
+      const latestEnergy = await prisma.energyLog.findFirst({
+        where: { deviceId: PULSE_ID, OR: [{ meterImported: { not: null } }, { meterValue: { not: null } }] },
+        orderBy: { createdAt: "desc" },
+      });
+
       return {
         consumptionSinceMidnight: reading.consumptionSinceMidnight,
         consumptionSincePreviousReading: reading.consumptionSincePreviousReading,
-        totalMeterValue: reading.totalMeterValue,
+        totalMeterValue: latestEnergy?.meterImported ?? latestEnergy?.meterValue ?? reading.totalMeterValue,
         costSinceMidnight: reading.costSinceMidnight,
         lastUpdated: reading.createdAt,
       };

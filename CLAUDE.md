@@ -134,7 +134,7 @@ Sparad i: `backend/.env` → `HOMEY_TOKEN`
 
 ---
 
-Aktuell version: **v0.41** (Energisensor-historik med aktuell förbrukning)
+Aktuell version: **v0.71** (Tailscale remote access)
 
 ---
 
@@ -154,15 +154,18 @@ Aktuell version: **v0.41** (Energisensor-historik med aktuell förbrukning)
 ---
 
 **Versionshistorik:**
-- **v0.60** 🟢 NYTT – Zonmappning för energisensorer, ryst versionsvisning (endast rubrik visar version)
+- **v0.71** 🟢 NYTT – Tailscale Docker-sidecar, remote access via https://k7-energi.tail498395.ts.net
+- **v0.70** ✅ – meterImported (meter_power.imported) som primär källa för exakt förbrukning
+- **v0.69** ✅ – Fixat totalMeterValue (visade 291 kWh istället för ~65100), korrekta kolumnrubriker
+- **v0.68** ✅ – Inline kalibrering under Inställningar/El, Mätardata flyttat dit, flicker-fix
+- **v0.67** ✅ – Dagsaggregering, EnergySettings (spotpris, nätavgift), mätarkalibrering
+- **v0.60** ✅ – Zonmappning för energisensorer, rensat versionsvisning
 - **v0.59** ✅ – Zonmappning från sensorer.txt: Soldäck, Altan norr, Kök, Tvätt/Pann/Bad
 - **v0.58** ✅ – Hårdkoda version i layout.tsx, ta bort miljövariabler för version
 - **v0.41** ✅ – Energisensor-historik API (aktuell + 1h/12h/24h medelvärden)
-- **v0.40** ✅ – Dual API response (zone från Homey + classification från DB), klassificeringar sparas korrekt
+- **v0.40** ✅ – Dual API response (zone från Homey + classification från DB)
 - **v0.31** ✅ – Zone-funktionaliteten, backend-persistering av INNE/UTE klassificering
-- **v0.30** ✅ – Version-display på två ställen, databasen körs, infinite loop fixat
-- **v0.29** ✅ – Frontend production build, Tailwind CSS fixed
-- **v0.28** ✅ – Zone-struktur i databas (zone nullable)
+- **v0.30** ✅ – Version-display, databasen körs, infinite loop fixat
 
 ### Kommandot "starta"
 
