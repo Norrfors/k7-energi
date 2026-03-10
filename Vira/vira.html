@@ -409,7 +409,7 @@
 </head>
 <body>
 
-<h1>🃏 Vira v1.11 · 32 deltagare · 8 bord · 6 omgångar</h1>
+<h1>🃏 Vira v1.12 · 32 deltagare · 8 bord · 6 omgångar</h1>
 
 <div class="btn-row">
   <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
@@ -453,7 +453,7 @@
 <script>
 "use strict";
 
-const VERSION = "v1.11";
+const VERSION = "v1.12";
 
 // Version integrated into h1 - no separate subtitle needed
 
@@ -947,9 +947,9 @@ function renderSpelarView({ seats, conflictPlayers }) {
     }
   }
 
-  let html = '<table><thead><tr>';
-  html += '<th style="text-align:left;padding-left:6px;">Spelare</th>';
-  for (let ri = 0; ri < ROUNDS; ri++) html += '<th>Omgång ' + (ri + 1) + '</th>';
+  let html = '<table style="table-layout:fixed;"><thead><tr>';
+  html += '<th style="text-align:left;padding-left:6px;width:140px;">Spelare</th>';
+  for (let ri = 0; ri < ROUNDS; ri++) html += '<th style="width:70px;">Omgång ' + (ri + 1) + '</th>';
   html += '</tr></thead><tbody>';
 
   for (const p of playerNrs) {
