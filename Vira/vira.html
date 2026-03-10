@@ -402,7 +402,7 @@
 </head>
 <body>
 
-<h1>🃏 Vira v0.96 · 32 deltagare · 8 bord · 6 omgångar</h1>
+<h1>🃏 Vira v0.97 · 32 deltagare · 8 bord · 6 omgångar</h1>
 
 <div class="btn-row">
   <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
@@ -446,7 +446,7 @@
 <script>
 "use strict";
 
-const VERSION = "v0.96";
+const VERSION = "v0.97";
 
 // Version integrated into h1 - no separate subtitle needed
 
@@ -525,8 +525,8 @@ function loadFile(event) {
     
     players = newPlayers;
     localStorage.setItem("vira_players", JSON.stringify(players));
-    localStorage.setItem("vira_players_file", file.name);
-    document.getElementById("fileInfo").textContent = file.name;
+    localStorage.setItem("vira_players_file", "Vira\\" + file.name);
+    document.getElementById("fileInfo").textContent = "Vira\\" + file.name;
     document.getElementById("sortGroup").style.display = "flex";
     sortMode = "nummer";
     updateSortButtons();
