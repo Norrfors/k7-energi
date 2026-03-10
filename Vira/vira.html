@@ -255,9 +255,10 @@
   }
 
   .seat-label {
-    font-size: 0.65rem;
-    color: #9ca3af;
-    width: 30px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #1e3a8a;
+    width: 40px;
     text-align: right;
     flex-shrink: 0;
   }
@@ -299,12 +300,13 @@
 
   /* ===== NAMNVISNING ===== */
   .seat-name {
-    font-size: 0.65rem;
+    font-size: 0.8rem;
+    font-weight: 600;
     color: #1e293b;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 90px;
+    max-width: 120px;
   }
 
   .player-row {
@@ -400,7 +402,7 @@
 </head>
 <body>
 
-<h1>🃏 Vira v0.92 · 32 deltagare · 8 bord · 6 omgångar</h1>
+<h1>🃏 Vira v0.93 · 32 deltagare · 8 bord · 6 omgångar</h1>
 
 <div class="btn-row">
   <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
@@ -444,7 +446,7 @@
 <script>
 "use strict";
 
-const VERSION = "v0.92";
+const VERSION = "v0.93";
 
 // Version integrated into h1 - no separate subtitle needed
 
@@ -840,7 +842,7 @@ function renderBordView({ rounds, seats, conflictPlayers }) {
   for (let ri = 0; ri < rounds.length; ri++) {
     html += '<tr><td style="vertical-align:middle;white-space:nowrap;">Omgång ' + (ri + 1) + '</td>';
     for (let ti = 0; ti < TABLES; ti++) {
-      html += '<td style="border-right:1px solid #cbd5e1;">';
+      html += '<td style="border-right:3px solid #1e3a8a;">';
       for (let pi = 0; pi < 4; pi++) {
         const p = seats[ri][ti][pi];
         const conflict = conflictPlayers[ri][ti].has(p);
