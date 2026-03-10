@@ -401,7 +401,7 @@
 </head>
 <body>
 
-<h1>🃏 Vira v0.98 · 32 deltagare · 8 bord · 6 omgångar</h1>
+<h1>🃏 Vira v0.99 · 32 deltagare · 8 bord · 6 omgångar</h1>
 
 <div class="btn-row">
   <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
@@ -445,13 +445,14 @@
 <script>
 "use strict";
 
-const VERSION = "v0.98";
+const VERSION = "v0.99";
 
 // Version integrated into h1 - no separate subtitle needed
 
 // ===== DELTAGARLISTA =====
 let players = {};  // players[nr] = { fornamn: "", efternamn: "" }
 let sortMode = "nummer"; // "nummer" | "fornamn" | "efternamn"
+let lastOpenedFilename = "DeltagarLista.txt"; // Spara originalfilnamnet för att föreslå vid sparning
 
 (function initPlayers() {
   const saved = localStorage.getItem("vira_players");
@@ -523,6 +524,7 @@ function loadFile(event) {
     }
     
     players = newPlayers;
+    lastOpenedFilename = file.name; // Spara originalnamnet
     localStorage.setItem("vira_players", JSON.stringify(players));
     localStorage.setItem("vira_players_file", "Vira\\" + file.name);
     document.getElementById("fileInfo").textContent = "Vira\\" + file.name;
@@ -621,11 +623,12 @@ function saveEditedData() {
     return;
   }
 
-  // Fråga efter filnamn
-  const filename = prompt("Filnamn för listan:", "DeltagarLista.txt");
+  // Fråga efter filnamn - föreslå originalnamnet
+  const filename = prompt("Filnamn för listan:", lastOpenedFilename);
   if (!filename) {
     return; // User cancelled
   }
+  lastOpenedFilename = filename; // Uppdatera för nästa gång
 
   // Uppdatera players-objektet
   players = newPlayers;
