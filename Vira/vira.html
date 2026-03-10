@@ -402,7 +402,7 @@
 </head>
 <body>
 
-<h1>🃏 Vira v0.93 · 32 deltagare · 8 bord · 6 omgångar</h1>
+<h1>🃏 Vira v0.94 · 32 deltagare · 8 bord · 6 omgångar</h1>
 
 <div class="btn-row">
   <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
@@ -446,7 +446,7 @@
 <script>
 "use strict";
 
-const VERSION = "v0.93";
+const VERSION = "v0.94";
 
 // Version integrated into h1 - no separate subtitle needed
 
@@ -461,8 +461,12 @@ let sortMode = "nummer"; // "nummer" | "fornamn" | "efternamn"
     try {
       players = JSON.parse(saved);
       const count = Object.keys(players).length;
-      document.getElementById("fileInfo").textContent = fname || "okänd fil";
-      document.getElementById("sortGroup").style.display = "flex";
+      // Migrera från gamla värdet - rensa om det är det gamla formatet
+      const displayName = (fname && !fname.includes("[Manuellt")) ? fname : "Inget namn-register laddat – visar spelarnummer";
+      document.getElementById("fileInfo").textContent = displayName;
+      if (displayName !== "Inget namn-register laddat – visar spelarnummer") {
+        document.getElementById("sortGroup").style.display = "flex";
+      }
     } catch(e) { players = {}; }
   }
 })();
