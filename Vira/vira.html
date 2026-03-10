@@ -402,7 +402,7 @@
 </head>
 <body>
 
-<h1>🃏 Vira v1.05 · 32 deltagare · 8 bord · 6 omgångar</h1>
+<h1>🃏 Vira v1.06 · 32 deltagare · 8 bord · 6 omgångar</h1>
 
 <div class="btn-row">
   <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
@@ -446,7 +446,7 @@
 <script>
 "use strict";
 
-const VERSION = "v1.05";
+const VERSION = "v1.06";
 
 // Version integrated into h1 - no separate subtitle needed
 
@@ -883,7 +883,7 @@ function chip(p, conflict) {
 
 function renderBordView({ rounds, seats, conflictPlayers }) {
   let html = '<table><thead><tr>';
-  html += '<th style="text-align:left;padding-left:4px;width:35px;border-right:3px solid #1e3a8a;">Omgång</th>';
+  html += '<th style="text-align:left;padding-left:4px;width:35px;">Omgång</th>';
   for (let i = 1; i <= TABLES; i++) {
     html += '<th>Bord ' + i + '</th>';
   }
