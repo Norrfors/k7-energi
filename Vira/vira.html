@@ -226,13 +226,13 @@
     text-align: center;
   }
 
-  thead th:first-child { text-align: left; padding-left: 10px; }
+  thead th:first-child { text-align: left; padding-left: 4px; width: 35px; }
 
   tbody tr { background: #ffffff; }
 
   td {
     border: 1px solid #dbeafe;
-    padding: 4px 4px;
+    padding: 4px 2px;
     vertical-align: top;
   }
 
@@ -240,9 +240,10 @@
     font-weight: 700;
     color: #1e40af;
     white-space: nowrap;
-    padding: 4px 4px;
+    padding: 2px 2px;
     vertical-align: middle;
     font-size: 0.85rem;
+    width: 35px;
   }
 
   /* ===== SITTPLATS-RADER ===== */
@@ -401,7 +402,7 @@
 </head>
 <body>
 
-<h1>🃏 Vira v1.02 · 32 deltagare · 8 bord · 6 omgångar</h1>
+<h1>🃏 Vira v1.03 · 32 deltagare · 8 bord · 6 omgångar</h1>
 
 <div class="btn-row">
   <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
@@ -445,7 +446,7 @@
 <script>
 "use strict";
 
-const VERSION = "v1.02";
+const VERSION = "v1.03";
 
 // Version integrated into h1 - no separate subtitle needed
 
