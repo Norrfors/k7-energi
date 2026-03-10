@@ -402,7 +402,7 @@
 </head>
 <body>
 
-<h1>🃏 Vira v0.95 · 32 deltagare · 8 bord · 6 omgångar</h1>
+<h1>🃏 Vira v0.96 · 32 deltagare · 8 bord · 6 omgångar</h1>
 
 <div class="btn-row">
   <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
@@ -446,7 +446,7 @@
 <script>
 "use strict";
 
-const VERSION = "v0.95";
+const VERSION = "v0.96";
 
 // Version integrated into h1 - no separate subtitle needed
 
@@ -463,9 +463,12 @@ let sortMode = "nummer"; // "nummer" | "fornamn" | "efternamn"
       const count = Object.keys(players).length;
       
       if (count > 0) {
-        // Vi har data - visa filnamn eller default
-        const displayName = (fname && !fname.includes("[Manuellt")) ? fname : "Deltagarlista (från senare session)";
-        document.getElementById("fileInfo").textContent = displayName;
+        // Vi har data - visa filnamnet eller tom sträng om det är gamla värden
+        if (fname && !fname.includes("[Manuellt")) {
+          // Visa det faktiska filnamnet som användaren sparade
+          document.getElementById("fileInfo").textContent = fname;
+        }
+        // Visa sorteringsknapparna när vi har data
         document.getElementById("sortGroup").style.display = "flex";
       } else {
         // Ingen data
