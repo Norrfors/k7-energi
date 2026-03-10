@@ -409,7 +409,7 @@
 </head>
 <body>
 
-<h1>🃏 Vira v1.18 · 32 deltagare · 8 bord · 6 omgångar</h1>
+<h1>🃏 Vira v1.19 · 32 deltagare · 8 bord · 6 omgångar</h1>
 
 <div class="btn-row">
   <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
@@ -453,7 +453,7 @@
 <script>
 "use strict";
 
-const VERSION = "v1.18";
+const VERSION = "v1.19";
 
 // Version integrated into h1 - no separate subtitle needed
 
@@ -956,7 +956,7 @@ function renderSpelarView({ seats, conflictPlayers }) {
     html += '<tr style="height:20px;">';
     html += '<td style="text-align:left;vertical-align:middle;white-space:nowrap;padding:1px 3px;border-right:1px solid #cbd5e1;overflow:hidden;text-overflow:ellipsis;">';
     html += '<span class="chip" style="cursor:default;width:18px;height:18px;font-size:0.65rem;display:inline-block;margin-right:1px;vertical-align:middle;">' + p + '</span>';
-    html += '<span style="font-size:0.75rem;color:#1e293b;font-weight:500;vertical-align:middle;">' + getPlayerName(p) + '</span>';
+    html += '<span style="font-size:0.75rem;color:#1e293b;font-weight:500;vertical-align:middle;display:inline-block;max-width:45px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + getPlayerName(p) + '</span>';
     html += '</td>';
     for (let ri = 0; ri < ROUNDS; ri++) {
       const d = info[p] && info[p][ri];
@@ -965,7 +965,7 @@ function renderSpelarView({ seats, conflictPlayers }) {
       html += '<td style="text-align:center;vertical-align:middle;padding:0px 0.5px;font-size:0.73rem;' + bg + '">';
       if (d) {
         html += '<span style="font-weight:700;color:#1e40af;">' + d.table + '</span>';
-        html += '<span style="color:#64748b;margin:0 1px;">' + d.pos.substring(0, 2) + '</span>';
+        html += '<span style="color:#64748b;margin:0 1px;">' + d.pos + '</span>';
         if (conflict) html += '<span style="font-size:0.5rem;color:#dc2626;display:block;line-height:0.8;">⚠</span>';
       }
       html += '</td>';
