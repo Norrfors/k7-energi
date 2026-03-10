@@ -400,7 +400,7 @@
 </head>
 <body>
 
-<h1>🃏 Vira v0.91 · 32 deltagare · 8 bord · 6 omgångar</h1>
+<h1>🃏 Vira v0.92 · 32 deltagare · 8 bord · 6 omgångar</h1>
 
 <div class="btn-row">
   <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
@@ -444,7 +444,7 @@
 <script>
 "use strict";
 
-const VERSION = "v0.91";
+const VERSION = "v0.92";
 
 // Version integrated into h1 - no separate subtitle needed
 
@@ -609,15 +609,22 @@ function saveEditedData() {
     return;
   }
 
+  // Fråga efter filnamn
+  const filename = prompt("Filnamn för listan:", "DeltagarLista.txt");
+  if (!filename) {
+    return; // User cancelled
+  }
+
   // Uppdatera players-objektet
   players = newPlayers;
 
-  // Spara till localStorage
+  // Spara till localStorage med filväg
+  const filepath = "Vira\\" + filename;
   localStorage.setItem("vira_players", JSON.stringify(players));
-  localStorage.setItem("vira_players_file", "[Manuellt redigerad lista]");
+  localStorage.setItem("vira_players_file", filepath);
 
   // Uppdatera UI
-  document.getElementById("fileInfo").textContent = "[Manuellt redigerad lista]";
+  document.getElementById("fileInfo").textContent = filepath;
   document.getElementById("sortGroup").style.display = "flex";
   
   // Återställ sortering
@@ -631,7 +638,7 @@ function saveEditedData() {
   closeEditModal();
 
   // Bekräftelse
-  alert("✅ Sparad! " + count + " deltagare uppdaterad.");
+  alert("✅ Sparad! " + count + " deltagare uppdaterad.\nFilväg: " + filepath);
 }
 
 // ===== MARKERING =====
