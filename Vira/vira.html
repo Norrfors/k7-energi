@@ -228,8 +228,7 @@
 
   thead th:first-child { text-align: left; padding-left: 10px; }
 
-  tbody tr:nth-child(even) { background: #eff6ff; }
-  tbody tr:nth-child(odd)  { background: #ffffff; }
+  tbody tr { background: #ffffff; }
 
   td {
     border: 1px solid #dbeafe;
@@ -402,7 +401,7 @@
 </head>
 <body>
 
-<h1>🃏 Vira v0.97 · 32 deltagare · 8 bord · 6 omgångar</h1>
+<h1>🃏 Vira v0.98 · 32 deltagare · 8 bord · 6 omgångar</h1>
 
 <div class="btn-row">
   <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
@@ -446,7 +445,7 @@
 <script>
 "use strict";
 
-const VERSION = "v0.97";
+const VERSION = "v0.98";
 
 // Version integrated into h1 - no separate subtitle needed
 
@@ -851,7 +850,8 @@ function renderBordView({ rounds, seats, conflictPlayers }) {
   html += '</tr></thead><tbody>';
 
   for (let ri = 0; ri < rounds.length; ri++) {
-    html += '<tr><td style="vertical-align:middle;white-space:nowrap;">Omgång ' + (ri + 1) + '</td>';
+    const bottomBorder = ri < rounds.length - 1 ? 'border-bottom:3px solid #1e3a8a;' : '';
+    html += '<tr style="' + bottomBorder + '"><td style="vertical-align:middle;white-space:nowrap;">Omgång ' + (ri + 1) + '</td>';
     for (let ti = 0; ti < TABLES; ti++) {
       html += '<td style="border-right:3px solid #1e3a8a;">';
       for (let pi = 0; pi < 4; pi++) {
