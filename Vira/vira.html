@@ -400,7 +400,7 @@
 </head>
 <body>
 
-<h1>🃏 Vira v0.90 · 32 deltagare · 8 bord · 6 omgångar</h1>
+<h1>🃏 Vira v0.91 · 32 deltagare · 8 bord · 6 omgångar</h1>
 
 <div class="btn-row">
   <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
@@ -444,7 +444,7 @@
 <script>
 "use strict";
 
-const VERSION = "v0.90";
+const VERSION = "v0.91";
 
 // Version integrated into h1 - no separate subtitle needed
 
@@ -833,11 +833,12 @@ function renderBordView({ rounds, seats, conflictPlayers }) {
   for (let ri = 0; ri < rounds.length; ri++) {
     html += '<tr><td style="vertical-align:middle;white-space:nowrap;">Omgång ' + (ri + 1) + '</td>';
     for (let ti = 0; ti < TABLES; ti++) {
-      html += '<td>';
+      html += '<td style="border-right:1px solid #cbd5e1;">';
       for (let pi = 0; pi < 4; pi++) {
         const p = seats[ri][ti][pi];
         const conflict = conflictPlayers[ri][ti].has(p);
-        html += '<div class="seat-row"><span class="seat-label">' + POSITIONS[pi] + ':</span>';
+        html += '<div class="seat-row">';
+        html += '<span class="seat-label">' + POSITIONS[pi] + '</span>';
         html += chip(p, conflict);
         html += '<span class="seat-name">' + getPlayerName(p) + '</span>';
         html += '</div>';
@@ -882,8 +883,8 @@ function renderSpelarView({ seats, conflictPlayers }) {
 
   for (const p of playerNrs) {
     html += '<tr>';
-    html += '<td style="vertical-align:middle;white-space:nowrap;padding:4px 6px;">';
-    html += chip(p, false);
+    html += '<td style="vertical-align:middle;white-space:nowrap;padding:4px 6px;border-right:1px solid #cbd5e1;">';
+    html += '<span class="chip" style="cursor:default;">' + p + '</span>';
     html += ' <span style="font-size:0.75rem;color:#1e293b;">' + getPlayerName(p) + '</span>';
     html += '</td>';
     for (let ri = 0; ri < ROUNDS; ri++) {
