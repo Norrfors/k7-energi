@@ -186,6 +186,7 @@ export function performManualBackup() {
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      body: "{}",
     }
   );
 }
@@ -414,4 +415,30 @@ export function getMonthlyMeter(months: number = 24) {
 
 export function getDailyTemperatures(days: number = 30) {
   return apiFetch<DailyTemperature[]>(`/api/aggregate/daily-temperatures?days=${days}`);
+}
+
+export interface DbTableStat {
+  tabell: string;
+  total: string;
+  data: string;
+  index: string;
+  rader: number;
+}
+
+export interface DbStats {
+  totalDb: string;
+  tables: DbTableStat[];
+}
+
+export function getDbStats() {
+  return apiFetch<DbStats>("/api/admin/db-stats");
+}
+
+export interface TableData {
+  tableName: string;
+  rows: Record<string, unknown>[];
+}
+
+export function getTableData(tableName: string) {
+  return apiFetch<TableData>(`/api/admin/table-data/${tableName}`);
 }

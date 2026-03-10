@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getHealth, getTemperatures, getEnergy, getMeterLatest, getMeterToday, getMeterLast24Hours, setManualMeterValue, getBackupSettings, saveBackupSettings, performManualBackup, BackupSettings, getTemperatureHistory, getEnergyHistory, getTemperatureSensors, getEnergySensors, updateSensorVisibility, updateSensorZone, SensorInfo, calibrateMeter, getCalibrationHistory, getEnergySettings, saveEnergySettings, EnergySettings, getDailyMeter, getWeeklyMeter, getMonthlyMeter, DailyMeter, WeeklyMeter, MonthlyMeter } from "@/lib/api";
+import { getHealth, getTemperatures, getEnergy, getMeterLatest, getMeterToday, getMeterLast24Hours, setManualMeterValue, getBackupSettings, saveBackupSettings, performManualBackup, BackupSettings, getTemperatureHistory, getEnergyHistory, getTemperatureSensors, getEnergySensors, updateSensorVisibility, updateSensorZone, SensorInfo, calibrateMeter, getCalibrationHistory, getEnergySettings, saveEnergySettings, EnergySettings, getDailyMeter, getWeeklyMeter, getMonthlyMeter, DailyMeter, WeeklyMeter, MonthlyMeter, getDbStats, DbStats, getTableData, TableData } from "@/lib/api";
 import { StatusCard } from "@/components/StatusCard";
 import CapabilitiesModal from "@/components/CapabilitiesModal";
 
@@ -42,7 +42,7 @@ interface MeterReading {
   time?: string;
 }
 
-type TabType = "dashboard" | "meter" | "historik" | "settings";
+type TabType = "dashboard" | "meter" | "historik" | "settings" | "vira";
 type SettingsTabType = "backup" | "temperature" | "energy";
 
 export default function Dashboard() {
@@ -100,6 +100,21 @@ export default function Dashboard() {
   const [backupMessage, setBackupMessage] = useState<string>("");
   const [backupError, setBackupError] = useState<string>("");
 
+  // Databasstatus state
+  const [dbStats, setDbStats] = useState<DbStats | null>(null);
+  const [dbStatsLoading, setDbStatsLoading] = useState(false);
+  const [selectedTableData, setSelectedTableData] = useState<TableData | null>(null);
+  const [tableDataLoading, setTableDataLoading] = useState(false);
+  const [dbTableTooltip, setDbTableTooltip] = useState<{ x: number; y: number; row: Record<string, unknown> } | null>(null);
+  const [dbTableSort, setDbTableSort] = useState<{ col: string; dir: "asc" | "desc" } | null>(null);
+
+  // Vira-schemaläggning
+  type ViraSchedule = { rounds: number[][][]; seats: number[][][]; conflicts: number; conflictPlayers: Set<number>[][] };
+  const [viraSchedule, setViraSchedule] = useState<ViraSchedule | null>(null);
+  const [viraGenerating, setViraGenerating] = useState(false);
+  const [viraSaving, setViraSaving] = useState(false);
+  const [viraSaveMsg, setViraSaveMsg] = useState("");
+
   // Sensor detail modal state
   const [selectedSensor, setSelectedSensor] = useState<{ name: string; type: "temperature" | "energy" } | null>(null);
   const [historicalData, setHistoricalData] = useState<Array<{ deviceName: string; temperature?: number; watts?: number; meterPower?: number; accumulatedCost?: number; createdAt: string }>>([]);
@@ -122,6 +137,32 @@ export default function Dashboard() {
     console.log(`[Dashboard] ${message}`, data || "");
   };
 
+  // Formaterar ett cellt värde i expanderad DB-tabell
+  const formatDbCell = (colName: string, value: unknown): React.ReactNode => {
+    if (value === null || value === undefined) return <span className="text-gray-300">—</span>;
+    // Date-objekt från Prisma
+    if (value instanceof Date) {
+      return value.toLocaleString("sv-SE", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+    }
+    // ISO-datumsträngar
+    if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}T/.test(value)) {
+      const d = new Date(value);
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleString("sv-SE", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+      }
+    }
+    // Talformatering
+    if (typeof value === "number") {
+      const colLower = colName.toLowerCase();
+      if (["temperature", "mintemp", "maxtemp", "avgtemp"].some(t => colLower.includes(t))) {
+        return value.toFixed(1);
+      }
+      if (Number.isInteger(value)) return String(value);
+      return value.toFixed(2);
+    }
+    return String(value);
+  };
+
   // Bestäm INNE/UTE-etikett baserat på deviceName
   const getLocationLabel = (deviceName: string): string => {
     const ute = ["ute", "utetemperatur", "utomhus", "exterior", "outside"];
@@ -131,6 +172,164 @@ export default function Dashboard() {
     if (ute.some(u => lower.includes(u))) return "🌤️ UTE";
     if (inne.some(i => lower.includes(i))) return "🏠 INNE";
     return "📍 MÄTARE";
+  };
+
+  // Vira – schemaläggning med lokal sökning (social golfer-problem: 32 deltagare, 8 bord à 4, 6 omgångar)
+  const generateViraSchedule = () => {
+    setViraGenerating(true);
+    setViraSaveMsg("");
+    setTimeout(() => {
+      const ROUNDS = 6, TABLES = 8, PPT = 4, N = 32;
+      // Uint8Array för O(1) par-lookup (spelare 1-32, index a*33+b)
+      const met = new Uint8Array(33 * 33);
+      const hasMet = (a: number, b: number) => met[a * 33 + b] === 1;
+      const setMet = (a: number, b: number) => { met[a * 33 + b] = 1; met[b * 33 + a] = 1; };
+
+      const shuffle = <T,>(arr: T[]): T[] => {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = (Math.random() * (i + 1)) | 0;
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      };
+
+      const countConf = (round: number[][]): number => {
+        let c = 0;
+        for (const tbl of round)
+          for (let i = 0; i < tbl.length; i++)
+            for (let j = i + 1; j < tbl.length; j++)
+              if (hasMet(tbl[i], tbl[j])) c++;
+        return c;
+      };
+
+      // Lokal sökning: slumpmässiga byten av spelare mellan bord
+      const localSearch = (round: number[][], iters: number): number => {
+        let conf = countConf(round);
+        for (let it = 0; it < iters && conf > 0; it++) {
+          const t1 = (Math.random() * TABLES) | 0;
+          const t2 = (Math.random() * TABLES) | 0;
+          if (t1 === t2) continue;
+          const p1i = (Math.random() * PPT) | 0;
+          const p2i = (Math.random() * PPT) | 0;
+          const p1 = round[t1][p1i], p2 = round[t2][p2i];
+          let before = 0, after = 0;
+          for (const p of round[t1]) { if (p !== p1) { if (hasMet(p1, p)) before++; if (hasMet(p2, p)) after++; } }
+          for (const p of round[t2]) { if (p !== p2) { if (hasMet(p2, p)) before++; if (hasMet(p1, p)) after++; } }
+          if (after <= before) { round[t1][p1i] = p2; round[t2][p2i] = p1; conf += after - before; }
+        }
+        return conf;
+      };
+
+      const rounds: number[][][] = [];
+      const conflictPlayers: Set<number>[][] = [];
+      let totalConflicts = 0;
+
+      for (let r = 0; r < ROUNDS; r++) {
+        const restarts = r < 2 ? 4 : r < 4 ? 15 : 35;
+        const iters = r < 2 ? 60000 : r < 4 ? 120000 : 180000;
+        let bestRound: number[][] = [];
+        let bestConf = Infinity;
+
+        for (let rs = 0; rs < restarts && bestConf > 0; rs++) {
+          const players = shuffle(Array.from({ length: N }, (_, i) => i + 1));
+          const round = Array.from({ length: TABLES }, (_, t) => [...players.slice(t * PPT, (t + 1) * PPT)]);
+          const conf = localSearch(round, iters);
+          if (conf < bestConf) { bestConf = conf; bestRound = round.map(t => [...t]); }
+        }
+
+        // Markera konflikterande spelare per bord
+        const cp: Set<number>[] = Array.from({ length: TABLES }, () => new Set<number>());
+        for (let t = 0; t < TABLES; t++)
+          for (let i = 0; i < PPT; i++)
+            for (let j = i + 1; j < PPT; j++)
+              if (hasMet(bestRound[t][i], bestRound[t][j])) { cp[t].add(bestRound[t][i]); cp[t].add(bestRound[t][j]); }
+
+        totalConflicts += bestConf === Infinity ? 0 : bestConf;
+        for (const tbl of bestRound) for (let i = 0; i < tbl.length; i++) for (let j = i + 1; j < tbl.length; j++) setMet(tbl[i], tbl[j]);
+        rounds.push(bestRound);
+        conflictPlayers.push(cp);
+      }
+      // Tilldela sittplatser (NORD=0, OST=1, SYD=2, VÄST=3) balanserat över alla omgångar
+      const PERMS4: number[][] = [
+        [0,1,2,3],[0,1,3,2],[0,2,1,3],[0,2,3,1],[0,3,1,2],[0,3,2,1],
+        [1,0,2,3],[1,0,3,2],[1,2,0,3],[1,2,3,0],[1,3,0,2],[1,3,2,0],
+        [2,0,1,3],[2,0,3,1],[2,1,0,3],[2,1,3,0],[2,3,0,1],[2,3,1,0],
+        [3,0,1,2],[3,0,2,1],[3,1,0,2],[3,1,2,0],[3,2,0,1],[3,2,1,0],
+      ];
+      const posCount = Array.from({ length: 33 }, () => new Array(4).fill(0));
+      const seats: number[][][] = [];
+      for (const round of rounds) {
+        const roundSeats: number[][] = [];
+        for (const table of round) {
+          let bestPerm = PERMS4[0], bestScore = Infinity;
+          for (const perm of PERMS4) {
+            const score = table.reduce((s, p, i) => s + posCount[p][perm[i]], 0);
+            if (score < bestScore) { bestScore = score; bestPerm = perm; }
+          }
+          const seatArr = new Array(4);
+          table.forEach((p, i) => { seatArr[bestPerm[i]] = p; posCount[p][bestPerm[i]]++; });
+          roundSeats.push(seatArr);
+        }
+        seats.push(roundSeats);
+      }
+
+      setViraSchedule({ rounds, seats, conflicts: totalConflicts, conflictPlayers });
+      setViraGenerating(false);
+    }, 10);
+  };
+
+  // Vira – generera HTML för utskrift/PDF
+  const buildViraHtml = (rounds: number[][][], seats: number[][][], conflictPlayers: Set<number>[][]): string => {
+    const now = new Date().toLocaleString("sv-SE");
+    const posLabels = ["NORD", "OST", "SYD", "VÄST"];
+    const rows = rounds.map((round, ri) => {
+      const cells = round.map((tbl, ti) => {
+        const rows4 = posLabels.map((pos, pi) => {
+          const p = seats[ri][ti][pi];
+          const red = conflictPlayers[ri]?.[ti]?.has(p);
+          const chipStyle = red
+            ? "display:inline-flex;width:22px;height:22px;align-items:center;justify-content:center;border-radius:50%;font-size:10px;font-weight:bold;background:#fee2e2;color:#b91c1c;border:2px solid #ef4444;"
+            : "display:inline-flex;width:22px;height:22px;align-items:center;justify-content:center;border-radius:50%;font-size:10px;font-weight:bold;background:#dbeafe;color:#1e40af;";
+          return `<div style="display:flex;align-items:center;gap:4px;margin:1px 0;"><span style="font-size:9px;color:#9ca3af;width:30px;text-align:right;">${pos}:</span><span style="${chipStyle}">${p}</span></div>`;
+        }).join("");
+        return `<td style="padding:4px 6px;border:1px solid #e5e7eb;">${rows4}</td>`;
+      }).join("");
+      const bg = ri % 2 === 0 ? "#ffffff" : "#eff6ff";
+      return `<tr style="background:${bg}"><td style="padding:6px 10px;font-weight:bold;color:#1e40af;border:1px solid #e5e7eb;white-space:nowrap;vertical-align:top;">Omgång ${ri + 1}</td>${cells}</tr>`;
+    }).join("");
+    const headers = Array.from({ length: 8 }, (_, i) => `<th style="padding:8px;background:#2563eb;color:white;font-weight:600;">Bord ${i + 1}</th>`).join("");
+    return `<!DOCTYPE html><html lang="sv"><head><meta charset="UTF-8"><title>Vira – Bordslottning</title>
+<style>body{font-family:Arial,sans-serif;padding:20px;}h1{color:#1e3a8a;margin-bottom:8px;}table{border-collapse:collapse;width:100%;}@media print{body{padding:10px;}}</style>
+</head><body>
+<h1>🃏 Vira – Bordslottning</h1>
+<table><thead><tr><th style="padding:8px;background:#2563eb;color:white;font-weight:600;text-align:left;">Omgång</th>${headers}</tr></thead><tbody>${rows}</tbody></table>
+<p style="margin-top:30px;color:#6b7280;font-size:12px;text-align:right;">by Gaxor &nbsp;·&nbsp; ${now}</p>
+</body></html>`;
+  };
+
+  const handleViraPrint = () => {
+    if (!viraSchedule) return;
+    const html = buildViraHtml(viraSchedule.rounds, viraSchedule.seats, viraSchedule.conflictPlayers);
+    const w = window.open("", "_blank");
+    if (w) { w.document.write(html); w.document.close(); setTimeout(() => w.print(), 300); }
+  };
+
+  const handleViraSave = async () => {
+    if (!viraSchedule) return;
+    setViraSaving(true);
+    setViraSaveMsg("");
+    try {
+      const html = buildViraHtml(viraSchedule.rounds, viraSchedule.seats, viraSchedule.conflictPlayers);
+      const res = await fetch("/api/vira/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ html }),
+      });
+      const data = await res.json();
+      setViraSaveMsg(data.success ? `✅ Sparad: ${data.filename}` : "❌ Kunde inte spara");
+    } catch { setViraSaveMsg("❌ Kunde inte spara"); }
+    setViraSaving(false);
   };
 
   // localStorage helpers for sensor visibility
@@ -800,6 +999,22 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
+      {/* Flytande tooltip för DB-tabellvy */}
+      {dbTableTooltip && (
+        <div
+          className="fixed z-50 bg-gray-900 text-white text-xs rounded-lg shadow-xl p-3 max-w-xs pointer-events-none"
+          style={{ top: dbTableTooltip.y + 14, left: dbTableTooltip.x + 14 }}
+        >
+          {(["id", "deviceId", "zoneId", "zoneName", "zonePath"] as const).map(key => (
+            dbTableTooltip.row[key] !== undefined && dbTableTooltip.row[key] !== null && (
+              <div key={key} className="mb-1 last:mb-0">
+                <span className="text-gray-400">{key}:</span>{" "}
+                <span className="font-mono break-all">{String(dbTableTooltip.row[key])}</span>
+              </div>
+            )
+          ))}
+        </div>
+      )}
       {/* Blinkande felruta – visas bara när något inte är anslutet */}
       {(health?.status !== "ok" || health?.database !== "ansluten" || !homeyConnected) && (
         <div className="animate-pulse bg-red-600 text-white font-bold text-center py-3 px-4 rounded-lg tracking-widest">
@@ -812,30 +1027,30 @@ export default function Dashboard() {
       )}
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 border-b border-gray-300 bg-gray-50 px-2 py-1 rounded-t-lg">
+      <div className="flex items-center gap-0.5 sm:gap-1 border-b border-gray-300 bg-gray-50 px-1 sm:px-2 py-1 rounded-t-lg overflow-x-auto">
         <button
           onClick={() => setActiveTab("dashboard")}
-          className={`px-4 py-2 font-semibold transition rounded-t-lg ${
+          className={`px-2 sm:px-4 py-2 text-sm sm:text-base font-semibold transition rounded-t-lg whitespace-nowrap ${
             activeTab === "dashboard"
               ? "bg-white text-blue-600 border-b-2 border-blue-600"
               : "text-gray-600 hover:text-gray-900 hover:bg-white"
           }`}
         >
-          📊 Dashboard
+          📊 <span className="hidden xs:inline">Dashboard</span><span className="xs:hidden">Dash</span>
         </button>
         <button
           onClick={() => setActiveTab("meter")}
-          className={`px-4 py-2 font-semibold transition rounded-t-lg ${
+          className={`px-2 sm:px-4 py-2 text-sm sm:text-base font-semibold transition rounded-t-lg whitespace-nowrap ${
             activeTab === "meter"
               ? "bg-white text-blue-600 border-b-2 border-blue-600"
               : "text-gray-600 hover:text-gray-900 hover:bg-white"
           }`}
         >
-          ⚡ Mätardata
+          ⚡ Mätare
         </button>
         <button
           onClick={() => setActiveTab("historik")}
-          className={`px-4 py-2 font-semibold transition rounded-t-lg ${
+          className={`px-2 sm:px-4 py-2 text-sm sm:text-base font-semibold transition rounded-t-lg whitespace-nowrap ${
             activeTab === "historik"
               ? "bg-white text-blue-600 border-b-2 border-blue-600"
               : "text-gray-600 hover:text-gray-900 hover:bg-white"
@@ -844,14 +1059,24 @@ export default function Dashboard() {
           📅 Historik
         </button>
         <button
+          onClick={() => setActiveTab("vira")}
+          className={`px-2 sm:px-4 py-2 text-sm sm:text-base font-semibold transition rounded-t-lg whitespace-nowrap ${
+            activeTab === "vira"
+              ? "bg-white text-blue-600 border-b-2 border-blue-600"
+              : "text-gray-600 hover:text-gray-900 hover:bg-white"
+          }`}
+        >
+          🃏 Vira
+        </button>
+        <button
           onClick={() => setActiveTab("settings")}
-          className={`px-4 py-2 font-semibold transition rounded-t-lg ml-auto flex items-center gap-2 ${
+          className={`px-2 sm:px-4 py-2 text-sm sm:text-base font-semibold transition rounded-t-lg ml-auto flex items-center gap-1 sm:gap-2 whitespace-nowrap ${
             activeTab === "settings"
               ? "bg-white text-blue-600 border-b-2 border-blue-600"
               : "text-gray-600 hover:text-gray-900 hover:bg-white"
           }`}
         >
-          ⚙️ Inställningar
+          ⚙️ <span className="hidden sm:inline">Inställningar</span><span className="sm:hidden">Inst.</span>
         </button>
       </div>
 
@@ -864,12 +1089,12 @@ export default function Dashboard() {
                 🌡️ Temperaturer
               </h2>
               <div className="border border-gray-300 rounded-lg overflow-hidden shadow-sm">
-                <div className="bg-blue-50 p-2 border-b border-gray-300 grid grid-cols-7 gap-1 font-semibold text-gray-700 text-xs">
+                <div className="bg-blue-50 p-2 border-b border-gray-300 grid grid-cols-3 sm:grid-cols-7 gap-1 font-semibold text-gray-700 text-xs">
                   <div className="col-span-2">Enhet</div>
-                  <div className="col-span-2">Zonestig</div>
+                  <div className="hidden sm:block sm:col-span-2">Zonestig</div>
                   <div className="text-right">Aktuell</div>
-                  <div className="text-right">Snitt 12h</div>
-                  <div className="text-right">Snitt 24h</div>
+                  <div className="hidden sm:block text-right">Snitt 12h</div>
+                  <div className="hidden sm:block text-right">Snitt 24h</div>
                 </div>
                 {temperatures
                   .sort((a, b) => a.deviceName.localeCompare(b.deviceName))
@@ -883,9 +1108,9 @@ export default function Dashboard() {
                   <div
                     key={t.deviceName}
                     onClick={() => { setSelectedSensor({ name: t.deviceName, type: "temperature" }); setSensorModalPage(1); }}
-                    className={`grid grid-cols-7 gap-1 p-2 ${
+                    className={`grid grid-cols-3 sm:grid-cols-7 gap-1 p-2 ${
                       index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                    } border-b border-gray-200 last:border-b-0 hover:bg-blue-100 transition text-xs cursor-pointer`}
+                    } border-b border-gray-200 last:border-b-0 active:bg-blue-100 hover:bg-blue-100 transition text-xs cursor-pointer`}
                   >
                     <div className="col-span-2 text-gray-800 font-medium truncate">
                       <div className="truncate">{t.deviceName}</div>
@@ -896,16 +1121,16 @@ export default function Dashboard() {
                         })()}
                       </span>
                     </div>
-                    <div className="col-span-2 text-gray-500 truncate self-center">
+                    <div className="hidden sm:block sm:col-span-2 text-gray-500 truncate self-center">
                       {t.zonePath || t.zone || ""}
                     </div>
-                    <div className="text-right font-semibold text-blue-600">
+                    <div className="text-right font-semibold text-blue-600 self-center">
                       {t.temperature !== null ? `${t.temperature.toFixed(1)}°` : "N/A"}
                     </div>
-                    <div className="text-right text-gray-700">
+                    <div className="hidden sm:block text-right text-gray-700 self-center">
                       {t.avg12h !== null && t.avg12h !== undefined ? `${t.avg12h.toFixed(1)}°` : "N/A"}
                     </div>
-                    <div className="text-right text-gray-700">
+                    <div className="hidden sm:block text-right text-gray-700 self-center">
                       {t.avg24h !== null && t.avg24h !== undefined ? `${t.avg24h.toFixed(1)}°` : "N/A"}
                     </div>
                   </div>
@@ -920,15 +1145,15 @@ export default function Dashboard() {
                 ⚡ Energiförbrukning
               </h2>
               <div className="border border-gray-300 rounded-lg overflow-hidden shadow-sm">
-                <div className="bg-yellow-50 p-2 border-b border-gray-300 grid grid-cols-10 gap-1 font-semibold text-gray-700 text-xs">
+                <div className="bg-yellow-50 p-2 border-b border-gray-300 grid grid-cols-3 sm:grid-cols-6 md:grid-cols-10 gap-1 font-semibold text-gray-700 text-xs">
                   <div className="col-span-2">Enhet</div>
-                  <div className="col-span-2">Zonestig</div>
+                  <div className="hidden md:block md:col-span-2">Zonestig</div>
                   <div className="text-right">Aktuell</div>
-                  <div className="text-right">Senaste 1h</div>
-                  <div className="text-right">Senaste 12h</div>
-                  <div className="text-right">Senaste 24h</div>
-                  <div className="text-right">Hittills idag</div>
-                  <div className="text-right">Föregående dygn</div>
+                  <div className="hidden sm:block text-right">Senaste 1h</div>
+                  <div className="hidden md:block text-right">Senaste 12h</div>
+                  <div className="hidden md:block text-right">Senaste 24h</div>
+                  <div className="hidden sm:block text-right">Idag</div>
+                  <div className="hidden md:block text-right">Fg dygn</div>
                 </div>
                 {energy
                   .sort((a, b) => a.deviceName.localeCompare(b.deviceName))
@@ -945,9 +1170,9 @@ export default function Dashboard() {
                       <div
                         key={e.deviceName}
                         onClick={() => { setSelectedSensor({ name: e.deviceName, type: "energy" }); setSensorModalPage(1); }}
-                        className={`grid grid-cols-10 gap-1 p-2 ${
+                        className={`grid grid-cols-3 sm:grid-cols-6 md:grid-cols-10 gap-1 p-2 ${
                           index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                        } border-b border-gray-200 last:border-b-0 hover:bg-yellow-100 transition text-xs cursor-pointer`}
+                        } border-b border-gray-200 last:border-b-0 active:bg-yellow-100 hover:bg-yellow-100 transition text-xs cursor-pointer`}
                       >
                         <div className="col-span-2 text-gray-800 font-medium truncate">
                           <div className="truncate">{e.deviceName}</div>
@@ -957,25 +1182,25 @@ export default function Dashboard() {
                             })()}
                           </span>
                         </div>
-                        <div className="col-span-2 text-gray-500 truncate self-center">
+                        <div className="hidden md:block md:col-span-2 text-gray-500 truncate self-center">
                           {e.zonePath || e.zone || ""}
                         </div>
-                        <div className="text-right font-semibold text-yellow-600">
+                        <div className="text-right font-semibold text-yellow-600 self-center">
                           {e.watts !== null ? `${e.watts.toFixed(0)}W` : "N/A"}
                         </div>
-                        <div className="text-right text-gray-700">
+                        <div className="hidden sm:block text-right text-gray-700 self-center">
                           {e.consumption1h !== null && e.consumption1h !== undefined ? `${e.consumption1h.toFixed(0)}Wh` : "N/A"}
                         </div>
-                        <div className="text-right text-gray-700">
+                        <div className="hidden md:block text-right text-gray-700 self-center">
                           {e.consumption12h !== null && e.consumption12h !== undefined ? `${e.consumption12h.toFixed(0)}Wh` : "N/A"}
                         </div>
-                        <div className="text-right text-gray-700">
+                        <div className="hidden md:block text-right text-gray-700 self-center">
                           {e.consumption24h !== null && e.consumption24h !== undefined ? `${e.consumption24h.toFixed(0)}Wh` : "N/A"}
                         </div>
-                        <div className="text-right text-gray-700">
+                        <div className="hidden sm:block text-right text-gray-700 self-center">
                           {e.consumptionToday !== null && e.consumptionToday !== undefined ? `${e.consumptionToday.toFixed(0)}Wh` : "N/A"}
                         </div>
-                        <div className="text-right text-gray-700">
+                        <div className="hidden md:block text-right text-gray-700 self-center">
                           {e.consumptionPreviousDay !== null && e.consumptionPreviousDay !== undefined ? `${e.consumptionPreviousDay.toFixed(0)}Wh` : "0 Wh"}
                         </div>
                       </div>
@@ -1059,12 +1284,12 @@ export default function Dashboard() {
           <p className="text-sm text-gray-500">Aggregerat dygn för dygn. Rådatan sparas 45 dagar, dagliga sammanfattningar sparas för alltid.</p>
 
           {/* Underfliktnavigering */}
-          <div className="flex gap-1 border-b border-gray-300">
+          <div className="flex gap-0.5 sm:gap-1 border-b border-gray-300 overflow-x-auto">
             {(["dagar", "veckor", "manader"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveHistoryTab(tab)}
-                className={`px-4 py-2 text-sm font-semibold transition rounded-t-lg ${
+                className={`px-3 sm:px-4 py-2 text-sm font-semibold transition rounded-t-lg whitespace-nowrap ${
                   activeHistoryTab === tab
                     ? "bg-white text-blue-600 border-b-2 border-blue-600"
                     : "text-gray-600 hover:text-gray-900"
@@ -1081,16 +1306,16 @@ export default function Dashboard() {
             <>
               {/* DAGAR */}
               {activeHistoryTab === "dagar" && (
-                <div className="border border-gray-300 rounded-lg overflow-hidden">
-                  <table className="w-full text-xs">
+                <div className="border border-gray-300 rounded-lg overflow-hidden overflow-x-auto">
+                  <table className="w-full text-xs min-w-[480px]">
                     <thead className="bg-blue-50 text-gray-700 font-semibold">
                       <tr>
-                        <th className="text-left px-3 py-2">Datum</th>
-                        <th className="text-right px-3 py-2">Förbrukning kWh</th>
-                        <th className="text-right px-3 py-2">Snitt W</th>
-                        <th className="text-right px-3 py-2">Topp W</th>
-                        <th className="text-right px-3 py-2">Mätare start</th>
-                        <th className="text-right px-3 py-2">Mätare slut</th>
+                        <th className="text-left px-2 sm:px-3 py-2">Datum</th>
+                        <th className="text-right px-2 sm:px-3 py-2">kWh</th>
+                        <th className="text-right px-2 sm:px-3 py-2">Snitt W</th>
+                        <th className="text-right px-2 sm:px-3 py-2">Topp W</th>
+                        <th className="text-right px-2 sm:px-3 py-2">Mätare start</th>
+                        <th className="text-right px-2 sm:px-3 py-2">Mätare slut</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -1099,12 +1324,12 @@ export default function Dashboard() {
                       ) : (
                         [...dailyMeter].reverse().map((row, i) => (
                           <tr key={row.id} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                            <td className="px-3 py-1.5 font-medium">{new Date(row.date).toLocaleDateString("sv-SE", { weekday: "short", month: "short", day: "numeric" })}</td>
-                            <td className="px-3 py-1.5 text-right font-bold text-blue-700">{row.consumptionKwh.toFixed(2)}</td>
-                            <td className="px-3 py-1.5 text-right">{Math.round(row.avgWatts)}</td>
-                            <td className="px-3 py-1.5 text-right text-orange-600">{Math.round(row.peakWatts)}</td>
-                            <td className="px-3 py-1.5 text-right text-gray-400">{row.meterStart.toFixed(0)}</td>
-                            <td className="px-3 py-1.5 text-right text-gray-400">{row.meterEnd.toFixed(0)}</td>
+                            <td className="px-2 sm:px-3 py-1.5 font-medium">{new Date(row.date).toLocaleDateString("sv-SE", { weekday: "short", month: "short", day: "numeric" })}</td>
+                            <td className="px-2 sm:px-3 py-1.5 text-right font-bold text-blue-700">{row.consumptionKwh.toFixed(2)}</td>
+                            <td className="px-2 sm:px-3 py-1.5 text-right">{Math.round(row.avgWatts)}</td>
+                            <td className="px-2 sm:px-3 py-1.5 text-right text-orange-600">{Math.round(row.peakWatts)}</td>
+                            <td className="px-2 sm:px-3 py-1.5 text-right text-gray-400">{row.meterStart.toFixed(0)}</td>
+                            <td className="px-2 sm:px-3 py-1.5 text-right text-gray-400">{row.meterEnd.toFixed(0)}</td>
                           </tr>
                         ))
                       )}
@@ -1112,8 +1337,8 @@ export default function Dashboard() {
                     {dailyMeter.length > 0 && (
                       <tfoot className="bg-gray-100 font-semibold text-xs border-t border-gray-300">
                         <tr>
-                          <td className="px-3 py-2">Totalt ({dailyMeter.length} dagar)</td>
-                          <td className="px-3 py-2 text-right text-blue-700">
+                          <td className="px-2 sm:px-3 py-2">Totalt ({dailyMeter.length} dagar)</td>
+                          <td className="px-2 sm:px-3 py-2 text-right text-blue-700">
                             {dailyMeter.reduce((s, r) => s + r.consumptionKwh, 0).toFixed(2)} kWh
                           </td>
                           <td colSpan={4}></td>
@@ -1199,10 +1424,10 @@ export default function Dashboard() {
           </h2>
 
           {/* Settings sous-tabs */}
-          <div className="flex items-center gap-1 border-b border-gray-300 bg-gray-50 px-2 py-1 rounded-t-lg">
+          <div className="flex items-center gap-0.5 sm:gap-1 border-b border-gray-300 bg-gray-50 px-1 sm:px-2 py-1 rounded-t-lg overflow-x-auto">
             <button
               onClick={() => setActiveSettingsTab("backup")}
-              className={`px-4 py-2 font-semibold transition rounded-t-lg ${
+              className={`px-2 sm:px-4 py-2 text-sm sm:text-base font-semibold transition rounded-t-lg whitespace-nowrap ${
                 activeSettingsTab === "backup"
                   ? "bg-white text-blue-600 border-b-2 border-blue-600"
                   : "text-gray-600 hover:text-gray-900 hover:bg-white"
@@ -1212,17 +1437,17 @@ export default function Dashboard() {
             </button>
             <button
               onClick={() => setActiveSettingsTab("temperature")}
-              className={`px-4 py-2 font-semibold transition rounded-t-lg ${
+              className={`px-2 sm:px-4 py-2 text-sm sm:text-base font-semibold transition rounded-t-lg whitespace-nowrap ${
                 activeSettingsTab === "temperature"
                   ? "bg-white text-blue-600 border-b-2 border-blue-600"
                   : "text-gray-600 hover:text-gray-900 hover:bg-white"
               }`}
             >
-              🌡️ Temperaturer
+              🌡️ <span className="hidden sm:inline">Temperaturer</span><span className="sm:hidden">Temp.</span>
             </button>
             <button
               onClick={() => setActiveSettingsTab("energy")}
-              className={`px-4 py-2 font-semibold transition rounded-t-lg ${
+              className={`px-2 sm:px-4 py-2 text-sm sm:text-base font-semibold transition rounded-t-lg whitespace-nowrap ${
                 activeSettingsTab === "energy"
                   ? "bg-white text-blue-600 border-b-2 border-blue-600"
                   : "text-gray-600 hover:text-gray-900 hover:bg-white"
@@ -1346,6 +1571,146 @@ export default function Dashboard() {
                       <p className="text-green-600 text-sm mt-2">{backupMessage}</p>
                     )}
                   </div>
+                </div>
+              </section>
+
+              {/* Databasstatus */}
+              <section>
+                <h3 className="text-xl font-bold mb-4 text-gray-900 flex items-center gap-2">
+                  🗄️ Databasstatus
+                </h3>
+                <div className="bg-gray-50 border border-gray-300 rounded-lg p-4 sm:p-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <button
+                      onClick={async () => {
+                        setDbStatsLoading(true);
+                        try { setDbStats(await getDbStats()); } catch {}
+                        setDbStatsLoading(false);
+                      }}
+                      disabled={dbStatsLoading}
+                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-400 transition"
+                    >
+                      {dbStatsLoading ? "Hämtar..." : "🔍 Visa databasstatus"}
+                    </button>
+                    {dbStats && (
+                      <span className="text-sm font-semibold text-gray-700">
+                        Totalt: <span className="text-indigo-700">{dbStats.totalDb}</span>
+                      </span>
+                    )}
+                  </div>
+
+                  {dbStats && (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-xs min-w-[400px]">
+                        <thead>
+                          <tr className="bg-indigo-50 text-gray-700 font-semibold">
+                            <th className="text-left px-3 py-2">Tabell</th>
+                            <th className="text-right px-3 py-2">Rader</th>
+                            <th className="text-right px-3 py-2">Data</th>
+                            <th className="text-right px-3 py-2">Index</th>
+                            <th className="text-right px-3 py-2">Totalt</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {dbStats.tables.map((t, i) => (
+                            <tr
+                              key={t.tabell}
+                              className={`cursor-pointer hover:bg-indigo-50 transition-colors ${selectedTableData?.tableName === t.tabell ? "bg-indigo-100" : i % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
+                              onClick={async () => {
+                                if (selectedTableData?.tableName === t.tabell) {
+                                  setSelectedTableData(null);
+                                  return;
+                                }
+                                setTableDataLoading(true);
+                                try { setSelectedTableData(await getTableData(t.tabell)); } catch {}
+                                setTableDataLoading(false);
+                              }}
+                            >
+                              <td className="px-3 py-1.5 font-mono text-indigo-700 underline decoration-dotted">{t.tabell}</td>
+                              <td className="px-3 py-1.5 text-right text-gray-600">{t.rader.toLocaleString("sv-SE")}</td>
+                              <td className="px-3 py-1.5 text-right text-gray-500">{t.data}</td>
+                              <td className="px-3 py-1.5 text-right text-gray-500">{t.index}</td>
+                              <td className="px-3 py-1.5 text-right font-semibold text-indigo-700">{t.total}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {/* Expanderad tabellvy */}
+                  {tableDataLoading && (
+                    <p className="mt-4 text-sm text-gray-500 italic">Hämtar tabelldata...</p>
+                  )}
+                  {selectedTableData && !tableDataLoading && (() => {
+                    const isHidden = (col: string) => col === "id" || col.endsWith("Id");
+                    const dateCols = ["createdAt", "updatedAt", "fetchedAt", "calibrationDateTime", "date", "lastBackupAt"];
+                    const allCols = selectedTableData.rows.length > 0 ? Object.keys(selectedTableData.rows[0]) : [];
+                    const rows = selectedTableData.rows;
+                    // Dölj updatedAt om den aldrig skiljer sig från createdAt (Prisma sätter båda till now() vid insert)
+                    const updatedAtRedundant = allCols.includes("updatedAt") && allCols.includes("createdAt") &&
+                      rows.every(r => String(r["updatedAt"]) === String(r["createdAt"]));
+                    const visible = allCols.filter(c => !isHidden(c) && !(c === "updatedAt" && updatedAtRedundant));
+                    const cols = [
+                      ...visible.filter(c => dateCols.includes(c)),
+                      ...visible.filter(c => !dateCols.includes(c)),
+                    ];
+                    const sortedRows = dbTableSort ? [...rows].sort((a, b) => {
+                      const av = a[dbTableSort.col], bv = b[dbTableSort.col];
+                      if (av === null || av === undefined) return 1;
+                      if (bv === null || bv === undefined) return -1;
+                      const cmp = av instanceof Date && bv instanceof Date ? av.getTime() - bv.getTime()
+                        : typeof av === "number" && typeof bv === "number" ? av - bv
+                        : String(av).localeCompare(String(bv), "sv");
+                      return dbTableSort.dir === "asc" ? cmp : -cmp;
+                    }) : rows;
+                    const handleSort = (col: string) => {
+                      setDbTableSort(s => s?.col === col ? { col, dir: s.dir === "asc" ? "desc" : "asc" } : { col, dir: "asc" });
+                    };
+                    return (
+                      <div className="mt-4 border border-indigo-200 rounded-lg overflow-hidden">
+                        <div className="flex items-center justify-between bg-indigo-600 text-white px-4 py-2">
+                          <span className="font-mono font-semibold text-sm">{selectedTableData.tableName} – {selectedTableData.rows.length} rader (senaste först)</span>
+                          <button onClick={() => { setSelectedTableData(null); setDbTableSort(null); }} className="text-white hover:text-indigo-200 text-lg font-bold leading-none">×</button>
+                        </div>
+                        <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+                          <table className="w-full text-xs whitespace-nowrap">
+                            <thead className="sticky top-0 bg-indigo-50 text-gray-700 font-semibold">
+                              <tr>
+                                {cols.map(c => (
+                                  <th
+                                    key={c}
+                                    className="text-left px-3 py-2 border-b border-indigo-100 cursor-pointer hover:bg-indigo-100 select-none"
+                                    onClick={() => handleSort(c)}
+                                  >
+                                    {c}
+                                    {dbTableSort?.col === c ? (dbTableSort.dir === "asc" ? " ▲" : " ▼") : " ⇅"}
+                                  </th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {sortedRows.map((row, i) => (
+                                <tr key={i} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                                  {cols.map(c => (
+                                    <td
+                                      key={c}
+                                      className={`px-3 py-1 text-gray-700 border-b border-gray-100${c === "deviceName" ? " cursor-help underline decoration-dotted" : ""}`}
+                                      onMouseEnter={c === "deviceName" ? (e) => setDbTableTooltip({ x: e.clientX, y: e.clientY, row }) : undefined}
+                                      onMouseMove={c === "deviceName" ? (e) => setDbTableTooltip(t => t ? { ...t, x: e.clientX, y: e.clientY } : null) : undefined}
+                                      onMouseLeave={c === "deviceName" ? () => setDbTableTooltip(null) : undefined}
+                                    >
+                                      {formatDbCell(c, row[c])}
+                                    </td>
+                                  ))}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               </section>
             </div>
@@ -1857,6 +2222,86 @@ export default function Dashboard() {
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* VIRA Tab */}
+      {activeTab === "vira" && (
+        <div className="space-y-6">
+          <div className="flex items-center gap-3 flex-wrap">
+            <h2 className="text-2xl font-bold text-gray-900">🃏 Vira – Bordslottning</h2>
+            <button onClick={generateViraSchedule} disabled={viraGenerating}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition font-semibold">
+              {viraGenerating ? "Genererar..." : viraSchedule ? "🔀 Generera nytt" : "🎲 Generera schema"}
+            </button>
+            {viraSchedule && (
+              <>
+                <button onClick={handleViraPrint}
+                  className="px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition font-semibold">
+                  🖨️ Skriv ut / PDF
+                </button>
+                <button onClick={handleViraSave} disabled={viraSaving}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 transition font-semibold">
+                  {viraSaving ? "Sparar..." : "💾 Spara till .\Vira"}
+                </button>
+              </>
+            )}
+            {viraSaveMsg && <span className="text-sm font-medium">{viraSaveMsg}</span>}
+            {viraSchedule && viraSchedule.conflicts > 0 && (
+              <span className="text-sm text-amber-700 bg-amber-100 px-3 py-1 rounded-full font-medium">
+                ⚠️ {viraSchedule.conflicts} konflikt{viraSchedule.conflicts > 1 ? "er" : ""} – röd ring = upprepat par
+              </span>
+            )}
+            {viraSchedule && viraSchedule.conflicts === 0 && (
+              <span className="text-sm text-green-700 bg-green-100 px-3 py-1 rounded-full font-medium">
+                ✅ Inga upprepade bordskamrater
+              </span>
+            )}
+          </div>
+
+          <p className="text-sm text-gray-500">
+            32 deltagare (1–32) fördelas på 8 bord à 4 per omgång. Ingen ska sitta med samma person som en tidigare omgång.
+          </p>
+
+          {viraSchedule && (
+            <div className="overflow-x-auto">
+              <table className="text-sm border-collapse min-w-full">
+                <thead>
+                  <tr className="bg-blue-600 text-white">
+                    <th className="px-3 py-2 text-left font-semibold whitespace-nowrap">Omgång</th>
+                    {Array.from({ length: 8 }, (_, i) => (
+                      <th key={i} className="px-3 py-2 text-center font-semibold whitespace-nowrap">Bord {i + 1}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {viraSchedule.rounds.map((round, ri) => (
+                    <tr key={ri} className={ri % 2 === 0 ? "bg-white" : "bg-blue-50"}>
+                      <td className="px-3 py-2 font-bold text-blue-800 whitespace-nowrap border-r border-blue-100">
+                        Omgång {ri + 1}
+                      </td>
+                      {round.map((table, ti) => (
+                        <td key={ti} className="px-1 py-1 border border-gray-100 text-xs">
+                          {["NORD","OST","SYD","VÄST"].map((pos, pi) => {
+                            const p = viraSchedule.seats[ri][ti][pi];
+                            const conflict = viraSchedule.conflictPlayers[ri]?.[ti]?.has(p);
+                            return (
+                              <div key={pos} className="flex items-center gap-1 px-1 py-0.5">
+                                <span className="text-gray-400 w-8 text-right shrink-0">{pos}:</span>
+                                <span className={`inline-flex w-6 h-6 items-center justify-center rounded-full text-xs font-bold shrink-0 ${
+                                  conflict ? "bg-red-100 text-red-700 ring-2 ring-red-500" : "bg-blue-100 text-blue-800"
+                                }`}>{p}</span>
+                              </div>
+                            );
+                          })}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 

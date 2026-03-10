@@ -8,7 +8,7 @@ ARG VERSION=dev
 WORKDIR /app
 
 # Installera OpenSSL för Prisma (Prisma kräver libssl.so.1.1)
-RUN apk add --no-cache openssl
+RUN apk add --no-cache openssl postgresql-client
 
 # Installera dependencies (inkl. devDependencies för TypeScript-build)
 COPY package*.json ./

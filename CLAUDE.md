@@ -138,6 +138,56 @@ Aktuell version: **v0.71** (Tailscale remote access)
 
 ---
 
+## 🪑 Bordsplacering-System (Vira)
+
+**Katalog:** `Vira/`
+
+**Filer:**
+- **`vira.html`** (v0.89) ← **Huvudversion** - Bordslottning med 3 sorteringsmöjligheter
+- `vira088.html` - Backup av tidigare version (sparad för referens)
+- `bordsplacering.html` (v1.00) - Alternativ implementering (visuell grid-layout)
+
+**Versionshistorik:** Se `Vira/VIRA-VERSION.md`
+
+### vira.html v0.89 - Bordslottning med sortering
+**Primär funktion:** Generera slumpmässiga bordsplaceringar för 32 spelare vid 8 bord
+
+#### Funktionalitet
+- 📂 **Filuppladdning** - ladda deltagarlista (`.txt`, `.csv`)
+- 🔄 **Automatisk parsning** - format: `Nr;Förnamn;Efternamn`
+- **3 sorteringsalternativ** när spelare visas:
+  - 🔢 **Nummer** (1-32 stigande) → visar "Förnamn Efternamn"
+  - 🔤 **Förnamn** (alfabetiskt A-Ö) → visar "Förnamn Efternamn"
+  - 🔤 **Efternamn** (alfabetiskt A-Ö, sekundär på förnamn) → visar "**Efternamn Förnamn**"
+- 🎲 **Generera schema** - algoritm minimerar upprepade par
+- 👤 **Visa per bord** eller **Visa per spelare** - två layoutlägen
+- 🖨️ **Skriv ut/PDF** - optimering för utskrift
+
+#### Layout & Design
+- Alla knappar på **en rad** för maximering av deltagar-rader
+- Version i rubrikraden: "Vira v0.89 · 32 deltagare · 8 bord · 6 omgångar"
+- "Klicka på siffra..."-hint visas endast i "vis per bord"-vyn
+- Sorteringsknapparna ligger direkt efter filnamnet
+- Filnamn visas renare (utan prefix)
+
+#### Format för medlemslista
+```
+Nr;Förnamn;Efternamn
+1;Anders;Berkmo
+2;Anna;Svanquist
+3;Anita;Bergstedt
+```
+
+Separatorer som stöds: `;` (semikolon), `\t` (tab), `,` (komma)
+
+---
+
+## bordsplacering.html v1.00 - Visuell bordsplaceringslayout
+
+**Alternativ implementering** med grid-baserad visuell layout (se `Vira/VERSION.md`)
+
+---
+
 ## 🟢 SESSION 2026-02-28 CONT. - v0.41 Energisensor-Historik
 
 ✅ **v0.41 implementerad:**

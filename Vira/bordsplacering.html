@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bordsplacering - Medlemslista</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 15px;
+        }
+        
+        h1 {
+            color: #333;
+            margin: 0;
+            font-size: 28px;
+        }
+        
+        .version {
+            background: #f0f4ff;
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: #667eea;
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        .upload-section {
+            background: #f9f9f9;
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s;
+        }
+        
+        .upload-section.dragover {
+            background: #f0f4ff;
+            border-color: #764ba2;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+        }
+        
+        .upload-section h2 {
+            color: #667eea;
+            margin-top: 0;
+            font-size: 20px;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+        
+        .file-input-label {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #667eea;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .file-input-label:hover {
+            background: #5568d3;
+        }
+        
+        .file-name {
+            color: #764ba2;
+            font-weight: 600;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .content-section {
+            display: none;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .controls label {
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .sort-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .sort-btn {
+            padding: 8px 16px;
+            background: #e8eef9;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #333;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .sort-btn:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+        
+        .sort-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .seating-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .seat {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .seat:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .seat-number {
+            color: #667eea;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .seat-name {
+            color: #333;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .error {
+            background: #ffebee;
+            border: 1px solid #ef5350;
+            border-radius: 4px;
+            padding: 15px;
+            color: #c62828;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .error.active {
+            display: block;
+        }
+        
+        .success {
+            background: #e8f5e9;
+            border: 1px solid #66bb6a;
+            border-radius: 4px;
+            padding: 15px;
+            color: #2e7d32;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .success.active {
+            display: block;
+        }
+        
+        .no-data {
+            text-align: center;
+            color: #999;
+            padding: 40px;
+            font-style: italic;
+        }
+        
+        .stats {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🪑 Bordsplacering</h1>
+            <div class="version" id="versionBadge">v1.00</div>
+        </div>
+        
+        <div class="error" id="errorDiv"></div>
+        <div class="success" id="successDiv"></div>
+        
+        <div class="upload-section" id="uploadSection">
+            <h2>Ladda upp medlemslista</h2>
+            <p style="color: #666; font-size: 14px;">Format: <code style="background: #e8eef9; padding: 2px 6px; border-radius: 3px;">Nr;Förnamn;Efternamn</code></p>
+            
+            <div class="file-input-wrapper">
+                <label for="fileInput" class="file-input-label">📁 Välj textfil (.txt)</label>
+                <input type="file" id="fileInput" accept=".txt" />
+            </div>
+            
+            <div class="file-name" id="fileName"></div>
+        </div>
+        
+        <div class="content-section" id="contentSection">
+            <div class="controls">
+                <label>Sortera på:</label>
+                <div class="sort-buttons">
+                    <button class="sort-btn active" onclick="setSortBy('fornamn')">Förnamn</button>
+                    <button class="sort-btn" onclick="setSortBy('efternamn')">Efternamn</button>
+                    <button class="sort-btn" onclick="setSortBy('nr')">Nummer</button>
+                </div>
+            </div>
+            
+            <div class="seating-grid" id="seatingGrid">
+            </div>
+            
+            <div class="stats" id="stats"></div>
+        </div>
+    </div>
+
+    <script>
+        let members = [];
+        let sortBy = 'fornamn'; // fornamn, efternamn, nr
+        
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const errorDiv = document.getElementById('errorDiv');
+        const successDiv = document.getElementById('successDiv');
+        const uploadSection = document.getElementById('uploadSection');
+        const contentSection = document.getElementById('contentSection');
+        const seatingGrid = document.getElementById('seatingGrid');
+        const stats = document.getElementById('stats');
+
+        function showError(message) {
+            errorDiv.textContent = '❌ ' + message;
+            errorDiv.classList.add('active');
+            successDiv.classList.remove('active');
+        }
+
+        function showSuccess(message) {
+            successDiv.textContent = '✅ ' + message;
+            successDiv.classList.add('active');
+            errorDiv.classList.remove('active');
+        }
+
+        fileInput.addEventListener('change', handleFileUpload);
+
+        // Drag-and-drop
+        uploadSection.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadSection.classList.add('dragover');
+        });
+
+        uploadSection.addEventListener('dragleave', () => {
+            uploadSection.classList.remove('dragover');
+        });
+
+        uploadSection.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadSection.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileUpload({ target: fileInput });
+            }
+        });
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            
+            if (!file) return;
+
+            if (!file.name.endsWith('.txt')) {
+                showError('Vänligen välj en .txt-fil');
+                return;
+            }
+
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+                    parseFile(content, file.name);
+                } catch (error) {
+                    showError('Fel vid läsning av fil: ' + error.message);
+                }
+            };
+
+            reader.onerror = function() {
+                showError('Kunde inte läsa filen');
+            };
+
+            reader.readAsText(file, 'utf-8');
+        }
+
+        function parseFile(content, filename) {
+            const lines = content.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            
+            if (lines.length === 0) {
+                showError('Filen är tom');
+                return;
+            }
+
+            members = [];
+            
+            for (let line of lines) {
+                let parts = line.split(';').map(p => p.trim());
+                
+                if (parts.length < 3) {
+                    parts = line.split('\t').map(p => p.trim());
+                }
+                
+                if (parts.length >= 3) {
+                    // Rensa whitespace
+                    const nr = parts[0].trim();
+                    const fornamn = parts[1].trim();
+                    const efternamn = parts[2].trim();
+                    
+                    // Hoppa över rubrikrader
+                    if (isNaN(nr) && (nr.toLowerCase() === 'nr' || nr.toLowerCase() === 'nummer')) {
+                        continue;
+                    }
+                    
+                    members.push({
+                        nr: nr,
+                        fornamn: fornamn,
+                        efternamn: efternamn,
+                        fullnamn: fornamn + ' ' + efternamn
+                    });
+                }
+            }
+
+            if (members.length === 0) {
+                showError('Kunde inte tolka filen. Kontrollera formatet: Nr;Förnamn;Efternamn');
+                return;
+            }
+
+            showSuccess(`${members.length} medlemmar inlästa från ${filename}`);
+            fileName.textContent = `📄 Fil: ${filename}`;
+            
+            uploadSection.style.display = 'none';
+            contentSection.classList.add('active');
+            
+            renderSeating();
+        }
+
+        function setSortBy(field) {
+            sortBy = field;
+            
+            // Uppdatera aktiv knapp
+            document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            renderSeating();
+        }
+
+        function renderSeating() {
+            // Sortera medlemmar
+            let sorted = [...members];
+            
+            if (sortBy === 'fornamn') {
+                sorted.sort((a, b) => a.fornamn.toLowerCase().localeCompare(b.fornamn.toLowerCase(), 'sv'));
+            } else if (sortBy === 'efternamn') {
+                sorted.sort((a, b) => a.efternamn.toLowerCase().localeCompare(b.efternamn.toLowerCase(), 'sv'));
+            } else if (sortBy === 'nr') {
+                sorted.sort((a, b) => parseInt(a.nr) - parseInt(b.nr));
+            }
+
+            // Rendera bordsplatser
+            seatingGrid.innerHTML = '';
+            
+            sorted.forEach((member, index) => {
+                const seat = document.createElement('div');
+                seat.className = 'seat';
+                seat.innerHTML = `
+                    <div class="seat-number">Plats ${index + 1}</div>
+                    <div class="seat-name">${member.fullnamn}</div>
+                `;
+                seatingGrid.appendChild(seat);
+            });
+
+            stats.textContent = `${members.length} medlemmar placerade`;
+        }
+    </script>
+</body>
+</html>

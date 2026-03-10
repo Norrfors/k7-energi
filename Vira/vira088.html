@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vira – Bordslottning</title>
+<style>
+  /* ===== GRUNDLÄGGANDE ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f4ff;
+    color: #1e293b;
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+    color: #1e3a8a;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 16px;
+  }
+
+  /* ===== KNAPPAR ===== */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+
+  button {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+
+  button:disabled { opacity: 0.5; cursor: default; }
+
+  .btn-generate { background: #2563eb; color: white; }
+  .btn-generate:hover:not(:disabled) { background: #1d4ed8; }
+  .btn-layout   { background: #7c3aed; color: white; }
+  .btn-layout:hover:not(:disabled)   { background: #6d28d9; }
+  .btn-print    { background: #059669; color: white; }
+  .btn-print:hover:not(:disabled) { background: #047857; }
+
+  /* ===== STATUS ===== */
+  #status {
+    min-height: 24px;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+    color: #374151;
+  }
+  #status.warn { color: #b91c1c; font-weight: 600; }
+  #status.ok   { color: #065f46; }
+
+  /* ===== TABELL ===== */
+  .table-wrap { overflow-x: auto; }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  thead th {
+    background: #2563eb;
+    color: white;
+    padding: 8px 6px;
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  thead th:first-child { text-align: left; padding-left: 10px; }
+
+  tbody tr:nth-child(even) { background: #eff6ff; }
+  tbody tr:nth-child(odd)  { background: #ffffff; }
+
+  td {
+    border: 1px solid #dbeafe;
+    padding: 4px 4px;
+    vertical-align: top;
+  }
+
+  td:first-child {
+    font-weight: 700;
+    color: #1e40af;
+    white-space: nowrap;
+    padding: 4px 10px;
+    vertical-align: middle;
+    font-size: 0.85rem;
+  }
+
+  /* ===== SITTPLATS-RADER ===== */
+  .seat-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 2px 0;
+  }
+
+  .seat-label {
+    font-size: 0.65rem;
+    color: #9ca3af;
+    width: 30px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.15; }
+  }
+
+  .chip {
+    display: inline-flex;
+    width: 26px;
+    height: 26px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 0.72rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    background: #dbeafe;
+    color: #1e40af;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .chip.conflict {
+    background: #fee2e2;
+    color: #b91c1c;
+    outline: 2px solid #ef4444;
+    outline-offset: 1px;
+  }
+
+  .chip.selected {
+    background: #dc2626 !important;
+    color: white !important;
+    outline: none !important;
+    animation: blink 0.7s ease-in-out infinite;
+  }
+
+  /* ===== NAMNVISNING ===== */
+  .seat-name {
+    font-size: 0.65rem;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 90px;
+  }
+
+  .player-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    background: #f8faff;
+    border: 1px solid #dbeafe;
+    border-radius: 6px;
+    font-size: 0.82rem;
+  }
+
+  .btn-load { background: #0891b2; color: white; }
+  .btn-load:hover { background: #0e7490; }
+  .btn-sort { background: #475569; color: white; }
+  .btn-sort:hover { background: #334155; }
+
+  #fileInfo { color: #475569; }
+
+  /* ===== SIGNATUR ===== */
+  #signature {
+    margin-top: 18px;
+    font-size: 0.78rem;
+    color: #9ca3af;
+    text-align: right;
+  }
+
+  /* ===== PRINT ===== */
+  @media print {
+    @page { size: A4 landscape; margin: 8mm; }
+
+    body { background: white; padding: 0; }
+
+    .btn-row, .player-row, #status, #clickHint { display: none; }
+
+    h1 { font-size: 1.1rem; margin-bottom: 2px; }
+    .subtitle { font-size: 0.7rem; margin-bottom: 6px; }
+
+    table { width: 100%; table-layout: fixed; }
+
+    thead th {
+      font-size: 0.75rem;
+      padding: 5px 3px;
+      background: #2563eb !important;
+      color: white !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    td:first-child {
+      font-size: 0.75rem;
+      padding: 3px 6px;
+    }
+
+    td {
+      padding: 2px 2px;
+      border: 1px solid #c7d2fe !important;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #eff6ff !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .seat-label { font-size: 0.6rem; width: 26px; }
+
+    .chip {
+      width: 22px;
+      height: 22px;
+      font-size: 0.65rem;
+    }
+
+    .chip.conflict {
+      background: #fee2e2 !important;
+      color: #b91c1c !important;
+      outline: 2px solid #ef4444 !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .seat-row { margin: 1px 0; }
+
+    #signature {
+      font-size: 0.65rem;
+      margin-top: 6px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<h1>🃏 Vira – Bordslottning</h1>
+<p class="subtitle" id="versionLabel"></p>
+
+<div class="btn-row">
+  <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
+  <button class="btn-layout"   id="btnLayout"   onclick="toggleLayout()" disabled>👤 Visa per spelare</button>
+  <button class="btn-print"    id="btnPrint"    onclick="window.print()" disabled>🖨️ Skriv ut / PDF</button>
+</div>
+
+<div class="player-row">
+  <button class="btn-load" onclick="document.getElementById('fileInput').click()">📂 Ladda deltagarlista</button>
+  <input type="file" id="fileInput" accept=".txt,.csv" style="display:none" onchange="loadFile(event)">
+  <span id="fileInfo">Inget namn-register laddat – visar spelarnummer</span>
+  <button class="btn-sort" id="btnSort" onclick="toggleSort()" style="display:none">🔤 Sortera A–Ö</button>
+</div>
+
+<div id="status">Klicka på "Generera schema" för att slumpa bordslottning.</div>
+
+<p id="clickHint" style="display:none;font-size:0.78rem;color:#64748b;margin-bottom:8px;font-style:italic;">
+  Klicka på en siffra nedan för att visa personens placering vid olika bord. Klicka igen på siffran för att stänga den, eller klicka på en ny siffra.
+</p>
+<div class="table-wrap" id="tableWrap"></div>
+<div id="signature"></div>
+
+<script>
+"use strict";
+
+const VERSION = "v0.88";
+
+document.getElementById("versionLabel").textContent = "Fristående version " + VERSION + " · 32 deltagare · 8 bord · 6 omgångar";
+
+// ===== DELTAGARLISTA =====
+let players = {};  // players[nr] = namn
+let sortMode = "nr"; // "nr" | "namn"
+
+(function initPlayers() {
+  const saved = localStorage.getItem("vira_players");
+  const fname = localStorage.getItem("vira_players_file");
+  if (saved) {
+    try {
+      players = JSON.parse(saved);
+      const count = Object.keys(players).length;
+      document.getElementById("fileInfo").textContent =
+        "💾 Kom ihåg: " + (fname || "okänd fil") + " – " + count + " spelare";
+      document.getElementById("btnSort").style.display = "";
+    } catch(e) { players = {}; }
+  }
+})();
+
+function loadFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const lines = e.target.result.split(/\r?\n/).filter(l => l.trim());
+    const newPlayers = {};
+    let errors = 0;
+    for (const line of lines) {
+      const sep = line.includes(";") ? ";" : ",";
+      const parts = line.split(sep);
+      if (parts.length >= 2) {
+        const nr = parseInt(parts[0].trim());
+        const name = parts.slice(1).join(sep).trim();
+        if (!isNaN(nr) && nr > 0 && name) newPlayers[nr] = name;
+        else errors++;
+      } else errors++;
+    }
+    const count = Object.keys(newPlayers).length;
+    if (count === 0) { alert("Inga giltiga rader. Förväntat format: nr;namn"); return; }
+    players = newPlayers;
+    localStorage.setItem("vira_players", JSON.stringify(players));
+    localStorage.setItem("vira_players_file", file.name);
+    document.getElementById("fileInfo").textContent =
+      "✅ " + file.name + " – " + count + " spelare" + (errors ? "  (" + errors + " rader ignorerade)" : "");
+    document.getElementById("btnSort").style.display = "";
+    if (lastResult) render(lastResult, false);
+  };
+  reader.readAsText(file, "UTF-8");
+  event.target.value = "";
+}
+
+function toggleSort() {
+  sortMode = sortMode === "nr" ? "namn" : "nr";
+  document.getElementById("btnSort").textContent =
+    sortMode === "nr" ? "🔤 Sortera A–Ö" : "🔢 Sortera 1–32";
+  if (lastResult) render(lastResult, false);
+}
+
+function playerName(p) { return players[p] || String(p); }
+
+// ===== MARKERING =====
+let selectedPlayer = null;
+let layoutMode = "bord"; // "bord" | "spelare"
+let lastResult = null;
+
+function selectPlayer(p) {
+  selectedPlayer = (selectedPlayer === p) ? null : p;
+  document.querySelectorAll(".chip").forEach(chip => {
+    chip.classList.toggle("selected", parseInt(chip.dataset.player) === selectedPlayer);
+  });
+}
+
+function toggleLayout() {
+  layoutMode = layoutMode === "bord" ? "spelare" : "bord";
+  document.getElementById("btnLayout").textContent =
+    layoutMode === "bord" ? "👤 Visa per spelare" : "🃏 Visa per bord";
+  if (lastResult) render(lastResult, false);
+}
+
+// ===== KONSTANTER =====
+const ROUNDS = 6, TABLES = 8, PPT = 4, N = 32;
+const POSITIONS = ["NORD", "OST", "SYD", "VÄST"];
+
+// Alla 24 permutationer av [0,1,2,3]
+const PERMS4 = [
+  [0,1,2,3],[0,1,3,2],[0,2,1,3],[0,2,3,1],[0,3,1,2],[0,3,2,1],
+  [1,0,2,3],[1,0,3,2],[1,2,0,3],[1,2,3,0],[1,3,0,2],[1,3,2,0],
+  [2,0,1,3],[2,0,3,1],[2,1,0,3],[2,1,3,0],[2,3,0,1],[2,3,1,0],
+  [3,0,1,2],[3,0,2,1],[3,1,0,2],[3,1,2,0],[3,2,0,1],[3,2,1,0],
+];
+
+// ===== ALGORITM =====
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = (Math.random() * (i + 1)) | 0;
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function generate() {
+  const btnGen = document.getElementById("btnGenerate");
+  const btnPrt = document.getElementById("btnPrint");
+  const status = document.getElementById("status");
+
+  btnGen.disabled = true;
+  btnGen.textContent = "⏳ Genererar...";
+  status.className = "";
+  status.textContent = "Räknar...";
+
+  setTimeout(() => {
+    try {
+      layoutMode = "bord";
+      document.getElementById("btnLayout").textContent = "👤 Visa per spelare";
+      const result = buildSchedule();
+      render(result, true);
+      const msg = result.totalConflicts === 0
+        ? "✅ Inga konflikter – alla par är unika!"
+        : "⚠️ " + result.totalConflicts + " konflikt" + (result.totalConflicts > 1 ? "er" : "") + " (röd ring = upprepat par)";
+      status.className = result.totalConflicts === 0 ? "ok" : "warn";
+      status.textContent = msg;
+      btnPrt.disabled = false;
+    } catch(e) {
+      status.className = "warn";
+      status.textContent = "Fel: " + e.message;
+    }
+    btnGen.disabled = false;
+    btnGen.textContent = "🔀 Generera nytt";
+  }, 20);
+}
+
+function buildSchedule() {
+  // Uint8Array för O(1) par-lookup
+  const met = new Uint8Array(33 * 33);
+  const hasMet = (a, b) => met[a * 33 + b] === 1;
+  const setMet = (a, b) => { met[a * 33 + b] = 1; met[b * 33 + a] = 1; };
+
+  const countConf = (round) => {
+    let c = 0;
+    for (const tbl of round)
+      for (let i = 0; i < tbl.length; i++)
+        for (let j = i + 1; j < tbl.length; j++)
+          if (hasMet(tbl[i], tbl[j])) c++;
+    return c;
+  };
+
+  const localSearch = (round, iters) => {
+    let conf = countConf(round);
+    for (let it = 0; it < iters && conf > 0; it++) {
+      const t1 = (Math.random() * TABLES) | 0;
+      const t2 = (Math.random() * TABLES) | 0;
+      if (t1 === t2) continue;
+      const p1i = (Math.random() * PPT) | 0;
+      const p2i = (Math.random() * PPT) | 0;
+      const p1 = round[t1][p1i], p2 = round[t2][p2i];
+      let before = 0, after = 0;
+      for (const p of round[t1]) { if (p !== p1) { if (hasMet(p1, p)) before++; if (hasMet(p2, p)) after++; } }
+      for (const p of round[t2]) { if (p !== p2) { if (hasMet(p2, p)) before++; if (hasMet(p1, p)) after++; } }
+      if (after <= before) { round[t1][p1i] = p2; round[t2][p2i] = p1; conf += after - before; }
+    }
+    return conf;
+  };
+
+  const rounds = [];
+  const conflictPlayers = []; // conflictPlayers[r][t] = Set of player numbers
+  let totalConflicts = 0;
+
+  for (let r = 0; r < ROUNDS; r++) {
+    const restarts = r < 2 ? 4 : r < 4 ? 15 : 35;
+    const iters    = r < 2 ? 60000 : r < 4 ? 120000 : 180000;
+    let bestRound = [], bestConf = Infinity;
+
+    for (let rs = 0; rs < restarts && bestConf > 0; rs++) {
+      const players = shuffle(Array.from({ length: N }, (_, i) => i + 1));
+      const round = Array.from({ length: TABLES }, (_, t) => players.slice(t * PPT, (t + 1) * PPT));
+      const conf = localSearch(round, iters);
+      if (conf < bestConf) { bestConf = conf; bestRound = round.map(t => [...t]); }
+    }
+
+    // Markera konflikterande spelare
+    const cp = Array.from({ length: TABLES }, () => new Set());
+    for (let t = 0; t < TABLES; t++)
+      for (let i = 0; i < PPT; i++)
+        for (let j = i + 1; j < PPT; j++)
+          if (hasMet(bestRound[t][i], bestRound[t][j])) {
+            cp[t].add(bestRound[t][i]);
+            cp[t].add(bestRound[t][j]);
+          }
+
+    totalConflicts += bestConf === Infinity ? 0 : bestConf;
+    for (const tbl of bestRound)
+      for (let i = 0; i < tbl.length; i++)
+        for (let j = i + 1; j < tbl.length; j++)
+          setMet(tbl[i], tbl[j]);
+
+    rounds.push(bestRound);
+    conflictPlayers.push(cp);
+  }
+
+  // ===== SITTPLATSFÖRDELNING (NORD/OST/SYD/VÄST) =====
+  // posCount[spelare][position] = antal gånger spelaren suttit på den platsen
+  const posCount = Array.from({ length: 33 }, () => [0, 0, 0, 0]);
+  const seats = []; // seats[r][t][position] = spelarnummer
+
+  for (const round of rounds) {
+    const roundSeats = [];
+    for (const table of round) {
+      // Välj permutation som minimerar upprepade positioner
+      let bestPerm = PERMS4[0], bestScore = Infinity;
+      for (const perm of PERMS4) {
+        const score = table.reduce((s, p, i) => s + posCount[p][perm[i]], 0);
+        if (score < bestScore) { bestScore = score; bestPerm = perm; }
+      }
+      const seatArr = new Array(4);
+      table.forEach((p, i) => {
+        seatArr[bestPerm[i]] = p;
+        posCount[p][bestPerm[i]]++;
+      });
+      roundSeats.push(seatArr);
+    }
+    seats.push(roundSeats);
+  }
+
+  return { rounds, seats, conflictPlayers, totalConflicts };
+}
+
+// ===== RENDERING =====
+
+function render(result, updateSignature) {
+  lastResult = result;
+  if (updateSignature !== false) {
+    const now = new Date().toLocaleString("sv-SE");
+    document.getElementById("signature").textContent = "by Gaxor  ·  " + now + "  ·  " + VERSION;
+  }
+  selectedPlayer = null;
+  document.getElementById("clickHint").style.display = "block";
+  document.getElementById("btnLayout").disabled = false;
+
+  if (layoutMode === "bord") renderBordView(result);
+  else renderSpelarView(result);
+}
+
+function chip(p, conflict) {
+  return '<span class="chip' + (conflict ? ' conflict' : '') +
+    '" data-player="' + p + '" onclick="selectPlayer(' + p + ')">' + p + '</span>';
+}
+
+function renderBordView({ rounds, seats, conflictPlayers }) {
+  let html = '<table><thead><tr>';
+  html += '<th style="text-align:left;padding-left:10px;">Omgång</th>';
+  for (let i = 1; i <= TABLES; i++) html += '<th>Bord ' + i + '</th>';
+  html += '</tr></thead><tbody>';
+
+  for (let ri = 0; ri < rounds.length; ri++) {
+    html += '<tr><td style="vertical-align:middle;white-space:nowrap;">Omgång ' + (ri + 1) + '</td>';
+    for (let ti = 0; ti < TABLES; ti++) {
+      html += '<td>';
+      for (let pi = 0; pi < 4; pi++) {
+        const p = seats[ri][ti][pi];
+        const conflict = conflictPlayers[ri][ti].has(p);
+        html += '<div class="seat-row"><span class="seat-label">' + POSITIONS[pi] + ':</span>';
+        html += chip(p, conflict);
+        if (players[p]) html += '<span class="seat-name">' + players[p] + '</span>';
+        html += '</div>';
+      }
+      html += '</td>';
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  document.getElementById("tableWrap").innerHTML = html;
+}
+
+function renderSpelarView({ seats, conflictPlayers }) {
+  // Bygg lookup: playerInfo[spelare][omgång] = { table, pos, conflict }
+  const info = {};
+  for (let ri = 0; ri < seats.length; ri++) {
+    for (let ti = 0; ti < seats[ri].length; ti++) {
+      for (let pi = 0; pi < 4; pi++) {
+        const p = seats[ri][ti][pi];
+        if (!info[p]) info[p] = {};
+        info[p][ri] = { table: ti + 1, pos: POSITIONS[pi], conflict: conflictPlayers[ri][ti].has(p) };
+      }
+    }
+  }
+
+  // Bygg sorterad spelarlista
+  const playerNrs = Array.from({ length: N }, (_, i) => i + 1);
+  if (sortMode === "namn" && Object.keys(players).length > 0) {
+    playerNrs.sort((a, b) => playerName(a).localeCompare(playerName(b), "sv"));
+  }
+
+  let html = '<table><thead><tr>';
+  html += '<th style="text-align:left;padding-left:6px;">Spelare</th>';
+  for (let ri = 0; ri < ROUNDS; ri++) html += '<th>Omgång ' + (ri + 1) + '</th>';
+  html += '</tr></thead><tbody>';
+
+  for (const p of playerNrs) {
+    html += '<tr>';
+    html += '<td style="vertical-align:middle;white-space:nowrap;padding:4px 6px;">';
+    html += chip(p, false);
+    if (players[p]) html += ' <span style="font-size:0.75rem;color:#1e293b;">' + players[p] + '</span>';
+    html += '</td>';
+    for (let ri = 0; ri < ROUNDS; ri++) {
+      const d = info[p] && info[p][ri];
+      const conflict = d && d.conflict;
+      const bg = conflict ? 'background:#fff1f2;' : '';
+      html += '<td style="text-align:center;vertical-align:middle;' + bg + '">';
+      if (d) {
+        html += '<div style="font-size:0.75rem;font-weight:700;color:#1e40af;">Bord ' + d.table + '</div>';
+        html += '<div style="font-size:0.7rem;color:#64748b;">' + d.pos + '</div>';
+        if (conflict) html += '<div style="font-size:0.6rem;color:#dc2626;">⚠ konflikt</div>';
+      }
+      html += '</td>';
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  document.getElementById("tableWrap").innerHTML = html;
+}
+</script>
+</body>
+</html>

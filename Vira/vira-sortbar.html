@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIRA medlemmar - Sortbar lista</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-top: 0;
+            font-size: 28px;
+        }
+        
+        .info {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        .controls {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            cursor: pointer;
+            user-select: none;
+            font-weight: 600;
+            border: none;
+            transition: background 0.3s;
+        }
+        
+        th:hover {
+            background: #5568d3;
+        }
+        
+        th.sort-asc::after {
+            content: " ▲";
+            font-size: 12px;
+        }
+        
+        th.sort-desc::after {
+            content: " ▼";
+            font-size: 12px;
+        }
+        
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f5f5f5;
+        }
+        
+        tr:nth-child(even):hover {
+            background-color: #efefef;
+        }
+        
+        .nr-col {
+            width: 60px;
+            text-align: center;
+            font-weight: 500;
+            color: #667eea;
+        }
+        
+        .fornamn-col {
+            width: 40%;
+        }
+        
+        .efternamn-col {
+            width: 40%;
+        }
+        
+        .no-results {
+            text-align: center;
+            color: #999;
+            padding: 20px;
+            font-style: italic;
+        }
+        
+        .stats {
+            text-align: right;
+            color: #999;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 VIRA medlemmar</h1>
+        <div class="info">Klicka på kolumnrubrikerna för att sortera</div>
+        
+        <div class="controls">
+            <input type="text" class="search-box" id="searchBox" placeholder="🔍 Sök efter nummer, förnamn eller efternamn...">
+        </div>
+        
+        <table id="membersTable">
+            <thead>
+                <tr>
+                    <th class="nr-col" onclick="sortTable(0)">Nr</th>
+                    <th class="fornamn-col" onclick="sortTable(1)">Förnamn</th>
+                    <th class="efternamn-col" onclick="sortTable(2)">Efternamn</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+        </table>
+        
+        <div class="stats">
+            Visning: <span id="displayCount">0</span> / <span id="totalCount">0</span> medlemmar
+        </div>
+    </div>
+
+    <script>
+        // Data från ViraMedlemmar.txt
+        const members = [
+            [1, "Anders", "Berkmo"],
+            [2, "Anders", "Svanquist"],
+            [3, "Anita", "Bergstedt"],
+            [4, "Ann", "Emanuelsson"],
+            [5, "Anna-Karin", "Hoffstedt"],
+            [6, "Anna-Karin", "Andersson"],
+            [7, "Anneli", "Rydbacken"],
+            [8, "Arvid", "Gerdtman"],
+            [9, "Åsa", "Karlsson"],
+            [10, "Åsa", "Olsson"],
+            [11, "Bengt", "Green"],
+            [12, "Bengt", "Nyfjäll"],
+            [13, "Bengt", "Olsson"],
+            [14, "Berit", "Eldemar"],
+            [15, "Bertil", "Gunnarson"],
+            [16, "Boel", "Hall"],
+            [17, "Bror", "Andreasson"],
+            [18, "Christer", "Holgersson"],
+            [19, "Christer", "Rosberg"],
+            [20, "Christer", "Sohlberg"],
+            [21, "Curt", "Bäckström"],
+            [22, "Erik", "Bergman"],
+            [23, "Göran", "Yllner"],
+            [24, "Gunnar", "Jähkel"],
+            [25, "Håkan", "Lennerstad"],
+            [26, "Hanna", "Shev"],
+            [27, "Hannes", "Brattgård"],
+            [28, "Hans", "Arnevall"],
+            [29, "Helen", "Walter"],
+            [30, "Ingrid", "Wallman"],
+            [31, "Jan", "Ohlsson"],
+            [32, "Jan", "Kibe"]
+        ];
+
+        let currentSort = { column: null, ascending: true };
+        let filteredMembers = [...members];
+
+        function renderTable(data) {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+
+            if (data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="3" class="no-results">Inga medlemmar funna</td></tr>';
+            } else {
+                data.forEach(member => {
+                    const row = `<tr>
+                        <td class="nr-col">${member[0]}</td>
+                        <td class="fornamn-col">${member[1]}</td>
+                        <td class="efternamn-col">${member[2]}</td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            }
+
+            document.getElementById('displayCount').textContent = data.length;
+            document.getElementById('totalCount').textContent = members.length;
+            
+            // Uppdatera sorteringsindikator
+            const headers = document.querySelectorAll('th');
+            headers.forEach((h, i) => {
+                h.classList.remove('sort-asc', 'sort-desc');
+                if (currentSort.column === i) {
+                    h.classList.add(currentSort.ascending ? 'sort-asc' : 'sort-desc');
+                }
+            });
+        }
+
+        function sortTable(column) {
+            // Växla mellan stigande och fallande om samma kolumn klickas
+            if (currentSort.column === column) {
+                currentSort.ascending = !currentSort.ascending;
+            } else {
+                currentSort.column = column;
+                currentSort.ascending = true;
+            }
+
+            filteredMembers.sort((a, b) => {
+                let aVal = a[column];
+                let bVal = b[column];
+
+                // Om det är en nummer-kolumn, sortera numeriskt
+                if (column === 0) {
+                    aVal = parseInt(aVal);
+                    bVal = parseInt(bVal);
+                } else {
+                    // För texter, gör case-insensitiv sortering
+                    aVal = String(aVal).toLowerCase().trim();
+                    bVal = String(bVal).toLowerCase().trim();
+                }
+
+                if (aVal < bVal) return currentSort.ascending ? -1 : 1;
+                if (aVal > bVal) return currentSort.ascending ? 1 : -1;
+                return 0;
+            });
+
+            renderTable(filteredMembers);
+        }
+
+        function filterMembers(searchTerm) {
+            const term = searchTerm.toLowerCase().trim();
+            
+            if (term === '') {
+                filteredMembers = [...members];
+            } else {
+                filteredMembers = members.filter(member => {
+                    return (
+                        member[0].toString().includes(term) ||
+                        member[1].toLowerCase().includes(term) ||
+                        member[2].toLowerCase().includes(term)
+                    );
+                });
+            }
+
+            // Applicera befintlig sortering på filtrerade resultat
+            if (currentSort.column !== null) {
+                sortTable(currentSort.column);
+            } else {
+                renderTable(filteredMembers);
+            }
+        }
+
+        // Sökfunktionalitet
+        document.getElementById('searchBox').addEventListener('keyup', (e) => {
+            filterMembers(e.target.value);
+        });
+
+        // Initial rendering
+        renderTable(members);
+    </script>
+</body>
+</html>

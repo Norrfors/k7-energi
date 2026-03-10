@@ -2,6 +2,8 @@ import "dotenv/config"; // Laddar .env-filen automatiskt
 import Fastify from "fastify";
 import cors from "@fastify/cors";
 import { execSync } from "child_process";
+import * as path from "path";
+import * as fs from "fs";
 import prisma from "./shared/db";
 import { homeyRoutes } from "./modules/homey/homey.controller";
 import { historyRoutes } from "./modules/history/history.controller";
@@ -111,6 +113,92 @@ async function start() {
     const { isVisible } = req.body as { isVisible: boolean };
     const updated = await updateSensorVisibility(deviceId, isVisible);
     reply.send(updated);
+  });
+
+  // Databasstatus – storlek per tabell och antal rader
+  app.get("/api/admin/db-stats", async (req, reply) => {
+    const sizes = await prisma.$queryRaw<{ tabell: string; total: string; data: string; index: string }[]>`
+      SELECT
+        relname AS tabell,
+        pg_size_pretty(pg_total_relation_size(relid)) AS total,
+        pg_size_pretty(pg_relation_size(relid)) AS data,
+        pg_size_pretty(pg_indexes_size(relid)) AS index
+      FROM pg_catalog.pg_statio_user_tables
+      ORDER BY pg_total_relation_size(relid) DESC
+    `;
+    const totalDb = await prisma.$queryRaw<{ total_db: string }[]>`
+      SELECT pg_size_pretty(pg_database_size('homey_db')) AS total_db
+    `;
+    const counts = await prisma.$queryRaw<{ tabell: string; rader: bigint }[]>`
+      SELECT relname AS tabell, n_live_tup AS rader
+      FROM pg_stat_user_tables
+      ORDER BY n_live_tup DESC
+    `;
+    const countMap: Record<string, number> = {};
+    for (const c of counts) countMap[c.tabell] = Number(c.rader);
+
+    reply.send({
+      totalDb: totalDb[0]?.total_db ?? "okänt",
+      tables: sizes.map(t => ({ ...t, rader: countMap[t.tabell] ?? 0 })),
+    });
+  });
+
+  // Tabelldata – hämtar de 200 senaste raderna från en godkänd tabell
+  app.get("/api/admin/table-data/:tableName", async (req, reply) => {
+    const { tableName } = req.params as { tableName: string };
+    const allowed = [
+      "TemperatureLog", "EnergyLog", "MeterReading", "Device",
+      "MeterCalibration", "DailyMeterAggregate", "DailyEnergyAggregate",
+      "DailyTemperatureAggregate", "EnergySettings", "BackupSettings",
+      "SensorVisibility", "PriceLog", "ExternalData",
+    ];
+    if (!allowed.includes(tableName)) {
+      reply.status(400).send({ error: "Otillåten tabell" });
+      return;
+    }
+    const orderMap: Record<string, string> = {
+      TemperatureLog: '"createdAt"',
+      EnergyLog: '"createdAt"',
+      MeterReading: '"createdAt"',
+      Device: '"updatedAt"',
+      MeterCalibration: '"calibrationDateTime"',
+      DailyMeterAggregate: '"date"',
+      DailyEnergyAggregate: '"date"',
+      DailyTemperatureAggregate: '"date"',
+      EnergySettings: '"updatedAt"',
+      BackupSettings: '"updatedAt"',
+      SensorVisibility: '"updatedAt"',
+      PriceLog: '"createdAt"',
+      ExternalData: '"fetchedAt"',
+    };
+    const orderBy = orderMap[tableName] ?? '"id"';
+    // Tabeller med zone + deviceId: JOIN Device för att ersätta zone med zonePath
+    const zoneJoinTables = ["TemperatureLog", "EnergyLog", "DailyEnergyAggregate", "DailyTemperatureAggregate"];
+    let rows: unknown[];
+    if (zoneJoinTables.includes(tableName)) {
+      rows = await prisma.$queryRawUnsafe(
+        `SELECT t.*, COALESCE(d."zonePath", t."zone") AS zone
+         FROM "${tableName}" t
+         LEFT JOIN "Device" d ON t."deviceId" = d."id"
+         ORDER BY t.${orderBy} DESC LIMIT 200`
+      );
+    } else {
+      rows = await prisma.$queryRawUnsafe(
+        `SELECT * FROM "${tableName}" ORDER BY ${orderBy} DESC LIMIT 200`
+      );
+    }
+    reply.send({ tableName, rows });
+  });
+
+  // Vira – spara HTML-fil till /app/vira/
+  app.post("/api/vira/save", async (req, reply) => {
+    const { html } = req.body as { html: string };
+    const viraDir = path.resolve("/app/vira");
+    if (!fs.existsSync(viraDir)) fs.mkdirSync(viraDir, { recursive: true });
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, -5);
+    const filename = `vira-${timestamp}.html`;
+    fs.writeFileSync(path.join(viraDir, filename), html, "utf-8");
+    reply.send({ success: true, filename });
   });
 
   // Health check – enkel endpoint för att testa att allt kör

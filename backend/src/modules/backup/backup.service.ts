@@ -63,32 +63,11 @@ export class BackupService {
       const filename = `backup_${timestamp}.sql.gz`;
       const filepath = path.join(backupFolder, filename);
 
-      // Konstruera pg_dump-kommando
-      const dbUrl = process.env.DATABASE_URL || 'postgresql://energi_user:energi_pass@localhost:5432/energi_db';
-      
-      // Använd docker exec om vi är i containeriserad miljö
-      const isWindows = process.platform === 'win32';
-      const dockerCommand = isWindows 
-        ? `docker exec k7-energi-db-1 pg_dump -U energi_user -d energi_db | gzip > "${filepath}"`
-        : `docker exec k7-energi-db-1 pg_dump -U energi_user -d energi_db | gzip > ${filepath}`;
-      const localCommand = isWindows
-        ? `pg_dump ${dbUrl} | gzip > "${filepath}"`
-        : `pg_dump ${dbUrl} | gzip > ${filepath}`;
-      
-      // Försök med docker först, fallback till lokal
-      try {
-        const shell = isWindows ? 'cmd.exe' : '/bin/sh';
-        execSync(dockerCommand, { shell } as any);
-        console.log(`[Backup] Backup framgångsrikt sparad: ${filepath}`);
-      } catch (dockerError) {
-        console.log('[Backup] Docker-metod misslyckades, försöker lokal pg_dump...');
-        try {
-          const shell = isWindows ? 'cmd.exe' : '/bin/sh';
-          execSync(localCommand, { shell } as any);
-        } catch (localError) {
-          throw localError;
-        }
-      }
+      // Kör pg_dump direkt mot DB-containern via Docker-nätverket
+      const dbUrl = process.env.DATABASE_URL || 'postgresql://postgres:postgres@db:5432/homey_db';
+      const command = `pg_dump "${dbUrl}" | gzip > "${filepath}"`;
+      execSync(command, { shell: '/bin/sh' });
+      console.log(`[Backup] Backup framgångsrikt sparad: ${filepath}`);
 
       // Uppdatera lastBackupAt
       await db.backupSettings.update({

@@ -1,0 +1,32 @@
+1;Anders;Berkmo
+2;Anders;Svanquist
+3;Anita;Bergstedt
+4;Ann;Emanuelsson
+5;Anna-Karin ;Hoffstedt
+6;Anna-Karin;Andersson
+7;Anneli;Rydbacken
+8;Arvid;Gerdtman
+9;Ã…sa;Karlsson
+10;Ã…sa;Olsson
+11;Bengt;Green
+12;Bengt;NyfjÃ¤ll
+13;Bengt;Olsson
+14;Berit;Eldemar
+15;Bertil;Gunnarson
+16;Boel;Hall
+17;Bror;Andreasson
+18;Christer;Holgersson
+19;Christer;rosberg
+20;Christer;Sohlberg		
+21;Curt	;BÃ¤ckstrÃ¶m
+22;Erik	;Bergman
+23;GÃ¶ran;Yllner
+24;Gunnar;JÃ¤hkel
+25;HÃ¥kan;Lennerstad
+26;Hanna;Shev
+27;Hannes;BrattgÃ¥rd
+28;Hans;Arnevall
+29;Helen;Walter
+30;Ingrid;Wallman
+31;Jan;Ohlsson
+32;Jan;Kibe
