@@ -453,7 +453,7 @@
 <script>
 "use strict";
 
-const VERSION = "v1.20";
+const VERSION = "v1.21";
 
 // Version integrated into h1 - no separate subtitle needed
 
@@ -934,6 +934,16 @@ function renderSpelarView({ seats, conflictPlayers }) {
     }
   }
 
+  // Beräkna längsta namn för kolumnbredd
+  let maxNameLen = 10;
+  for (let p = 1; p <= N; p++) {
+    const name = getPlayerName(p);
+    if (name && name.length > 0) {
+      maxNameLen = Math.max(maxNameLen, name.length);
+    }
+  }
+  const nameColWidth = Math.ceil(maxNameLen * 6.3) + 42; // ~6.3px per tecken vid 0.9rem + siffra + chip
+
   // Sortering
   const playerNrs = Array.from({ length: N }, (_, i) => i + 1);
   if (Object.keys(players).length > 0) {
@@ -947,25 +957,25 @@ function renderSpelarView({ seats, conflictPlayers }) {
     }
   }
 
-  let html = '<table style="table-layout:fixed;width:100%;font-size:0.8rem;"><thead><tr>';
-  html += '<th style="text-align:left;padding:1px 3px;width:55px;font-size:0.78rem;font-weight:600;">Spelare</th>';
-  for (let ri = 0; ri < ROUNDS; ri++) html += '<th style="width:48px;padding:1px 0.5px;font-size:0.75rem;font-weight:600;">Omg' + (ri + 1) + '</th>';
+  let html = '<table style="table-layout:fixed;width:100%;font-size:0.9rem;border-collapse:collapse;"><thead><tr>';
+  html += '<th style="text-align:left;padding:0 1px;width:' + nameColWidth + 'px;font-size:0.9rem;font-weight:600;">Spelare</th>';
+  for (let ri = 0; ri < ROUNDS; ri++) html += '<th style="width:55px;padding:0 1px;font-size:0.85rem;font-weight:600;">Omg' + (ri + 1) + '</th>';
   html += '</tr></thead><tbody>';
 
   for (const p of playerNrs) {
     html += '<tr>';
-    html += '<td style="text-align:left;vertical-align:top;padding:1px 3px;border-right:1px solid #cbd5e1;word-wrap:break-word;overflow-wrap:break-word;">';
-    html += '<span class="chip" style="cursor:default;width:18px;height:18px;font-size:0.65rem;display:inline-block;margin-right:1px;vertical-align:middle;">' + p + '</span>';
-    html += '<span style="font-size:0.72rem;color:#1e293b;font-weight:500;display:inline;">' + getPlayerName(p) + '</span>';
+    html += '<td style="text-align:left;vertical-align:top;padding:0 1px;border-right:1px solid #cbd5e1;">';
+    html += '<span class="chip" style="cursor:default;width:18px;height:18px;font-size:0.75rem;display:inline-block;margin-right:2px;vertical-align:middle;">' + p + '</span>';
+    html += '<span style="font-size:0.9rem;color:#1e293b;font-weight:500;">' + getPlayerName(p) + '</span>';
     html += '</td>';
     for (let ri = 0; ri < ROUNDS; ri++) {
       const d = info[p] && info[p][ri];
       const conflict = d && d.conflict;
       const bg = conflict ? 'background:#fff1f2;' : '';
-      html += '<td style="text-align:center;vertical-align:middle;padding:1px 0.5px;font-size:0.73rem;' + bg + '">';
+      html += '<td style="text-align:center;vertical-align:middle;padding:0 1px;font-size:0.85rem;' + bg + '">';
       if (d) {
         html += '<span style="font-weight:700;color:#1e40af;">' + d.table + '</span>';
-        html += '<span style="color:#64748b;margin:0 1px;">' + d.pos + '</span>';
+        html += '<span style="color:#64748b;margin-left:2px;">' + d.pos + '</span>';
         if (conflict) html += '<span style="font-size:0.5rem;color:#dc2626;display:block;line-height:0.8;">⚠</span>';
       }
       html += '</td>';
