@@ -343,14 +343,14 @@
 
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
-    body { background: white; padding: 0; margin: 0; }
+    body { background: white; padding: 0; margin: 0; width: 297mm; }
 
     .btn-row, .player-row, #status, #clickHint, .sort-group { display: none !important; }
 
     h1 { font-size: 1.3rem; margin: 0 0 4px 0; padding: 0; font-weight: bold; }
     .subtitle { font-size: 0.8rem; margin: 0; padding: 0; }
 
-    table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 8px 0 0 0; }
+    table { width: 280mm; table-layout: fixed; border-collapse: collapse; margin: 8px 0 0 0; }
 
     thead th {
       font-size: 0.8rem;
@@ -409,7 +409,7 @@
 </head>
 <body>
 
-<h1>🃏 Vira v1.10 · 32 deltagare · 8 bord · 6 omgångar</h1>
+<h1>🃏 Vira v1.11 · 32 deltagare · 8 bord · 6 omgångar</h1>
 
 <div class="btn-row">
   <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
@@ -453,7 +453,7 @@
 <script>
 "use strict";
 
-const VERSION = "v1.10";
+const VERSION = "v1.11";
 
 // Version integrated into h1 - no separate subtitle needed
 
@@ -711,7 +711,6 @@ function selectPlayer(p) {
 }
 
 function printBord() {
-  alert("💡 Instruktion:\n\n1. I utskriftsrutan, leta efter\n   \"Orientering\" eller \"Orientation\"\n\n2. Välj \"Liggande\" eller \"Landscape\"\n\n3. Klicka sedan \"Skriv ut\" eller \"Spara som PDF\"");
   window.print();
 }
 
