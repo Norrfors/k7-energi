@@ -409,7 +409,7 @@
 </head>
 <body>
 
-<h1>🃏 Vira v1.12 · 32 deltagare · 8 bord · 6 omgångar</h1>
+<h1>🃏 Vira v1.13 · 32 deltagare · 8 bord · 6 omgångar</h1>
 
 <div class="btn-row">
   <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
@@ -453,7 +453,7 @@
 <script>
 "use strict";
 
-const VERSION = "v1.12";
+const VERSION = "v1.13";
 
 // Version integrated into h1 - no separate subtitle needed
 
@@ -947,26 +947,26 @@ function renderSpelarView({ seats, conflictPlayers }) {
     }
   }
 
-  let html = '<table style="table-layout:fixed;"><thead><tr>';
-  html += '<th style="text-align:left;padding-left:6px;width:140px;">Spelare</th>';
-  for (let ri = 0; ri < ROUNDS; ri++) html += '<th style="width:70px;">Omgång ' + (ri + 1) + '</th>';
+  let html = '<table style="table-layout:fixed;width:100%;font-size:0.75rem;"><thead><tr>';
+  html += '<th style="text-align:left;padding:3px 4px;width:105px;font-size:0.8rem;">Spelare</th>';
+  for (let ri = 0; ri < ROUNDS; ri++) html += '<th style="width:50px;padding:3px 2px;font-size:0.75rem;">Omg ' + (ri + 1) + '</th>';
   html += '</tr></thead><tbody>';
 
   for (const p of playerNrs) {
     html += '<tr>';
-    html += '<td style="vertical-align:middle;white-space:nowrap;padding:4px 6px;border-right:1px solid #cbd5e1;">';
-    html += '<span class="chip" style="cursor:default;">' + p + '</span>';
-    html += ' <span style="font-size:0.75rem;color:#1e293b;">' + getPlayerName(p) + '</span>';
+    html += '<td style="text-align:left;vertical-align:middle;white-space:nowrap;padding:3px 4px;border-right:1px solid #cbd5e1;">';
+    html += '<span class="chip" style="cursor:default;width:20px;height:20px;font-size:0.65rem;">' + p + '</span>';
+    html += '<span style="font-size:0.7rem;color:#1e293b;">' + getPlayerName(p) + '</span>';
     html += '</td>';
     for (let ri = 0; ri < ROUNDS; ri++) {
       const d = info[p] && info[p][ri];
       const conflict = d && d.conflict;
       const bg = conflict ? 'background:#fff1f2;' : '';
-      html += '<td style="text-align:center;vertical-align:middle;' + bg + '">';
+      html += '<td style="text-align:center;vertical-align:middle;padding:2px 0;' + bg + '">';
       if (d) {
-        html += '<div style="font-size:0.75rem;font-weight:700;color:#1e40af;">Bord ' + d.table + '</div>';
-        html += '<div style="font-size:0.7rem;color:#64748b;">' + d.pos + '</div>';
-        if (conflict) html += '<div style="font-size:0.6rem;color:#dc2626;">⚠ konflikt</div>';
+        html += '<div style="font-size:0.7rem;font-weight:700;color:#1e40af;">' + d.table + '</div>';
+        html += '<div style="font-size:0.65rem;color:#64748b;margin-top:-1px;">' + d.pos + '</div>';
+        if (conflict) html += '<div style="font-size:0.55rem;color:#dc2626;margin-top:-1px;">⚠</div>';
       }
       html += '</td>';
     }
