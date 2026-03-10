@@ -401,7 +401,7 @@
 </head>
 <body>
 
-<h1>🃏 Vira v1.00 · 32 deltagare · 8 bord · 6 omgångar</h1>
+<h1>🃏 Vira v1.01 · 32 deltagare · 8 bord · 6 omgångar</h1>
 
 <div class="btn-row">
   <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
@@ -445,7 +445,7 @@
 <script>
 "use strict";
 
-const VERSION = "v1.00";
+const VERSION = "v1.01";
 
 // Version integrated into h1 - no separate subtitle needed
 
@@ -605,16 +605,47 @@ function closeEditModal() {
 }
 
 function saveEditedData() {
-  const newPlayers = {};
-  let errors = 0;
-
-  // Läs alla input-fält
+  // Bygga textrepresentation från input-fälten (samma format som inladdad fil)
+  let textData = "";
   for (let nr = 1; nr <= 32; nr++) {
     const fornamn = document.querySelector(`.edit-fornamn[data-nr="${nr}"]`)?.value.trim() || "";
     const efternamn = document.querySelector(`.edit-efternamn[data-nr="${nr}"]`)?.value.trim() || "";
-
+    
     if (fornamn || efternamn) {
-      newPlayers[nr] = { fornamn, efternamn };
+      textData += nr + ";" + fornamn + ";" + efternamn + "\n";
+    }
+  }
+
+  // Parsa genom SAMMA logik som loadFile() - säkerställer samma åtgärd
+  const lines = textData.split(/\r?\n/).filter(l => l.trim());
+  const newPlayers = {};
+  let errors = 0;
+  
+  for (const line of lines) {
+    const sep = line.includes(";") ? ";" : (line.includes("\t") ? "\t" : ",");
+    const parts = line.split(sep).map(p => p.trim());
+    
+    if (parts.length >= 3) {
+      // Format: Nr;Förnamn;Efternamn
+      const nr = parseInt(parts[0]);
+      const fornamn = parts[1];
+      const efternamn = parts[2];
+      
+      if (!isNaN(nr) && nr > 0 && fornamn && efternamn) {
+        newPlayers[nr] = { fornamn, efternamn };
+      } else {
+        errors++;
+      }
+    } else if (parts.length === 2) {
+      // Format: Nr;Namn (fallback)
+      const nr = parseInt(parts[0]);
+      const namn = parts[1];
+      
+      if (!isNaN(nr) && nr > 0 && namn) {
+        newPlayers[nr] = { fornamn: namn.split(" ")[0] || namn, efternamn: namn.split(" ").slice(1).join(" ") || "" };
+      } else {
+        errors++;
+      }
     } else {
       errors++;
     }
@@ -633,7 +664,7 @@ function saveEditedData() {
   }
   lastOpenedFilename = filename; // Uppdatera för nästa gång
 
-  // Uppdatera players-objektet
+  // Uppdatera players-objektet med validerad data
   players = newPlayers;
 
   // Spara till localStorage med filväg
