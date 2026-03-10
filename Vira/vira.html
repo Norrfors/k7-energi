@@ -402,7 +402,7 @@
 </head>
 <body>
 
-<h1>🃏 Vira v1.04 · 32 deltagare · 8 bord · 6 omgångar</h1>
+<h1>🃏 Vira v1.05 · 32 deltagare · 8 bord · 6 omgångar</h1>
 
 <div class="btn-row">
   <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
@@ -446,7 +446,7 @@
 <script>
 "use strict";
 
-const VERSION = "v1.04";
+const VERSION = "v1.05";
 
 // Version integrated into h1 - no separate subtitle needed
 
@@ -883,19 +883,17 @@ function chip(p, conflict) {
 
 function renderBordView({ rounds, seats, conflictPlayers }) {
   let html = '<table><thead><tr>';
-  html += '<th style="text-align:left;padding-left:4px;width:35px;">Omgång</th>';
+  html += '<th style="text-align:left;padding-left:4px;width:35px;border-right:3px solid #1e3a8a;">Omgång</th>';
   for (let i = 1; i <= TABLES; i++) {
-    const leftBorder = i === 1 ? 'border-left:3px solid #1e3a8a;' : '';
-    html += '<th style="' + leftBorder + '">Bord ' + i + '</th>';
+    html += '<th>Bord ' + i + '</th>';
   }
   html += '</tr></thead><tbody>';
 
   for (let ri = 0; ri < rounds.length; ri++) {
     const bottomBorder = ri < rounds.length - 1 ? 'border-bottom:3px solid #1e3a8a;' : '';
-    html += '<tr style="' + bottomBorder + '"><td style="vertical-align:middle;white-space:nowrap;">OMG ' + (ri + 1) + '</td>';
+    html += '<tr style="' + bottomBorder + '"><td style="vertical-align:middle;white-space:nowrap;border-right:3px solid #1e3a8a;">OMG ' + (ri + 1) + '</td>';
     for (let ti = 0; ti < TABLES; ti++) {
-      const leftBorder = ti === 0 ? 'border-left:3px solid #1e3a8a;' : '';
-      html += '<td style="border-right:3px solid #1e3a8a;' + leftBorder + '">';
+      html += '<td style="border-right:3px solid #1e3a8a;">';
       for (let pi = 0; pi < 4; pi++) {
         const p = seats[ri][ti][pi];
         const conflict = conflictPlayers[ri][ti].has(p);
