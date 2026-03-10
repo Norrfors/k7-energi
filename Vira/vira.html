@@ -409,7 +409,7 @@
 </head>
 <body>
 
-<h1>🃏 Vira v1.14 · 32 deltagare · 8 bord · 6 omgångar</h1>
+<h1>🃏 Vira v1.15 · 32 deltagare · 8 bord · 6 omgångar</h1>
 
 <div class="btn-row">
   <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
@@ -453,7 +453,7 @@
 <script>
 "use strict";
 
-const VERSION = "v1.14";
+const VERSION = "v1.15";
 
 // Version integrated into h1 - no separate subtitle needed
 
@@ -947,26 +947,26 @@ function renderSpelarView({ seats, conflictPlayers }) {
     }
   }
 
-  let html = '<table style="table-layout:fixed;width:100%;font-size:0.7rem;"><thead><tr>';
-  html += '<th style="text-align:left;padding:2px 3px;width:90px;font-size:0.75rem;">Spelare</th>';
-  for (let ri = 0; ri < ROUNDS; ri++) html += '<th style="width:38px;padding:2px 1px;font-size:0.7rem;">Omg' + (ri + 1) + '</th>';
+  let html = '<table style="table-layout:fixed;width:100%;font-size:0.75rem;"><thead><tr>';
+  html += '<th style="text-align:left;padding:1px 2px;width:85px;font-size:0.75rem;">Spelare</th>';
+  for (let ri = 0; ri < ROUNDS; ri++) html += '<th style="width:42px;padding:1px 1px;font-size:0.75rem;">Omg' + (ri + 1) + '</th>';
   html += '</tr></thead><tbody>';
 
   for (const p of playerNrs) {
     html += '<tr>';
-    html += '<td style="text-align:left;vertical-align:middle;white-space:nowrap;padding:2px 3px;border-right:1px solid #cbd5e1;overflow:hidden;">';
-    html += '<span class="chip" style="cursor:default;width:18px;height:18px;font-size:0.6rem;display:inline-block;margin-right:2px;">' + p + '</span>';
-    html += '<span style="font-size:0.68rem;color:#1e293b;display:inline-block;min-width:50px;overflow:hidden;text-overflow:ellipsis;">' + getPlayerName(p) + '</span>';
+    html += '<td style="text-align:left;vertical-align:middle;white-space:nowrap;padding:1px 2px;border-right:1px solid #cbd5e1;">';
+    html += '<span class="chip" style="cursor:default;width:20px;height:20px;font-size:0.65rem;display:inline-block;margin-right:1px;">' + p + '</span>';
+    html += '<span style="font-size:0.75rem;color:#1e293b;">' + getPlayerName(p) + '</span>';
     html += '</td>';
     for (let ri = 0; ri < ROUNDS; ri++) {
       const d = info[p] && info[p][ri];
       const conflict = d && d.conflict;
       const bg = conflict ? 'background:#fff1f2;' : '';
-      html += '<td style="text-align:center;vertical-align:middle;padding:1px 0;font-size:0.65rem;' + bg + '">';
+      html += '<td style="text-align:center;vertical-align:middle;padding:1px 0;font-size:0.72rem;' + bg + '">';
       if (d) {
         html += '<div style="font-weight:700;color:#1e40af;line-height:1.1;">' + d.table + '</div>';
-        html += '<div style="color:#64748b;line-height:1;font-size:0.6rem;">' + d.pos.charAt(0) + '</div>';
-        if (conflict) html += '<div style="font-size:0.5rem;color:#dc2626;">⚠</div>';
+        html += '<div style="color:#64748b;line-height:1.1;font-size:0.68rem;">' + d.pos.substring(0, 2) + '</div>';
+        if (conflict) html += '<div style="font-size:0.55rem;color:#dc2626;">⚠</div>';
       }
       html += '</td>';
     }
