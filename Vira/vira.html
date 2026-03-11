@@ -340,6 +340,7 @@
   /* ===== PRINT ===== */
   @media print {
     @page { size: A4; margin: 8mm; orphans: 2; widows: 2; }
+    @page:landscape { size: A4 landscape; margin: 8mm; }
 
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
@@ -453,7 +454,7 @@
 <script>
 "use strict";
 
-const VERSION = "v1.21";
+const VERSION = "v1.22";
 
 // Version integrated into h1 - no separate subtitle needed
 
@@ -959,7 +960,7 @@ function renderSpelarView({ seats, conflictPlayers }) {
 
   let html = '<table style="table-layout:fixed;width:100%;font-size:0.9rem;border-collapse:collapse;"><thead><tr>';
   html += '<th style="text-align:left;padding:0 1px;width:' + nameColWidth + 'px;font-size:0.9rem;font-weight:600;">Spelare</th>';
-  for (let ri = 0; ri < ROUNDS; ri++) html += '<th style="width:55px;padding:0 1px;font-size:0.85rem;font-weight:600;">Omg' + (ri + 1) + '</th>';
+  for (let ri = 0; ri < ROUNDS; ri++) html += '<th style="text-align:left;width:55px;padding:0 1px;font-size:0.85rem;font-weight:600;">Omg' + (ri + 1) + '</th>';
   html += '</tr></thead><tbody>';
 
   for (const p of playerNrs) {
@@ -972,7 +973,7 @@ function renderSpelarView({ seats, conflictPlayers }) {
       const d = info[p] && info[p][ri];
       const conflict = d && d.conflict;
       const bg = conflict ? 'background:#fff1f2;' : '';
-      html += '<td style="text-align:center;vertical-align:middle;padding:0 1px;font-size:0.85rem;' + bg + '">';
+      html += '<td style="text-align:left;vertical-align:middle;padding:0 1px;font-size:0.85rem;' + bg + '">';
       if (d) {
         html += '<span style="font-weight:700;color:#1e40af;">' + d.table + '</span>';
         html += '<span style="color:#64748b;margin-left:2px;">' + d.pos + '</span>';
