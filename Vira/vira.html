@@ -410,7 +410,7 @@
 </head>
 <body>
 
-<h1>🃏 Vira v1.22 · 32 deltagare · 8 bord · 6 omgångar</h1>
+<h1>🃏 Vira v1.23 · 32 deltagare · 8 bord · 6 omgångar</h1>
 
 <div class="btn-row">
   <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
@@ -454,7 +454,7 @@
 <script>
 "use strict";
 
-const VERSION = "v1.22";
+const VERSION = "v1.23";
 
 // Version integrated into h1 - no separate subtitle needed
 
@@ -905,14 +905,13 @@ function renderBordView({ rounds, seats, conflictPlayers }) {
     const bottomBorder = ri < rounds.length - 1 ? 'border-bottom:3px solid #1e3a8a;' : '';
     html += '<tr style="' + bottomBorder + '"><td style="vertical-align:middle;white-space:nowrap;border-right:3px solid #1e3a8a;font-size:2rem;font-weight:700;padding:4px 6px;">' + (ri + 1) + '</td>';
     for (let ti = 0; ti < TABLES; ti++) {
-      html += '<td style="border-right:3px solid #1e3a8a;">';
+      html += '<td style="border-right:3px solid #1e3a8a;padding:2px;">';
       for (let pi = 0; pi < 4; pi++) {
         const p = seats[ri][ti][pi];
         const conflict = conflictPlayers[ri][ti].has(p);
-        html += '<div class="seat-row">';
-        html += '<span class="seat-label">' + POSITIONS[pi] + '</span>';
+        html += '<div class="seat-row" style="display:flex;gap:3px;align-items:center;font-size:0.9rem;">';
         html += chip(p, conflict);
-        html += '<span class="seat-name">' + getPlayerName(p) + '</span>';
+        html += '<span class="seat-label" style="font-weight:600;color:#1e3a8a;min-width:45px;">' + POSITIONS[pi] + '</span>';
         html += '</div>';
       }
       html += '</td>';
