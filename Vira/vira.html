@@ -182,7 +182,7 @@
 </head>
 <body>
 
-<h1 id="mainTitle">🃏 Vira v1.42 · Ingen fil vald</h1>
+<h1 id="mainTitle">🃏 Vira v1.43 · Ingen fil vald</h1>
 
 <!-- RAD 1: Fil + sortering -->
 <div class="btn-row">
@@ -225,7 +225,13 @@
 <!-- RESULTAT MODAL (OMG 1–6) -->
 <div class="modal-overlay" id="resultsModal">
   <div class="modal-content wide">
-    <div class="modal-header">📊 Registrera resultat</div>
+    <div class="modal-header" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>📊 Registrera resultat</span>
+      <span style="display:flex;gap:4px;">
+        <button class="sort-btn active" id="resSortNr"  onclick="sortResults('nummer')">🔢 Nr</button>
+        <button class="sort-btn"        id="resSortSum" onclick="sortResults('summa')">📊 Resultat</button>
+      </span>
+    </div>
     <div class="results-grid" id="resultsGrid"></div>
     <div class="modal-buttons">
       <button class="btn-cancel" onclick="closeResultsModal()">Stäng</button>
@@ -244,11 +250,12 @@
 <script>
 "use strict";
 
-const VERSION = "v1.42";
+const VERSION = "v1.43";
 
 // ===== STATE =====
 let players  = {};
 let sortMode = "nummer";
+let resultsSortMode = "nummer";
 let fileHandle  = null;
 let lastResult  = null;
 let layoutMode  = "bord";
@@ -583,7 +590,31 @@ function saveEditedData() {
 
 // ===== RESULTAT MODAL =====
 
+function sortResults(mode) {
+  // Spara nuvarande input-värden innan omsortering
+  const activePlayers = getActivePlayers();
+  for (const nr of activePlayers) {
+    if (!players[nr]) continue;
+    for (let col = 1; col <= 6; col++) {
+      const inp = document.querySelector(`.res-omg[data-nr="${nr}"][data-col="${col}"]`);
+      if (inp) players[nr]["omg" + col] = parseSvenska(inp.value);
+    }
+  }
+  resultsSortMode = mode;
+  document.getElementById("resSortNr").classList.toggle("active",  mode === "nummer");
+  document.getElementById("resSortSum").classList.toggle("active", mode === "summa");
+  buildResultsRows();
+}
+
 function openResultsModal() {
+  resultsSortMode = "nummer";
+  document.getElementById("resSortNr").classList.add("active");
+  document.getElementById("resSortSum").classList.remove("active");
+  buildResultsRows();
+  document.getElementById("resultsModal").classList.add("open");
+}
+
+function buildResultsRows() {
   const grid = document.getElementById("resultsGrid");
   grid.innerHTML = "";
 
@@ -593,7 +624,13 @@ function openResultsModal() {
   hdr.innerHTML = "<div>Nr</div><div>Namn</div><div>O1</div><div>O2</div><div>O3</div><div>O4</div><div>O5</div><div>O6</div><div>Sum</div>";
   grid.appendChild(hdr);
 
-  const activePlayers = getActivePlayers();
+  let activePlayers = getActivePlayers();
+  if (resultsSortMode === "summa") {
+    activePlayers = [...activePlayers].sort((a, b) => {
+      const diff = calculateSum(b) - calculateSum(a);
+      return diff !== 0 ? diff : a - b;
+    });
+  }
   const inputMap = {};
 
   for (let ri = 0; ri < activePlayers.length; ri++) {
@@ -652,7 +689,6 @@ function openResultsModal() {
     });
   }
 
-  document.getElementById("resultsModal").classList.add("open");
 }
 
 function closeResultsModal() { document.getElementById("resultsModal").classList.remove("open"); }
