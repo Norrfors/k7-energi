@@ -437,7 +437,7 @@
 </head>
 <body>
 
-<h1>🃏 Vira v1.27 · 32 deltagare · 8 bord · 6 omgångar</h1>
+<h1>🃏 Vira v1.25 · 32 deltagare · 8 bord · 6 omgångar</h1>
 
 <div class="btn-row">
   <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
@@ -482,7 +482,7 @@
 <script>
 "use strict";
 
-const VERSION = "v1.27";
+const VERSION = "v1.25";
 
 // Version integrated into h1 - no separate subtitle needed
 
@@ -496,35 +496,7 @@ let lastOpenedFilename = "DeltagarLista.txt"; // Spara originalfilnamnet för at
   const fname = localStorage.getItem("vira_players_file");
   if (saved) {
     try {
-      let loaded = JSON.parse(saved);
-      
-      // Konvertera från gamla versioner (v1.35 hade `namn`, v1.25 behöver `fornamn`/`efternamn`)
-      const converted = {};
-      for (const nr in loaded) {
-        const p = loaded[nr];
-        if (typeof p === "string") {
-          // Gammalt format (bara sträng)
-          converted[nr] = {
-            fornamn: p.split(" ")[0] || p,
-            efternamn: p.split(" ").slice(1).join(" ") || "",
-            narvaro: "",
-            omg1: "", omg2: "", omg3: "", omg4: "", omg5: "", omg6: ""
-          };
-        } else if (p.namn && !p.fornamn) {
-          // v1.35 format (har `namn` men inte `fornamn`)
-          converted[nr] = {
-            fornamn: p.namn.split(" ")[0] || p.namn,
-            efternamn: p.namn.split(" ").slice(1).join(" ") || "",
-            narvaro: p.narvaro || "",
-            omg1: p.omg1 || "", omg2: p.omg2 || "", omg3: p.omg3 || "", omg4: p.omg4 || "", omg5: p.omg5 || "", omg6: p.omg6 || ""
-          };
-        } else {
-          // v1.26 format (redan korrekt)
-          converted[nr] = p;
-        }
-      }
-      
-      players = converted;
+      players = JSON.parse(saved);
       const count = Object.keys(players).length;
       
       if (count > 0) {
@@ -640,22 +612,18 @@ function getPlayerName(nr) {
   const p = players[nr];
   // Om sorterad på efternamn, visa "Efternamn Förnamn"
   if (sortMode === "efternamn") {
-    const en = p.efternamn || "";
-    const fn = p.fornamn || "";
-    return (en || fn || String(nr)).trim();
+    return p.efternamn + (p.fornamn ? " " + p.fornamn : "");
   }
   // Standard: Förnamn Efternamn
-  const fn = p.fornamn || "";
-  const en = p.efternamn || "";
-  return (fn || en || String(nr)).trim();
+  return p.fornamn + (p.efternamn ? " " + p.efternamn : "");
 }
 
 function getPlayerFornamn(nr) {
-  return (players[nr]?.fornamn || "").trim() || String(nr);
+  return players[nr]?.fornamn || String(nr);
 }
 
 function getPlayerEfternamn(nr) {
-  return (players[nr]?.efternamn || "").trim();
+  return players[nr]?.efternamn || "";
 }
 
 // ===== REDIGERING =====

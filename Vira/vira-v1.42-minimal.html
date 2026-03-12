@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <title>Vira – v1.42</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h1 { color: #1e3a8a; }
+    button { padding: 10px 20px; font-size: 14px; cursor: pointer; }
+    input[type="file"] { display: none; }
+  </style>
+</head>
+<body>
+
+<h1 id="mainTitle">🃏 Vira v1.42 · Ingen fil vald</h1>
+
+<div>
+  <button onclick="openFile()">📂 Öppna medlemslista</button>
+  <input type="file" id="fileInputFallback" accept=".txt,.csv" onchange="loadFileFallback(event)">
+  <span id="fileInfo">Ingen fil vald</span>
+</div>
+
+<div id="status" style="margin-top: 20px; padding: 10px; background: #f0f0f0;"></div>
+
+<script>
+let players = {};
+
+function openFile() {
+  console.log("openFile() called");
+  const input = document.getElementById("fileInputFallback");
+  if (input) {
+    console.log("Input element found, clicking...");
+    input.click();
+  } else {
+    console.error("Input element not found!");
+  }
+}
+
+function loadFileFallback(event) {
+  console.log("loadFileFallback called");
+  const file = event.target.files[0];
+  
+  if (!file) {
+    console.log("No file selected");
+    return;
+  }
+  
+  console.log("File selected: " + file.name);
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    console.log("File read successfully");
+    parseAndLoadFile(e.target.result, file.name);
+  };
+  reader.readAsText(file, "UTF-8");
+  event.target.value = "";
+}
+
+function parseAndLoadFile(content, filename) {
+  console.log("Parsing file: " + filename);
+  const lines = content.split('\n').filter(l => l.trim());
+  console.log("Total lines: " + lines.length);
+  
+  const newPlayers = {};
+  
+  for (const line of lines) {
+    const parts = line.split(';').map(p => p.trim());
+    if (parts.length >= 3) {
+      const nr = parseInt(parts[0]);
+      if (!isNaN(nr) && nr > 0) {
+        newPlayers[nr] = {
+          fornamn: parts[1],
+          efternamn: parts[2],
+          narvaro: parts[3] || "+"
+        };
+      }
+    }
+  }
+  
+  players = newPlayers;
+  const count = Object.keys(players).length;
+  
+  document.getElementById("fileInfo").textContent = "📌 " + filename + " (" + count + " spelare)";
+  document.getElementById("mainTitle").textContent = "🃏 Vira v1.42 · " + count + " deltagare";
+  document.getElementById("status").textContent = "✅ Fil inläst: " + filename + " med " + count + " spelare";
+  
+  console.log("File parsed successfully: " + count + " players");
+}
+
+console.log("Script loaded");
+</script>
+
+</body>
+</html>

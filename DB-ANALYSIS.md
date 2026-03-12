@@ -129,4 +129,4 @@ Saknas: Index på `zone` om man filtrerar INNE/UTE – men låg prioritet tills 
 | 3 | capabilitiesToLog tom för alla sensorer | 🟡 Medel |
 | 4 | EnergyLog och MeterReading duplicerar data | 🟡 Medel |
 | 5 | ExternalData oanvänd | 🟢 Lågt |
-| 6 | Ingen databas-rensning | 🟢 Lågt |
+| 6 | Ingen databas-rensning | 🟢 Låg

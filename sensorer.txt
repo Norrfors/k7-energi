@@ -1,0 +1,200 @@
+	
+Huvudentre-RING	Huvudentre	Dörrklocka	Ring	-	
+1x INTERNAL	-	två dagar sedan		
+Hall Generic Remote/Button	Hall	Fjärrkontroll	Nexa	-	
+1x CR2450	-	-		
+01-Remote Control	Lediga	Fjärrkontroll	IKEA Home Smart	-	
+LOW	-	-	tre dagar sedan		
+VS-AltanSpot Styrbar	AltanSpot	Fjärrkontroll	IKEA Home Smart	-	
+-	-	en dag sedan		
+VS-Trapp-ÖV-Styrbar	Hall	Fjärrkontroll	IKEA Home Smart	-	
+LOW	-	-	21 timmar sedan		
+VS-Trapp-BV-Styrbar	Hall	Fjärrkontroll	IKEA Home Smart	-	
+-	-	21 timmar sedan		
+VS-Sång Styrbar	Huvudsovrum	Fjärrkontroll	IKEA Home Smart	-	
+-	-	21 timmar sedan		
+VS-Hall-ÖV-Styrbar	Hall	Fjärrkontroll	IKEA Home Smart	-	
+-	-	-		
+VS-BV-Hall-Styrbar	Huvudentre	Fjärrkontroll	IKEA Home Smart	-	
+LOW	-	-	en timme sedan		
+VS BV Matbord Styrbar Remote Control	Matsal	Fjärrkontroll	IKEA Home Smart	-	
+-	-	21 timmar sedan		
+Generic Remote/Button	Lediga	Fjärrkontroll	Nexa	-	
+1x CR2450	-	-		
+VS-BV-Kök Spisfläkt Rodret	Kök	Fjärrkontroll	IKEA Home Smart	-	
+100%	-	-	13 timmar sedan		
+FK3 Generic Remote/Button	Lediga	Fjärrkontroll	Nexa	-	
+1x CR2450	-	-		
+02-Remote Control	Vardagsrum	Fjärrkontroll	IKEA Home Smart	-	
+LOW	-	-	en dag sedan		
+EWT0006	Lediga	Fjärrkontroll	Telldus	-	
+1x CR2032	-	fyra dagar sedan		
+VS-AltanKlot Styrbar	AltanKlot	Fjärrkontroll	IKEA Home Smart	-	
+-	-	22 timmar sedan		
+Arbplats Generic Remote/Button	Kök	Fjärrkontroll	Nexa	-	
+1x CR2450	-	-		
+Sonos Move	Kök	Högtalare	Sonos		
+100%	1x INTERNAL	-	fem dagar sedan		
+Sonos Roam	Altan norr	Högtalare	Sonos		
+100%	-	-	fem dagar sedan		
+Sonos Vardagsrum	Vardagsrum	Högtalare	Sonos		-	-	-	fem dagar sedan		
+Sonos Kök Play3	Kök	Högtalare	Sonos		-	-	-	fem dagar sedan		
+Sonos Roam2	Altan norr	Högtalare	Sonos		
+69%	1x INTERNAL	-	fem dagar sedan		
+Sonos-Symfonisk	Kök	Högtalare	Sonos		-	-	-	fem dagar sedan		
+BILRESA scroll wheel	Lediga	Knapp	IKEA Home Smart		
+100%	2x AAA	-	-		
+Klot-31	KlotRad-3	Lampa	IKEA Home Smart		-	-	0 W	tre minuter sedan		
+Matsal vä	Lampor FÖNSTER	Lampa	IKEA Home Smart		-	-	-	18 minuter sedan		
+Spot-tak-01 (GU10)	Hall	Lampa	IKEA Home Smart		-	-	0 W	31 minuter sedan		
+Klot-23	KlotRad-2	Lampa	IKEA Home Smart		-	-	0 W	21 minuter sedan		
+Klot-12	KlotRad-1	Lampa	IKEA Home Smart		-	-	0 W	en timme sedan		
+BV Hall Hö	Lampor FÖNSTER	Lampa	IKEA Home Smart		-	-	0 W	13 minuter sedan		
+Källarentre-Spot-13	Lampor UTE	Lampa	IKEA Home Smart		-	-	-	-		
+AltanSpot-04-RGBW	AltanSpot	Lampa	IKEA Home Smart		-	-	1 W	49 minuter sedan		
+Huvudsovrum	Lampor FÖNSTER	Lampa	IKEA Home Smart		-	-	1 W	tio minuter sedan		
+Spot-tak-05 (GU10)	Hall	Lampa	IKEA Home Smart		-	-	-	en minut sedan		
+Matsal Hö	Lampor FÖNSTER	Lampa	IKEA Home Smart		-	-	-	26 minuter sedan		
+Klot-33	KlotRad-3	Lampa	IKEA Home Smart		-	-	0 W	24 minuter sedan		
+spisfläkt Dimbart Transformator	Kök	Lampa	IKEA Home Smart		-	-	0 W	20 minuter sedan		
+V-Rum Hö	Lampor FÖNSTER	Lampa	IKEA Home Smart		-	-	-	14 minuter sedan		
+Kristall-01	Hall	Lampa	IKEA Home Smart		-	-	1 W	-		
+Källarentre-Spot-11	Lampor UTE	Lampa	IKEA Home Smart		-	-	-	elva minuter sedan		
+Spot-tak-04 (GU10)	Hall	Lampa	IKEA Home Smart		-	-	-	en timme sedan		
+Sovrum Syd Dimmable Bulb (E27)	Lampor FÖNSTER	Lampa	IKEA Home Smart		-	-	1 W	-		
+Säng-HO (E14)	Huvudsovrum	Lampa	IKEA Home Smart		-	-	-	fyra minuter sedan		
+Källarentre-Spot-09	Lampor UTE	Lampa	IKEA Home Smart		-	-	2 W	en timme sedan		
+YTTERtrapp-ORMANÄS	Entre Källare	Lampa	IKEA Home Smart		-	-	0 W	åtta minuter sedan		
+Spot-tak-03 (GU10)	Hall	Lampa	IKEA Home Smart		-	-	0 W	43 minuter sedan		
+Huvudentre	Lampor UTE	Lampa	IKEA Home Smart		-	-	3 W	53 minuter sedan		
+AltanSpot-06-RGBW	AltanSpot	Lampa	IKEA Home Smart		-	-	1 W	20 minuter sedan		
+VU-1 (312538)	Klädkammare	Lampa	Telldus		-	-	-	-		
+Adventsstjärna E14	Lampor FÖNSTER	Lampa	IKEA Home Smart		-	-	0 W	-		
+Tak Vrum	Vardagsrum	Lampa	IKEA Home Smart		-	-	1 W	åtta minuter sedan		
+IKEA Symfonisk	Kök	Lampa	IKEA Home Smart		-	-	2 W	28 minuter sedan		
+Bardisk Gen Plug-in On/Off	Kök	Lampa	Nexa		-	-	-	-		
+Klot-21	KlotRad-2	Lampa	IKEA Home Smart		-	-	0 W	21 minuter sedan		
+Klot-22	KlotRad-2	Lampa	IKEA Home Smart		-	-	1 W	27 minuter sedan		
+Jordglob Tunable White Bulb (E14)	Hall	Lampa	IKEA Home Smart		-	-	-	22 minuter sedan		
+Spot-trapp-07 (GU10)	Hall	Lampa	IKEA Home Smart		-	-	-	-		
+AltanSpot-03	AltanSpot	Lampa	IKEA Home Smart		-	-	1 W	en timme sedan		
+Justerbar Vit Lampa (E14)	Lediga	Lampa	IKEA Home Smart		-	-	-	-		
+Smart ljusremsa L900 TAPO	Lediga	Lampa	Tapo		-	-	14 W	-		
+Garage Höger	Lampor UTE	Lampa	-		-	-	3 W	två minuter sedan		
+AltanSpot-07-RGBW	AltanSpot	Lampa	IKEA Home Smart		-	-	1 W	19 minuter sedan		
+V-Rum Vä	Lampor FÖNSTER	Lampa	IKEA Home Smart		-	-	-	åtta minuter sedan		
+Källarentre-Spot-12	Lampor UTE	Lampa	IKEA Home Smart		-	-	-	en timme sedan		
+AltanSpot-01	AltanSpot	Lampa	IKEA Home Smart		-	-	1 W	fem minuter sedan		
+Matbord led driver	Matsal	Lampa	Sunricher		-	-	1 W	fem dagar sedan		
+Skydsrum	Lampor UTE	Lampa	-		-	-	3 W	-		
+Spot-08 (GU10)	Lediga	Lampa	IKEA Home Smart		-	-	-	-		
+Spot-trapp-06 (GU10)	Hall	Lampa	IKEA Home Smart		-	-	-	-		
+Källarentre-Spot-10	Lampor UTE	Lampa	IKEA Home Smart		-	-	0 W	tre minuter sedan		
+AltanSpot-05-RGBW	AltanSpot	Lampa	IKEA Home Smart		-	-	1 W	fem minuter sedan		
+Klot-11	KlotRad-1	Lampa	IKEA Home Smart		-	-	0 W	fem minuter sedan		
+V-Rum Hörn	Lampor FÖNSTER	Lampa	IKEA Home Smart		-	-	-	19 minuter sedan		
+Tak Hall	Huvudentre	Lampa	IKEA Home Smart		-	-	1 W	25 minuter sedan		
+Källarentre-Spot-14	Lampor UTE	Lampa	IKEA Home Smart		-	-	-	-		
+Garage Vänster	Lampor UTE	Lampa	-		-	-	3 W	två minuter sedan		
+Spot-trapp-02 (GU10)	Hall	Lampa	IKEA Home Smart		-	-	0 W	58 minuter sedan		
+BV Hall Vä	Lampor FÖNSTER	Lampa	IKEA Home Smart		-	-	1 W	22 minuter sedan		
+AltanSpot-02	AltanSpot	Lampa	IKEA Home Smart		-	-	1 W	37 minuter sedan		
+Säng-VÄ (E14)	Huvudsovrum	Lampa	IKEA Home Smart		-	-	-	22 minuter sedan		
+Klot-32	KlotRad-3	Lampa	IKEA Home Smart		-	-	0 W	sju minuter sedan		
+Klot-13	KlotRad-1	Lampa	IKEA Home Smart		-	-	0 W	17 minuter sedan		
+Huvudingång Doprman	Huvudentre	Lås	Yale Doorman	-	-	-	0 W	fem dagar sedan		
+LMDT-609	Lediga	Sensor	Nexa	-	
+2x AA	-	-		
+Outdoor Occupancy Sensor GARAGE	Garage	Sensor	Philips Hue, without the bridge	-	
+95.5%	-	-	tre minuter sedan		
+T01	Altan norr	Sensor	Wireless Weather Sensors	-	-	-	0 W	fem dagar sedan		
+Namron Multisensor 4512734	Vardagsrum	Sensor	Namron	-	
+40%	2x AAA	-	fem dagar sedan		
+Rörelse-Vallhorn-01	Klädkammare	Sensor	IKEA Home Smart	-	
+-	-	två minuter sedan		
+Oregon Regn PCR800	Balkong	Sensor	Wireless Weather Sensors	-	
+OK	-	-	fem dagar sedan		
+k7 (K7-INNE) — K7-INNE	Huvudsovrum	Sensor	Netatmo	-	
+4x AAA	-	fem dagar sedan		
+k7 vind (K7-INNE) — K7-VIND	Altan norr	Sensor	Netatmo	-	
+48%	4x AAA	-	fem dagar sedan		
+WH2 kanske skyddsrum eller garage	Garage	Sensor	Wireless Weather Sensors		-	-	-	-		
+WH2 Inne Gatuplan	Matsal	Sensor	Wireless Weather Sensors		-	-	-	-		
+Rörelse BV PA-88R	Kök	Sensor	Telldus	-	
+1x CR2032	-	fyra dagar sedan		
+Rörelse-Vallhorn-05	Altan norr	Sensor	IKEA Home Smart	-	
+97%	-	-	45 minuter sedan		
+Oregon Vind WGR800	Balkong	Sensor	Wireless Weather Sensors	-	
+OK	-	-	fem dagar sedan		
+Rörelse-Vallhorn-02	Huvudsovrum	Sensor	IKEA Home Smart	-	
+91%	-	-	30 minuter sedan		
+Outdoor Occupancy Sensor HUVUDENTRE	Huvudentre	Sensor	Philips Hue, without the bridge	-	
+100%	-	-	två minuter sedan		
+WH2 UTE Norr Inglas	Altan norr	Sensor	Wireless Weather Sensors		-	-	-	-		
+Rörelse Badrum IKEA	Badrum	Sensor	IKEA Home Smart	-	
+LOW	-	-	nio timmar sedan		
+MYGGBETT door/window sensor	Lediga	Sensor	IKEA Home Smart	-	
+100%	1x AAA	-	-		
+Oregon INNE	Vardagsrum	Sensor	Wireless Weather Sensors	-	
+OK	-	-	fem dagar sedan		
+WH2 ÖV xx IN	Badrum	Sensor	Wireless Weather Sensors	-	-	-	0 W	fem dagar sedan		
+Oregon Temp THGN800	Balkong	Sensor	Wireless Weather Sensors	-	
+OK	-	-	fem dagar sedan		
+Rörelse 02 Smart PIR Motion Sensor	Lediga	Sensor	Tuya Zigbee	-	
+OK	-	-	-		
+k7 (K7-INNE) — K7-UTE	Altan norr	Sensor	Netatmo		
+23%	4x AAA	-	fem dagar sedan		
+WH2 x OUT	Lediga	Sensor	Wireless Weather Sensors	-	-	-	0 W	fem dagar sedan		
+WH2 ny UTE Telldus	Lediga	Sensor	Wireless Weather Sensors		-	-	-	-		
+Rörelse Källarentre dörr MYGGSPRAY wrlss mtn sensor	Entre Källare	Sensor	-		
+100%	2x AAA	-	-		
+Rörelse-Vallhorn-04	Lediga	Sensor	IKEA Home Smart	-	
+91%	-	-	sex minuter sedan		
+WH2 ÖV UTE	Balkong	Sensor	Wireless Weather Sensors		-	-	-	-		
+Rörelse-Vallhorn-03	Lediga	Sensor	IKEA Home Smart	-	
+90%	-	-	20 minuter sedan		
+Rörelse 03 Smart PIR Motion Sensor	Lediga	Sensor	Tuya Zigbee	-	
+OK	-	-	-		
+Rörelse Ozzi PA-88R	Huvudentre	Sensor	Telldus	-	
+1x CR2032	-	fem dagar sedan		
+WH2 -- kanske garage el skyddsrum	Garage	Sensor	Wireless Weather Sensors		-	-	-	-		
+Rörelse Garage LMDT-609	Lediga	Sensor	Nexa	-	
+2x AA	-	-		
+Rörelse Källarentre trappa MYGGSPRAY wrlss mtn sensor	Entre Källare	Sensor	-		
+100%	2x AAA	-	-		
+k7 regn (K7-INNE) — K7-regn	Altan norr	Sensor	Netatmo		
+20%	4x AAA	-	fem dagar sedan		
+k7 — ÖV Huvudsovrum	Huvudsovrum	Termostat	Netatmo	-	
+100%	2x AA	-	fem dagar sedan		
+k7 — ÖV Sovrum Norr	Sorum-norr	Termostat	Netatmo	-	
+61.9%	2x AA	-	fem dagar sedan		
+k7 BV — Vardagsrum	Vardagsrum	Termostat	Netatmo	-	
+100%	2x AA	-	fem dagar sedan		
+k7 — ÖV Sovrum Syd	Sovrum-syd	Termostat	Netatmo	-	
+76.4%	2x AA	-	fem dagar sedan		
+k7 — BV Hall	Hall	Termostat	Netatmo	-	
+100%	2x AA	-	fem dagar sedan		
+k7 — ÖV Hall	Hall	Termostat	Netatmo	-	
+100%	2x AA	-	fem dagar sedan		
+k7 — BV Matsal	Matsal	Termostat	Netatmo	-	
+100%	2x AA	-	fem dagar sedan		
+ÖV Badrum termostat 4512744/45	Badrum	Termostat	Namron		-	-	0 W	fem dagar sedan		
+k7 — ÖV Kontor	Kontor	Termostat	Netatmo	-	
+77.1%	2x AA	-	fem dagar sedan		
+VU-Effektmät	Altan norr	Väggkontakt	IKEA Home Smart		-	-	0 W	två minuter sedan		
+VU-3 (312538)	Kök	Väggkontakt	Telldus		-	-	-	-		
+VUZ02 Switch	Kök	Väggkontakt	Telldus Z-wave		-	-	-	fem dagar sedan		
+VU-A6Z-Nous	Soldäck	Väggkontakt	Nous		-	-	0 W	två minuter sedan		
+Garage-t01 Outlet	Garage	Väggkontakt	IKEA Home Smart		-	-	0 W	54 minuter sedan		
+VUz-01Plug-in Switch Mini	Kök	Väggkontakt	Telldus Z-wave		-	-	0 W	-		
+Bevattning VUZ03 Switch	Trädgård	Väggkontakt	Telldus Z-wave		-	-	0 W	fem dagar sedan		
+VU-2 (312538)	Vardagsrum	Väggkontakt	Telldus		-	-	-	-		
+Automower-GRIND	Trädgård	Väggkontakt	Nexa		-	-	0 W	-		
+Inglasning Spotl On/Off	Altan norr	Väggkontakt	Nexa		-	-	-	-		
+Altherma Hotwatertank	Tvätt/Pann/Bad	Värmepanna	Daikin ONECTA		-	-	0 W	fem dagar sedan		
+Element-Klimat	Tvätt/Pann/Bad	Värmepump	Daikin ONECTA		-	-	0 W	fem dagar sedan		
+Spakvridare Smart Valve Controller LZ3	Trädgård	Övrigt	Nous		-	-	0 W	-		
+jan.norrfors@gaxor.se	Hem	Övrigt	Google Sheets	-	-	-	-	-		
+HUGO	Trädgård	Övrigt	Husqvarna Automower Connect	-	-	-	-	fem dagar sedan		
+Tibber Pris relativ	Tvätt/Pann/Bad	Övrigt	Tibber	-	-	-	-	fem dagar sedan		
+Pulse Krokgatan 7	Tvätt/Pann/Bad	Övrigt	Tibber	-	-	-	3533 W	fem dagar sedan		

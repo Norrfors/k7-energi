@@ -1,5 +1,8 @@
 # Bordsplacering - Versionshistorik
 
+## v1.24 - 2026-03-11
+✅ Två print-knappar för orientering-val (stående/liggande)
+
 ## v1.00 - 2026-03-10
 - ✅ Grundversion av bordsplacering-systemet
 - ✅ Användare laddar upp textfil (Nr;Förnamn;Efternamn)
