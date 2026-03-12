@@ -38,6 +38,8 @@
   .btn-save:hover { background: #047857; }
   .btn-cancel   { background: #cbd5e1; color: #1e293b; }
   .btn-cancel:hover { background: #94a3b8; }
+  .btn-saveas   { background: #475569; color: white; }
+  .btn-saveas:hover:not(:disabled) { background: #334155; }
 
   .sort-group { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
   .sort-label { font-size: 0.7rem; font-weight: 600; color: #334155; white-space: nowrap; margin-right: 2px; }
@@ -159,15 +161,12 @@
 
   /* ===== PRINT ===== */
   @media print {
-    @page { size: A4; margin: 8mm; }
-    body.print-landscape @page { size: A4 landscape; margin: 8mm; }
-    body.print-portrait  @page { size: A4 portrait;  margin: 8mm; }
+    @page { margin: 8mm; }
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    body { background: white; padding: 0; margin: 0; width: 210mm; }
+    body { background: white; padding: 0; margin: 0; }
     .btn-row, #status, #clickHint { display: none !important; }
     h1 { font-size: 1.1rem; margin: 0 0 3px 0; font-weight: bold; }
-    table { width: 200mm; table-layout: fixed; border-collapse: collapse; margin: 4px 0 0 0; }
-    body.print-landscape table { width: 280mm; }
+    table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 4px 0 0 0; }
     thead th { font-size: 0.8rem; padding: 6px 4px; background: #1e3a8a !important; color: white !important; border: 1px solid #1e3a8a !important; font-weight: bold; }
     tbody td { padding: 3px 2px; border: 0.5px solid #cbd5e1 !important; font-size: 0.7rem; }
     td:first-child { font-size: 0.85rem; padding: 4px 6px; background: #f0f9ff !important; font-weight: bold; width: 50px; text-align: center; border-right: 2px solid #1e3a8a !important; }
@@ -183,7 +182,7 @@
 </head>
 <body>
 
-<h1 id="mainTitle">🃏 Vira v1.41 · Ingen fil vald</h1>
+<h1 id="mainTitle">🃏 Vira v1.42 · Ingen fil vald</h1>
 
 <!-- RAD 1: Fil + sortering -->
 <div class="btn-row">
@@ -207,8 +206,8 @@
   <button class="btn-results" id="btnResults" onclick="openResultsModal()" disabled>📊 Resultat</button>
   <button class="btn-final"   id="btnFinal"   onclick="generateFinal()"   disabled>🏆 Final</button>
   <button class="btn-layout"  id="btnLayout"  onclick="toggleLayout()"    disabled>👤 Visa per spelare</button>
-  <button class="btn-print" id="btnPrintPortrait"  onclick="printBord('portrait')"  disabled>🖨️ Stående</button>
-  <button class="btn-print" id="btnPrintLandscape" onclick="printBord('landscape')" disabled>🖨️ Liggande</button>
+  <button class="btn-print"   id="btnPrint"   onclick="window.print()"    disabled>🖨️ Skriv ut</button>
+  <button class="btn-saveas"  id="btnSaveAs"  onclick="saveAs()" disabled>💾 Spara som...</button>
 </div>
 
 <!-- REDIGERA MODAL (Nr / Förnamn / Efternamn / Närvaro) -->
@@ -245,7 +244,7 @@
 <script>
 "use strict";
 
-const VERSION = "v1.41";
+const VERSION = "v1.42";
 
 // ===== STATE =====
 let players  = {};
@@ -361,6 +360,7 @@ function loadFileContent(content, filename) {
   localStorage.setItem("vira_players_file", filename);
 
   document.getElementById("sortGroup").style.display = "flex";
+  document.getElementById("btnSaveAs").disabled = false;
   sortMode = "nummer";
   updateSortButtons();
   updateMainTitle();
@@ -738,11 +738,34 @@ function selectPlayer(p) {
   });
 }
 
-function printBord(orientation) {
-  document.body.classList.toggle("print-landscape", orientation === "landscape");
-  document.body.classList.toggle("print-portrait",  orientation === "portrait");
-  setTimeout(() => window.print(), 50);
-  setTimeout(() => document.body.classList.remove("print-landscape", "print-portrait"), 100);
+async function saveAs() {
+  if (Object.keys(players).length === 0) { alert("Ingen deltagarlista att spara."); return; }
+  const csv = generateCSV();
+  try {
+    // Windows-dialog via File System Access API
+    const handle = await window.showSaveFilePicker({
+      suggestedName: "ViraMedlemmar.txt",
+      types: [{ description: "Textfil", accept: { "text/plain": [".txt", ".csv"] } }]
+    });
+    const writable = await handle.createWritable();
+    await writable.write(csv);
+    await writable.close();
+    // Ny fil blir den aktiva auto-spara-filen
+    fileHandle = handle;
+    const file = await handle.getFile();
+    document.getElementById("fileInfo").textContent = "📌 " + file.name + " (Auto-sparas)";
+    localStorage.setItem("vira_players_file", file.name);
+    const st = document.getElementById("status");
+    st.className = "ok"; st.textContent = "✅ Sparad: " + file.name;
+  } catch (err) {
+    if (err.name === "AbortError") return; // Användaren avbröt
+    // Fallback: browser-download om API saknas
+    const blob = new Blob([csv], { type: "text/plain;charset=utf-8" });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href = url; a.download = "ViraMedlemmar.txt"; a.click();
+    URL.revokeObjectURL(url);
+  }
 }
 
 function toggleLayout() {
@@ -781,8 +804,8 @@ function generate() {
         : "⚠️ " + result.totalConflicts + " konflikt" + (result.totalConflicts > 1 ? "er" : "") + " (röd ring = upprepat par)";
       st.className = result.totalConflicts === 0 ? "ok" : "warn";
       st.textContent = msg;
-      document.getElementById("btnPrintPortrait").disabled  = false;
-      document.getElementById("btnPrintLandscape").disabled = false;
+      document.getElementById("btnPrint").disabled   = false;
+      document.getElementById("btnSaveAs").disabled  = false;
       document.getElementById("btnLayout").disabled  = false;
       document.getElementById("btnResults").disabled = false;
       updateMainTitle();
