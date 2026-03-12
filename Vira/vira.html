@@ -185,7 +185,7 @@
 </head>
 <body>
 
-<h1 id="mainTitle">🃏 Vira v1.56 · Ingen fil vald</h1>
+<h1 id="mainTitle">🃏 Vira v1.57 · Ingen fil vald</h1>
 
 <!-- RAD 1: Fil + sortering -->
 <div class="btn-row">
@@ -259,7 +259,7 @@
 <script>
 "use strict";
 
-const VERSION = "v1.56";
+const VERSION = "v1.57";
 
 // ===== STATE =====
 let players  = {};
@@ -1208,10 +1208,12 @@ function renderSpelarView({ seats, conflictPlayers, leftoverPlayers, leftoverSea
 
   let html = `<table style="table-layout:fixed;width:100%;font-size:0.9rem;border-collapse:collapse;"><thead><tr>`;
   html += `<th style="text-align:left;padding:0 1px;width:${nameColWidth}px;font-size:0.9rem;font-weight:600;">Spelare</th>`;
+  html += `<th style="width:70px;padding:0 2px;font-size:0.85rem;font-weight:600;"></th>`;
   for (let ri = 0; ri < ROUNDS; ri++)
     html += `<th style="text-align:left;width:55px;padding:0 1px;font-size:0.85rem;font-weight:600;">Omg${ri + 1}</th>`;
   html += '</tr><tr style="background:#f0f4ff;border-bottom:2px solid #cbd5e1;">';
   html += `<th style="padding:0 1px;font-size:0.75rem;color:#64748b;"></th>`;
+  html += `<th style="padding:0 2px;font-size:0.75rem;color:#64748b;"></th>`;
   for (let ri = 0; ri < ROUNDS; ri++)
     html += `<th style="text-align:left;width:55px;padding:2px 1px;font-size:0.75rem;color:#64748b;">Bord/Plac</th>`;
   html += "</tr></thead><tbody>";
@@ -1219,12 +1221,16 @@ function renderSpelarView({ seats, conflictPlayers, leftoverPlayers, leftoverSea
   for (const p of playerNrs) {
     const isActive   = !players[p] || players[p].narvaro === "+";
     const isInactive = players[p]?.narvaro === "-";
+    const isX        = players[p]?.narvaro === "X";
     html += `<tr style="${isInactive ? "opacity:0.5;" : ""}">`;
     html += `<td style="text-align:left;vertical-align:top;padding:0 1px;border-right:1px solid #cbd5e1;">`;
     html += `<span class="chip" style="cursor:default;width:18px;height:18px;font-size:0.75rem;display:inline-flex;margin-right:2px;vertical-align:middle;">${p}</span>`;
     html += `<span style="font-size:0.9rem;font-weight:500;">${getPlayerName(p)}</span>`;
     if (isInactive) html += `<span style="font-size:0.7rem;color:#94a3b8;margin-left:4px;">(Ej deltagande)</span>`;
     html += "</td>";
+    html += `<td style="text-align:center;vertical-align:middle;padding:0 2px;border-right:1px solid #cbd5e1;">`;
+    if (isX) html += `<span style="font-size:0.65rem;font-weight:700;color:white;background:#dc2626;border-radius:3px;padding:1px 4px;white-space:nowrap;">ÖVERTALIG</span>`;
+    html += `</td>`;
 
     for (let ri = 0; ri < ROUNDS; ri++) {
       const d = info[p]?.[ri];
