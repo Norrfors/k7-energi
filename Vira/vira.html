@@ -182,7 +182,7 @@
 </head>
 <body>
 
-<h1 id="mainTitle">🃏 Vira v1.43 · Ingen fil vald</h1>
+<h1 id="mainTitle">🃏 Vira v1.44 · Ingen fil vald</h1>
 
 <!-- RAD 1: Fil + sortering -->
 <div class="btn-row">
@@ -250,7 +250,7 @@
 <script>
 "use strict";
 
-const VERSION = "v1.43";
+const VERSION = "v1.44";
 
 // ===== STATE =====
 let players  = {};
@@ -716,47 +716,73 @@ function generateFinal() {
   const active = getActivePlayers();
   if (active.length < 4) { alert("För få aktiva spelare för en final."); return; }
 
-  const withSums = active.map(nr => ({ nr, sum: calculateSum(nr) }));
-  withSums.sort((a, b) => b.sum !== a.sum ? b.sum - a.sum : a.nr - b.nr);
-
-  const finalTable = withSums.slice(0, PPT).map(x => x.nr);
-  const rest       = shuffle(withSums.slice(PPT).map(x => x.nr));
-  const sumMap     = {};
-  withSums.forEach(x => sumMap[x.nr] = x.sum);
-
-  let html = '<table style="border-collapse:collapse;width:100%;">';
-  html += '<thead><tr>';
-  html += '<th style="background:#b45309;color:white;padding:8px;text-align:center;width:110px;">Bord</th>';
-  html += '<th style="background:#b45309;color:white;padding:8px;text-align:left;">Spelare</th>';
-  html += '</tr></thead><tbody>';
-
-  // Bord 1 – FINAL
-  html += '<tr style="background:#fef3c7;">';
-  html += '<td style="font-weight:700;color:#b45309;text-align:center;padding:8px;border:1px solid #fcd34d;">🏆 Bord 1<br><small>FINAL</small></td>';
-  html += '<td style="padding:6px;border:1px solid #fcd34d;">';
-  finalTable.forEach((nr, i) => {
-    const sum = sumMap[nr] || 0;
-    html += `<div style="display:flex;align-items:center;gap:6px;padding:2px 0;">`;
-    html += `<span style="font-weight:700;color:#b45309;width:18px;">${i + 1}.</span>`;
-    html += chip(nr, false);
-    html += `<span style="font-weight:600;">${getPlayerName(nr)}</span>`;
-    html += `<span style="color:#64748b;font-size:0.8rem;margin-left:auto;">${formatSvenska(sum.toFixed(2))} p</span>`;
-    html += "</div>";
+  // Sortera: högst sum, sedan lägst nr
+  const sorted = [...active].sort((a, b) => {
+    const diff = calculateSum(b) - calculateSum(a);
+    return diff !== 0 ? diff : a - b;
   });
-  html += "</td></tr>";
 
-  // Övriga bord
-  for (let t = 0; t < Math.ceil(rest.length / PPT); t++) {
-    const tbl = rest.slice(t * PPT, (t + 1) * PPT);
-    html += '<tr>';
-    html += `<td style="font-weight:700;color:#1e40af;text-align:center;padding:8px;border:1px solid #dbeafe;">Bord ${t + 2}</td>`;
-    html += '<td style="padding:6px;border:1px solid #dbeafe;">';
-    tbl.forEach(nr => {
-      html += `<div style="display:flex;align-items:center;gap:6px;padding:2px 0;">${chip(nr, false)}<span>${getPlayerName(nr)}</span></div>`;
-    });
-    html += "</td></tr>";
+  // Bord 1 = topp 4, resten slumpas
+  const table1 = sorted.slice(0, PPT);
+  const rest   = shuffle(sorted.slice(PPT));
+
+  // Bygg bord-array (samma antal bord som TABLES)
+  const numTables = Math.max(1, Math.ceil(active.length / PPT));
+  const round = [table1];
+  for (let t = 1; t < numTables; t++) {
+    round.push(rest.slice((t - 1) * PPT, t * PPT));
   }
-  html += "</tbody></table>";
+
+  // Tilldela NORD/OST/SYD/VÄST med PERMS4
+  const posCount = {};
+  active.forEach(p => posCount[p] = [0, 0, 0, 0]);
+  const seats = round.map(table => {
+    const filled = table.filter(Boolean);
+    let bestPerm = PERMS4[0], bestScore = Infinity;
+    for (const perm of PERMS4) {
+      const score = filled.reduce((s, p, i) => s + posCount[p][perm[i]], 0);
+      if (score < bestScore) { bestScore = score; bestPerm = perm; }
+    }
+    const seatArr = [null, null, null, null];
+    filled.forEach((p, i) => { seatArr[bestPerm[i]] = p; posCount[p][bestPerm[i]]++; });
+    return seatArr;
+  });
+
+  // Rendera – samma layout som bordsvyn men med 1 omgång och bord 1 i guld
+  const hasNames = Object.keys(players).length > 0;
+  let html = "<table><thead><tr>";
+  html += '<th style="text-align:left;padding-left:4px;width:60px;"></th>';
+  for (let t = 0; t < numTables; t++) {
+    const gold = t === 0 ? "background:#b45309 !important;" : "";
+    html += `<th style="${gold}">${t === 0 ? "🏆 Final" : "Bord " + (t + 1)}</th>`;
+  }
+  html += "</tr></thead><tbody><tr>";
+  html += '<td style="vertical-align:middle;border-right:3px solid #b45309;font-size:1.3rem;font-weight:700;padding:4px 6px;color:#b45309;">🏆</td>';
+
+  for (let ti = 0; ti < numTables; ti++) {
+    const isFinal  = ti === 0;
+    const border   = isFinal ? "#b45309" : "#1e3a8a";
+    const bg       = isFinal ? "background:#fffbeb;" : "";
+    html += `<td style="border-right:3px solid ${border};padding:2px;${bg}">`;
+    for (let pi = 0; pi < 4; pi++) {
+      const p = seats[ti]?.[pi];
+      if (!p) continue;
+      html += '<div class="seat-row">';
+      html += chip(p, false);
+      html += '<span class="seat-label">' + POSITIONS[pi] + "</span>";
+      if (hasNames) {
+        html += '<span class="seat-name">' + getPlayerName(p);
+        if (isFinal) {
+          const sum = calculateSum(p);
+          html += ' <span style="color:#b45309;font-size:0.68rem;">(' + formatSvenska(sum.toFixed(2)) + ')</span>';
+        }
+        html += "</span>";
+      }
+      html += "</div>";
+    }
+    html += "</td>";
+  }
+  html += "</tr></tbody></table>";
 
   document.getElementById("tableWrap").innerHTML = html;
   document.getElementById("clickHint").style.display = "none";
