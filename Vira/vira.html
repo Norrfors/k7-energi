@@ -5,49 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vira – Bordslottning</title>
 <style>
-  /* ===== GRUNDLÄGGANDE ===== */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Arial, sans-serif; background: #f0f4ff; color: #1e293b; padding: 20px; }
+  h1 { font-size: 1.2rem; color: #1e3a8a; margin-bottom: 6px; line-height: 1.2; }
 
-  body {
-    font-family: Arial, sans-serif;
-    background: #f0f4ff;
-    color: #1e293b;
-    padding: 20px;
-  }
-
-  h1 {
-    font-size: 1.2rem;
-    color: #1e3a8a;
-    margin-bottom: 6px;
-    line-height: 1.2;
-  }
-
-  .subtitle {
-    display: none;
-  }
-
-  /* ===== KNAPPAR ===== */
   .btn-row {
-    display: flex;
-    gap: 4px;
-    flex-wrap: nowrap;
-    margin-bottom: 8px;
-    align-items: center;
-    overflow-x: auto;
+    display: flex; gap: 4px; flex-wrap: nowrap;
+    margin-bottom: 8px; align-items: center; overflow-x: auto;
   }
-
   button {
-    padding: 5px 10px;
-    border: none;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-    flex-shrink: 0;
+    padding: 5px 10px; border: none; border-radius: 4px;
+    font-size: 0.75rem; font-weight: 600; cursor: pointer;
+    transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
   }
-
   button:disabled { opacity: 0.5; cursor: default; }
 
   .btn-generate { background: #2563eb; color: white; }
@@ -55,426 +25,219 @@
   .btn-layout   { background: #7c3aed; color: white; }
   .btn-layout:hover:not(:disabled)   { background: #6d28d9; }
   .btn-print    { background: #059669; color: white; }
-  .btn-print:hover:not(:disabled) { background: #047857; }
+  .btn-print:hover:not(:disabled)    { background: #047857; }
+  .btn-results  { background: #0891b2; color: white; }
+  .btn-results:hover:not(:disabled)  { background: #0e7490; }
+  .btn-final    { background: #d97706; color: white; }
+  .btn-final:hover:not(:disabled)    { background: #b45309; }
+  .btn-load     { background: #0891b2; color: white; }
+  .btn-load:hover { background: #0e7490; }
+  .btn-edit     { background: #ea580c; color: white; }
+  .btn-edit:hover { background: #dc2604; }
+  .btn-save     { background: #059669; color: white; }
+  .btn-save:hover { background: #047857; }
+  .btn-cancel   { background: #cbd5e1; color: #1e293b; }
+  .btn-cancel:hover { background: #94a3b8; }
 
-  /* ===== SORTERING ===== */
-  .sort-group {
-    display: flex;
-    gap: 4px;
-    margin: 0;
-    padding: 0;
-    background: transparent;
-    border-radius: 0;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-
-  .sort-label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: #334155;
-    white-space: nowrap;
-    margin-right: 2px;
-  }
-
+  .sort-group { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+  .sort-label { font-size: 0.7rem; font-weight: 600; color: #334155; white-space: nowrap; margin-right: 2px; }
   .sort-btn {
-    padding: 4px 8px;
-    font-size: 0.7rem;
-    background: white;
-    color: #334155;
-    border: 1px solid #cbd5e1;
-    border-radius: 3px;
-    cursor: pointer;
-    transition: all 0.15s;
+    padding: 4px 8px; font-size: 0.7rem; background: white;
+    color: #334155; border: 1px solid #cbd5e1; border-radius: 3px; cursor: pointer;
   }
-
   .sort-btn:hover { background: #e2e8f0; }
   .sort-btn.active { background: #475569; color: white; border-color: #475569; font-weight: 700; }
 
-  /* ===== REDIGERA-KNAPP ===== */
-  .btn-edit { background: #ea580c; color: white; padding: 5px 8px; }
-  .btn-edit:hover { background: #dc2604; }
+  .tables-input {
+    width: 45px; padding: 4px; border: 1px solid #cbd5e1;
+    border-radius: 3px; font-size: 0.75rem; text-align: center;
+  }
 
-  /* ===== MODAL ===== */
+  /* ===== MODALER ===== */
   .modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.4);
-    z-index: 1000;
-    overflow: auto;
+    display: none; position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%; background: rgba(0,0,0,0.4);
+    z-index: 1000; overflow: auto;
   }
-
   .modal-overlay.open {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: flex-start;
+    justify-content: center; padding-top: 30px;
   }
-
   .modal-content {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    max-width: 600px;
-    width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    background: white; border-radius: 8px; padding: 20px;
+    max-width: 500px; width: 95%; max-height: 85vh;
+    overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
   }
-
+  .modal-content.wide { max-width: 720px; }
   .modal-header {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #1e3a8a;
-    margin-bottom: 15px;
-    border-bottom: 2px solid #dbeafe;
-    padding-bottom: 10px;
+    font-size: 1rem; font-weight: 700; color: #1e3a8a;
+    margin-bottom: 12px; border-bottom: 2px solid #dbeafe; padding-bottom: 8px;
   }
+  .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px; }
+  .modal-buttons button { padding: 8px 16px; font-size: 0.8rem; }
 
-  .edit-grid {
-    display: grid;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-
+  /* ===== REDIGERA MODAL ===== */
+  .edit-grid { display: grid; gap: 5px; margin-bottom: 15px; }
   .edit-row {
     display: grid;
-    grid-template-columns: 35px 80px 80px 30px 35px 35px 35px 35px 35px 35px 50px;
-    gap: 4px;
-    align-items: center;
-    padding: 6px;
-    background: #f8faff;
-    border: 1px solid #dbeafe;
-    border-radius: 3px;
-    font-size: 0.7rem;
+    grid-template-columns: 30px 1fr 1fr 38px;
+    gap: 4px; align-items: center; padding: 5px 6px;
+    background: #f8faff; border: 1px solid #dbeafe;
+    border-radius: 3px; font-size: 0.7rem;
   }
-
-  .edit-row input {
-    padding: 4px;
-    border: 1px solid #cbd5e1;
-    border-radius: 2px;
-    font-size: 0.7rem;
-    font-family: Arial, sans-serif;
+  .edit-row input, .edit-row select {
+    padding: 4px; border: 1px solid #cbd5e1; border-radius: 2px;
+    font-size: 0.7rem; font-family: Arial, sans-serif; width: 100%;
   }
-
-  .edit-row select {
-    padding: 3px;
-    border: 1px solid #cbd5e1;
-    border-radius: 2px;
-    font-size: 0.7rem;
-    font-family: Arial, sans-serif;
+  .edit-row input:focus, .edit-row select:focus {
+    outline: none; border-color: #2563eb; background: #f0f9ff;
   }
+  .edit-nr { font-weight: 700; color: #1e40af; text-align: right; }
+  .edit-narvaro { text-align: center; font-weight: bold; }
 
-  .edit-narvaro {
-    text-align: center;
-    font-weight: bold;
+  /* ===== RESULTAT MODAL ===== */
+  .results-grid { display: grid; gap: 3px; margin-bottom: 15px; }
+  .results-row {
+    display: grid;
+    grid-template-columns: 28px 1fr 38px 38px 38px 38px 38px 38px 52px;
+    gap: 3px; align-items: center; padding: 4px 6px;
+    background: #f8faff; border: 1px solid #dbeafe;
+    border-radius: 3px; font-size: 0.7rem;
   }
-
-  .edit-omg {
-    text-align: center;
+  .results-row input {
+    padding: 3px; border: 1px solid #cbd5e1; border-radius: 2px;
+    font-size: 0.7rem; font-family: Arial, sans-serif;
+    text-align: center; width: 100%;
   }
-
-  .edit-summa {
-    background: #e0f2fe;
-    font-weight: bold;
-    text-align: center;
-    border: 1px solid #0ea5e9;
-    border-radius: 2px;
-  }
-
-  .edit-row input:focus {
-    outline: none;
-    border-color: #2563eb;
-    background: #f0f9ff;
-  }
-
-  .edit-nr {
-    font-weight: 700;
-    color: #1e40af;
-    text-align: right;
-  }
-
-  .modal-buttons {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-  }
-
-  .modal-buttons button {
-    padding: 8px 16px;
-    font-size: 0.8rem;
-  }
-
-  .btn-save {
-    background: #059669;
-    color: white;
-  }
-
-  .btn-save:hover {
-    background: #047857;
-  }
-
-  .btn-cancel {
-    background: #cbd5e1;
-    color: #1e293b;
-  }
-
-  .btn-cancel:hover {
-    background: #94a3b8;
+  .results-row input:focus { outline: none; border-color: #2563eb; background: #f0f9ff; }
+  .results-summa {
+    background: #e0f2fe; font-weight: bold; text-align: center;
+    border: 1px solid #0ea5e9; border-radius: 2px; padding: 3px; font-size: 0.7rem;
   }
 
   /* ===== STATUS ===== */
-  #status {
-    min-height: 18px;
-    font-size: 0.75rem;
-    margin-bottom: 6px;
-    color: #374151;
-  }
+  #status { min-height: 18px; font-size: 0.75rem; margin-bottom: 6px; color: #374151; }
   #status.warn { color: #b91c1c; font-weight: 600; }
   #status.ok   { color: #065f46; }
+  #fileInfo { color: #475569; font-weight: 500; font-size: 0.8rem; }
 
   /* ===== TABELL ===== */
   .table-wrap { overflow-x: auto; }
-
-  table {
-    border-collapse: collapse;
-    width: 100%;
-    table-layout: fixed;
-  }
-
+  table { border-collapse: collapse; width: 100%; table-layout: fixed; }
   thead th {
-    background: #2563eb;
-    color: white;
-    padding: 8px 6px;
-    font-size: 0.85rem;
-    text-align: center;
+    background: #2563eb; color: white;
+    padding: 8px 6px; font-size: 0.85rem; text-align: center;
   }
-
   thead th:first-child { text-align: left; padding-left: 4px; width: 35px; }
-
   tbody tr { background: #ffffff; }
-
-  td {
-    border: 1px solid #dbeafe;
-    padding: 4px 2px;
-    vertical-align: top;
-  }
-
+  td { border: 1px solid #dbeafe; padding: 4px 2px; vertical-align: top; }
   td:first-child {
-    font-weight: 700;
-    color: #1e40af;
-    white-space: nowrap;
-    padding: 2px 2px;
-    vertical-align: middle;
-    font-size: 0.85rem;
-    width: 35px;
+    font-weight: 700; color: #1e40af; white-space: nowrap;
+    padding: 2px 2px; vertical-align: middle; font-size: 0.85rem; width: 35px;
   }
 
-  /* ===== SITTPLATS-RADER ===== */
-  .seat-row {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin: 2px 0;
-  }
-
-  .seat-label {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: #1e3a8a;
-    width: 40px;
-    text-align: right;
-    flex-shrink: 0;
-  }
+  /* ===== CHIP & SITTPLATSER ===== */
+  .seat-row { display: flex; align-items: center; gap: 4px; margin: 2px 0; }
+  .seat-label { font-size: 0.85rem; font-weight: 700; color: #1e3a8a; width: 40px; text-align: right; flex-shrink: 0; }
+  .seat-name { font-size: 0.75rem; color: #374151; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 95px; }
 
   @keyframes blink {
     0%, 100% { opacity: 1; }
     50%       { opacity: 0.15; }
   }
-
   .chip {
-    display: inline-flex;
-    width: 26px;
-    height: 26px;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    font-size: 0.72rem;
-    font-weight: 700;
-    flex-shrink: 0;
-    background: #dbeafe;
-    color: #1e40af;
-    cursor: pointer;
-    user-select: none;
+    display: inline-flex; width: 26px; height: 26px;
+    align-items: center; justify-content: center;
+    border-radius: 50%; font-size: 0.72rem; font-weight: 700;
+    flex-shrink: 0; background: #dbeafe; color: #1e40af;
+    cursor: pointer; user-select: none;
   }
+  .chip.conflict { background: #fee2e2; color: #b91c1c; outline: 2px solid #ef4444; outline-offset: 1px; }
+  .chip.selected { background: #dc2626 !important; color: white !important; outline: none !important; animation: blink 0.7s ease-in-out infinite; }
 
-  .chip.conflict {
-    background: #fee2e2;
-    color: #b91c1c;
-    outline: 2px solid #ef4444;
-    outline-offset: 1px;
-  }
-
-  .chip.selected {
-    background: #dc2626 !important;
-    color: white !important;
-    outline: none !important;
-    animation: blink 0.7s ease-in-out infinite;
-  }
-
-  /* ===== NAMNVISNING ===== */
-  .seat-name {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #1e293b;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 120px;
-  }
-
-  .player-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-bottom: 4px;
-    padding: 4px 8px;
-    background: #f8faff;
-    border: 1px solid #dbeafe;
-    border-radius: 4px;
-    font-size: 0.75rem;
-  }
-
-  .btn-load { background: #0891b2; color: white; padding: 5px 8px; }
-  .btn-load:hover { background: #0e7490; }
-  .btn-sort { background: #475569; color: white; }
-  .btn-sort:hover { background: #334155; }
-
-  #fileInfo { color: #475569; font-weight: 500; }
-
-  /* ===== SIGNATUR ===== */
-  #signature {
-    margin-top: 18px;
-    font-size: 0.78rem;
-    color: #9ca3af;
-    text-align: right;
-  }
+  #signature { margin-top: 18px; font-size: 0.78rem; color: #9ca3af; text-align: right; }
 
   /* ===== PRINT ===== */
   @media print {
-    @page { size: A4; margin: 8mm; orphans: 2; widows: 2; }
+    @page { size: A4; margin: 8mm; }
     body.print-landscape @page { size: A4 landscape; margin: 8mm; }
-    body.print-portrait @page { size: A4 portrait; margin: 8mm; }
-
+    body.print-portrait  @page { size: A4 portrait;  margin: 8mm; }
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-
     body { background: white; padding: 0; margin: 0; width: 210mm; }
-
-    .btn-row, .player-row, #status, #clickHint, .sort-group { display: none !important; }
-
-    h1 { font-size: 1.1rem; margin: 0 0 3px 0; padding: 0; font-weight: bold; }
-    .subtitle { font-size: 0.75rem; margin: 0; padding: 0; }
-
+    .btn-row, #status, #clickHint { display: none !important; }
+    h1 { font-size: 1.1rem; margin: 0 0 3px 0; font-weight: bold; }
     table { width: 200mm; table-layout: fixed; border-collapse: collapse; margin: 4px 0 0 0; }
     body.print-landscape table { width: 280mm; }
-
-    thead th {
-      font-size: 0.8rem;
-      padding: 6px 4px;
-      background: #1e3a8a !important;
-      color: white !important;
-      border: 1px solid #1e3a8a !important;
-      font-weight: bold;
-    }
-
-    tbody td {
-      padding: 3px 2px;
-      border: 0.5px solid #cbd5e1 !important;
-      font-size: 0.7rem;
-    }
-
-    td:first-child {
-      font-size: 0.85rem;
-      padding: 4px 6px;
-      background: #f0f9ff !important;
-      font-weight: bold;
-      width: 50px;
-      text-align: center;
-      border-right: 2px solid #1e3a8a !important;
-    }
-
-    tbody tr:nth-child(even) {
-      background: #f8fafc !important;
-    }
-
+    thead th { font-size: 0.8rem; padding: 6px 4px; background: #1e3a8a !important; color: white !important; border: 1px solid #1e3a8a !important; font-weight: bold; }
+    tbody td { padding: 3px 2px; border: 0.5px solid #cbd5e1 !important; font-size: 0.7rem; }
+    td:first-child { font-size: 0.85rem; padding: 4px 6px; background: #f0f9ff !important; font-weight: bold; width: 50px; text-align: center; border-right: 2px solid #1e3a8a !important; }
+    tbody tr:nth-child(even) { background: #f8fafc !important; }
     .seat-label { font-size: 0.65rem; width: 24px; display: block; font-weight: 600; }
-
-    .chip {
-      width: 24px;
-      height: 24px;
-      font-size: 0.7rem;
-      display: inline-block;
-    }
-
-    .chip.conflict {
-      background: #fecaca !important;
-      color: #7f1d1d !important;
-      outline: 1px solid #dc2626 !important;
-    }
-
+    .chip { width: 24px; height: 24px; font-size: 0.7rem; display: inline-block; }
+    .chip.conflict { background: #fecaca !important; color: #7f1d1d !important; outline: 1px solid #dc2626 !important; }
     .seat-row { margin: 1px 0; padding: 0; line-height: 1.2; }
-
-    .seat-name { font-size: 0.72rem; }
-
-    #signature {
-      font-size: 0.65rem;
-      margin-top: 6px;
-    }
+    .seat-name { font-size: 0.65rem; }
+    #signature { font-size: 0.65rem; margin-top: 6px; }
   }
 </style>
 </head>
 <body>
 
-<h1>🃏 Vira v1.27 · 32 deltagare · 8 bord · 6 omgångar</h1>
+<h1 id="mainTitle">🃏 Vira v1.41 · Ingen fil vald</h1>
 
+<!-- RAD 1: Fil + sortering -->
 <div class="btn-row">
-  <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
-  <button class="btn-layout"   id="btnLayout"   onclick="toggleLayout()" disabled>👤 Visa per spelare</button>
-  <button class="btn-print"    id="btnPrintPortrait"  onclick="printBord('portrait')" disabled>🖨️ Stående</button>
-  <button class="btn-print"    id="btnPrintLandscape" onclick="printBord('landscape')" disabled>🖨️ Liggande</button>
-</div>
-
-<div class="player-row">
-  <button class="btn-load" onclick="document.getElementById('fileInput').click()">📂 Ladda deltagarlista</button>
-  <input type="file" id="fileInput" accept=".txt,.csv" style="display:none" onchange="loadFile(event)">
-  <span id="fileInfo">Inget namn-register laddat – visar spelarnummer</span>
-  <div class="sort-group" id="sortGroup" style="display:none;">
-    <button class="btn-edit" onclick="openEditModal()" style="margin-right:8px;">✏️ Redigera</button>
+  <button class="btn-load" onclick="openFile()">📂 Öppna fil</button>
+  <input type="file" id="fileInputFallback" accept=".txt,.csv" style="display:none" onchange="handleFileFallback(event)">
+  <span id="fileInfo">Ingen fil vald</span>
+  <span class="sort-group" id="sortGroup" style="display:none;">
+    <button class="btn-edit" onclick="openEditModal()">✏️ Redigera</button>
     <span class="sort-label">Sortera:</span>
     <button class="sort-btn active" onclick="setSortMode('nummer')">🔢 Nummer</button>
     <button class="sort-btn" onclick="setSortMode('fornamn')">🔤 Förnamn</button>
     <button class="sort-btn" onclick="setSortMode('efternamn')">🔤 Efternamn</button>
-  </div>
+  </span>
 </div>
 
-<!-- REDIGERINGSMODAL -->
+<!-- RAD 2: Schema-åtgärder -->
+<div class="btn-row">
+  <label style="font-size:0.75rem;color:#334155;font-weight:600;">Bord:</label>
+  <input type="number" id="numTablesInput" class="tables-input" min="1" max="32" value="8">
+  <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
+  <button class="btn-results" id="btnResults" onclick="openResultsModal()" disabled>📊 Resultat</button>
+  <button class="btn-final"   id="btnFinal"   onclick="generateFinal()"   disabled>🏆 Final</button>
+  <button class="btn-layout"  id="btnLayout"  onclick="toggleLayout()"    disabled>👤 Visa per spelare</button>
+  <button class="btn-print" id="btnPrintPortrait"  onclick="printBord('portrait')"  disabled>🖨️ Stående</button>
+  <button class="btn-print" id="btnPrintLandscape" onclick="printBord('landscape')" disabled>🖨️ Liggande</button>
+</div>
+
+<!-- REDIGERA MODAL (Nr / Förnamn / Efternamn / Närvaro) -->
 <div class="modal-overlay" id="editModal">
   <div class="modal-content">
-    <div class="modal-header">✏️ Redigera deltagarlista (32 spelare)</div>
+    <div class="modal-header">✏️ Redigera deltagarlista</div>
     <div class="edit-grid" id="editGrid"></div>
     <div class="modal-buttons">
       <button class="btn-cancel" onclick="closeEditModal()">Avbryt</button>
-      <button class="btn-save" onclick="saveEditedData()">💾 Spara</button>
+      <button class="btn-save"   onclick="saveEditedData()">💾 Spara</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTAT MODAL (OMG 1–6) -->
+<div class="modal-overlay" id="resultsModal">
+  <div class="modal-content wide">
+    <div class="modal-header">📊 Registrera resultat</div>
+    <div class="results-grid" id="resultsGrid"></div>
+    <div class="modal-buttons">
+      <button class="btn-cancel" onclick="closeResultsModal()">Stäng</button>
+      <button class="btn-save"   onclick="saveResults()">💾 Spara resultat</button>
     </div>
   </div>
 </div>
 
 <div id="status">Klicka på "Generera schema" för att slumpa bordslottning.</div>
-
 <p id="clickHint" style="display:none;font-size:0.78rem;color:#64748b;margin-bottom:8px;font-style:italic;">
-  Klicka på en siffra nedan för att visa personens placering vid olika bord. Klicka igen på siffran för att stänga den, eller klicka på en ny siffra.
+  Klicka på en siffra nedan för att visa personens placering. Klicka igen för att stänga.
 </p>
 <div class="table-wrap" id="tableWrap"></div>
 <div id="signature"></div>
@@ -482,141 +245,231 @@
 <script>
 "use strict";
 
-const VERSION = "v1.27";
+const VERSION = "v1.41";
 
-// Version integrated into h1 - no separate subtitle needed
+// ===== STATE =====
+let players  = {};
+let sortMode = "nummer";
+let fileHandle  = null;
+let lastResult  = null;
+let layoutMode  = "bord";
+let selectedPlayer = null;
 
-// ===== DELTAGARLISTA =====
-let players = {};  // players[nr] = { fornamn, efternamn, narvaro: "+"/"-"/"", omg1-omg6: "", summa: 0 }
-let sortMode = "nummer"; // "nummer" | "fornamn" | "efternamn"
-let lastOpenedFilename = "DeltagarLista.txt"; // Spara originalfilnamnet för att föreslå vid sparning
+// ===== KONSTANTER (let = kan ändras dynamiskt) =====
+let ROUNDS = 6, TABLES = 8, PPT = 4, N = 32;
+const POSITIONS = ["NORD", "OST", "SYD", "VÄST"];
+const PERMS4 = [
+  [0,1,2,3],[0,1,3,2],[0,2,1,3],[0,2,3,1],[0,3,1,2],[0,3,2,1],
+  [1,0,2,3],[1,0,3,2],[1,2,0,3],[1,2,3,0],[1,3,0,2],[1,3,2,0],
+  [2,0,1,3],[2,0,3,1],[2,1,0,3],[2,1,3,0],[2,3,0,1],[2,3,1,0],
+  [3,0,1,2],[3,0,2,1],[3,1,0,2],[3,1,2,0],[3,2,0,1],[3,2,1,0],
+];
 
-(function initPlayers() {
-  const saved = localStorage.getItem("vira_players");
-  const fname = localStorage.getItem("vira_players_file");
-  if (saved) {
-    try {
-      let loaded = JSON.parse(saved);
-      
-      // Konvertera från gamla versioner (v1.35 hade `namn`, v1.25 behöver `fornamn`/`efternamn`)
-      const converted = {};
-      for (const nr in loaded) {
-        const p = loaded[nr];
-        if (typeof p === "string") {
-          // Gammalt format (bara sträng)
-          converted[nr] = {
-            fornamn: p.split(" ")[0] || p,
-            efternamn: p.split(" ").slice(1).join(" ") || "",
-            narvaro: "",
-            omg1: "", omg2: "", omg3: "", omg4: "", omg5: "", omg6: ""
-          };
-        } else if (p.namn && !p.fornamn) {
-          // v1.35 format (har `namn` men inte `fornamn`)
-          converted[nr] = {
-            fornamn: p.namn.split(" ")[0] || p.namn,
-            efternamn: p.namn.split(" ").slice(1).join(" ") || "",
-            narvaro: p.narvaro || "",
-            omg1: p.omg1 || "", omg2: p.omg2 || "", omg3: p.omg3 || "", omg4: p.omg4 || "", omg5: p.omg5 || "", omg6: p.omg6 || ""
-          };
-        } else {
-          // v1.26 format (redan korrekt)
-          converted[nr] = p;
-        }
-      }
-      
-      players = converted;
-      const count = Object.keys(players).length;
-      
-      if (count > 0) {
-        // Vi har data - visa filnamnet eller tom sträng om det är gamla värden
-        if (fname && !fname.includes("[Manuellt")) {
-          // Visa det faktiska filnamnet som användaren sparade
-          document.getElementById("fileInfo").textContent = fname;
-          // Extrahera bara filnamnet från vägen (efter Vira\) för att föreslå vid sparning
-          const parts = fname.split(/\\|\//).pop();
-          if (parts) lastOpenedFilename = parts;
-        }
-        // Visa sorteringsknapparna när vi har data
-        document.getElementById("sortGroup").style.display = "flex";
-      } else {
-        // Ingen data
-        document.getElementById("fileInfo").textContent = "Inget namn-register laddat – visar spelarnummer";
-      }
-    } catch(e) { players = {}; }
+// ===== HJÄLPFUNKTIONER =====
+
+function getActivePlayers() {
+  const all = Object.keys(players).map(Number).sort((a, b) => a - b);
+  if (all.length === 0) return Array.from({ length: 32 }, (_, i) => i + 1);
+  const active = all.filter(nr => players[nr]?.narvaro === "+");
+  return active.length > 0 ? active : all;
+}
+
+function formatSvenska(val) {
+  if (val === "" || val == null) return "";
+  return String(val).replace(".", ",");
+}
+
+function parseSvenska(val) {
+  if (val === "" || val == null) return "";
+  return String(val).replace(",", ".");
+}
+
+function calculateSum(nr) {
+  const p = players[nr];
+  if (!p) return 0;
+  return ["omg1","omg2","omg3","omg4","omg5","omg6"]
+    .map(k => parseFloat(parseSvenska(p[k])) || 0)
+    .reduce((a, b) => a + b, 0);
+}
+
+function updateMainTitle() {
+  const total  = Object.keys(players).length;
+  const active = Object.values(players).filter(p => p.narvaro === "+").length;
+  let title;
+  if (total === 0) {
+    title = `🃏 Vira ${VERSION} · Ingen fil vald`;
+  } else if (active > 0 && active < total) {
+    title = `🃏 Vira ${VERSION} · ${total} deltagare (${active} aktiva) · ${TABLES} bord · 6 omgångar`;
+  } else {
+    title = `🃏 Vira ${VERSION} · ${total} deltagare · ${TABLES} bord · 6 omgångar`;
   }
-})();
+  document.getElementById("mainTitle").textContent = title;
+}
 
-function loadFile(event) {
+// ===== FIL-HANTERING =====
+
+async function openFile() {
+  try {
+    if (window.showOpenFilePicker) {
+      const [handle] = await window.showOpenFilePicker({
+        types: [{ description: "Textfiler", accept: { "text/plain": [".txt", ".csv"] } }]
+      });
+      fileHandle = handle;
+      const file = await handle.getFile();
+      const content = await file.text();
+      loadFileContent(content, file.name);
+      document.getElementById("fileInfo").textContent = "📌 " + file.name + " (Auto-sparas)";
+    } else {
+      document.getElementById("fileInputFallback").click();
+    }
+  } catch (err) {
+    if (err.name === "AbortError") return;
+    // Fallback om API saknas eller nekas
+    document.getElementById("fileInputFallback").click();
+  }
+}
+
+function handleFileFallback(event) {
   const file = event.target.files[0];
   if (!file) return;
+  fileHandle = null;
   const reader = new FileReader();
-  reader.onload = function(e) {
-    const lines = e.target.result.split(/\r?\n/).filter(l => l.trim());
-    const newPlayers = {};
-    let errors = 0;
-    
-    for (const line of lines) {
-      const sep = line.includes(";") ? ";" : (line.includes("\t") ? "\t" : ",");
-      const parts = line.split(sep).map(p => p.trim());
-      
-      if (parts.length >= 3) {
-        const nr = parseInt(parts[0]);
-        const fornamn = parts[1];
-        const efternamn = parts[2];
-        
-        if (!isNaN(nr) && nr > 0 && fornamn && efternamn) {
-          // Hantera både nytt format (med närvaro + omkgångar) och gammalt format
-          const narvaro = parts[3] || "";
-          const omg1 = parts[4] || "";
-          const omg2 = parts[5] || "";
-          const omg3 = parts[6] || "";
-          const omg4 = parts[7] || "";
-          const omg5 = parts[8] || "";
-          const omg6 = parts[9] || "";
-          
-          newPlayers[nr] = { fornamn, efternamn, narvaro, omg1, omg2, omg3, omg4, omg5, omg6 };
-        } else {
-          errors++;
-        }
-      } else if (parts.length === 2) {
-        // Format: Nr;Namn (fallback)
-        const nr = parseInt(parts[0]);
-        const namn = parts[1];
-        
-        if (!isNaN(nr) && nr > 0 && namn) {
-          newPlayers[nr] = { 
-            fornamn: namn.split(" ")[0] || namn, 
-            efternamn: namn.split(" ").slice(1).join(" ") || "", 
-            narvaro: "",
-            omg1: "", omg2: "", omg3: "", omg4: "", omg5: "", omg6: "" 
-          };
-        } else {
-          errors++;
-        }
-      } else {
-        errors++;
-      }
-    }
-    
-    const count = Object.keys(newPlayers).length;
-    if (count === 0) { 
-      alert("Inga giltiga rader. Förväntat format: Nr;Förnamn;Efternamn"); 
-      return; 
-    }
-    
-    players = newPlayers;
-    lastOpenedFilename = file.name; // Spara originalnamnet
-    localStorage.setItem("vira_players", JSON.stringify(players));
-    localStorage.setItem("vira_players_file", "Vira\\" + file.name);
-    document.getElementById("fileInfo").textContent = "Vira\\" + file.name;
-    document.getElementById("sortGroup").style.display = "flex";
-    sortMode = "nummer";
-    updateSortButtons();
-    if (lastResult) render(lastResult, false);
+  reader.onload = (e) => {
+    loadFileContent(e.target.result, file.name);
+    document.getElementById("fileInfo").textContent = file.name;
   };
   reader.readAsText(file, "UTF-8");
   event.target.value = "";
 }
+
+function loadFileContent(content, filename) {
+  const lines = content.split(/\r?\n/).filter(l => l.trim());
+  if (lines.length === 0) { alert("Filen är tom."); return; }
+  const newPlayers = detectAndParseFile(lines);
+  const total = Object.keys(newPlayers).length;
+  if (total === 0) { alert("Inga giltiga rader hittades."); return; }
+
+  players = newPlayers;
+  const active   = Object.values(players).filter(p => p.narvaro === "+").length;
+  const inactive = total - active;
+
+  const autoTables = Math.max(1, Math.ceil(active / 4) || 8);
+  document.getElementById("numTablesInput").value = autoTables;
+  TABLES = autoTables;
+
+  localStorage.setItem("vira_players", JSON.stringify(players));
+  localStorage.setItem("vira_players_file", filename);
+
+  document.getElementById("sortGroup").style.display = "flex";
+  sortMode = "nummer";
+  updateSortButtons();
+  updateMainTitle();
+
+  let msg = "✅ Importerad: " + total + " spelare";
+  if (inactive > 0) msg += " | 🟢 Aktiva: " + active + " | 🔴 Inaktiva: " + inactive;
+  const st = document.getElementById("status");
+  st.className = "ok"; st.textContent = msg;
+}
+
+function detectAndParseFile(lines) {
+  const first = lines.find(l => l.trim() && !l.toLowerCase().startsWith("nr"));
+  if (!first) return {};
+  const hasSep = first.includes(";") || first.includes("\t") || first.includes(",");
+  const sep     = first.includes(";") ? ";" : (first.includes("\t") ? "\t" : ",");
+  const field0  = first.split(sep)[0].trim();
+  const isNum   = /^\d/.test(field0) && !isNaN(parseInt(field0));
+  return (hasSep && isNum) ? parseStandardFile(lines) : parseNameOnlyFile(lines);
+}
+
+function parseStandardFile(lines) {
+  const result = {};
+  for (const line of lines) {
+    const sep   = line.includes(";") ? ";" : (line.includes("\t") ? "\t" : ",");
+    const parts = line.split(sep).map(p => p.trim());
+    if (parts.length < 3) continue;
+    const nr = parseInt(parts[0]);
+    if (isNaN(nr) || nr <= 0) continue;
+    const fornamn = parts[1] || "", efternamn = parts[2] || "";
+    if (!fornamn && !efternamn) continue;
+    result[nr] = {
+      fornamn, efternamn,
+      narvaro: parts[3] || "",
+      omg1: parts[4] || "", omg2: parts[5] || "", omg3: parts[6] || "",
+      omg4: parts[7] || "", omg5: parts[8] || "", omg6: parts[9] || "",
+    };
+  }
+  return result;
+}
+
+function parseNameOnlyFile(lines) {
+  const result = {};
+  let nr = 1;
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.toLowerCase() === "namn") continue;
+    const parts   = trimmed.split(/\s+/);
+    const fornamn = parts[0] || trimmed;
+    const efternamn = parts.slice(1).join(" ") || "";
+    result[nr] = {
+      fornamn, efternamn,
+      narvaro: nr <= 32 ? "+" : "-",
+      omg1: "", omg2: "", omg3: "", omg4: "", omg5: "", omg6: "",
+    };
+    nr++;
+  }
+  return result;
+}
+
+function generateCSV() {
+  let csv = "Nr;Förnamn;Efternamn;Närvaro;OMG1;OMG2;OMG3;OMG4;OMG5;OMG6\n";
+  Object.keys(players).map(Number).sort((a, b) => a - b).forEach(nr => {
+    const p = players[nr];
+    csv += `${nr};${p.fornamn};${p.efternamn};${p.narvaro};${p.omg1};${p.omg2};${p.omg3};${p.omg4};${p.omg5};${p.omg6}\n`;
+  });
+  return csv;
+}
+
+async function autoSaveToFile() {
+  if (!fileHandle) return;
+  try {
+    const writable = await fileHandle.createWritable();
+    await writable.write(generateCSV());
+    await writable.close();
+  } catch (err) { console.warn("Auto-sparning misslyckades:", err.message); }
+}
+
+// ===== INITIALISERING FRÅN LOCALSTORAGE =====
+(function initPlayers() {
+  const saved = localStorage.getItem("vira_players");
+  const fname = localStorage.getItem("vira_players_file");
+  if (!saved) { updateMainTitle(); return; }
+  try {
+    const loaded = JSON.parse(saved);
+    const converted = {};
+    for (const nr in loaded) {
+      const p = loaded[nr];
+      if (typeof p === "string") {
+        converted[nr] = { fornamn: p.split(" ")[0] || p, efternamn: p.split(" ").slice(1).join(" ") || "", narvaro: "", omg1: "", omg2: "", omg3: "", omg4: "", omg5: "", omg6: "" };
+      } else if (p.namn && !p.fornamn) {
+        converted[nr] = { fornamn: p.namn.split(" ")[0] || p.namn, efternamn: p.namn.split(" ").slice(1).join(" ") || "", narvaro: p.narvaro || "", omg1: p.omg1 || "", omg2: p.omg2 || "", omg3: p.omg3 || "", omg4: p.omg4 || "", omg5: p.omg5 || "", omg6: p.omg6 || "" };
+      } else {
+        converted[nr] = { fornamn: p.fornamn || "", efternamn: p.efternamn || "", narvaro: p.narvaro || "", omg1: p.omg1 || "", omg2: p.omg2 || "", omg3: p.omg3 || "", omg4: p.omg4 || "", omg5: p.omg5 || "", omg6: p.omg6 || "" };
+      }
+    }
+    players = converted;
+    if (Object.keys(players).length > 0) {
+      document.getElementById("sortGroup").style.display = "flex";
+      if (fname) document.getElementById("fileInfo").textContent = fname;
+      const active = Object.values(players).filter(p => p.narvaro === "+").length;
+      const autoTables = Math.max(1, Math.ceil(active / 4) || 8);
+      document.getElementById("numTablesInput").value = autoTables;
+      TABLES = autoTables;
+    }
+  } catch(e) { players = {}; }
+  updateMainTitle();
+})();
+
+// ===== SORTERING =====
 
 function setSortMode(mode) {
   sortMode = mode;
@@ -626,227 +479,270 @@ function setSortMode(mode) {
 
 function updateSortButtons() {
   document.querySelectorAll(".sort-btn").forEach(btn => {
-    btn.classList.remove("active");
-  });
-  document.querySelectorAll(".sort-btn").forEach(btn => {
-    if (btn.textContent.toLowerCase().includes(sortMode)) {
-      btn.classList.add("active");
-    }
+    const t = btn.textContent.toLowerCase();
+    btn.classList.toggle("active",
+      (sortMode === "nummer"    && t.includes("nummer")) ||
+      (sortMode === "fornamn"   && t.includes("förnamn")) ||
+      (sortMode === "efternamn" && t.includes("efternamn"))
+    );
   });
 }
 
 function getPlayerName(nr) {
   if (!players[nr]) return String(nr);
   const p = players[nr];
-  // Om sorterad på efternamn, visa "Efternamn Förnamn"
-  if (sortMode === "efternamn") {
-    const en = p.efternamn || "";
-    const fn = p.fornamn || "";
-    return (en || fn || String(nr)).trim();
-  }
-  // Standard: Förnamn Efternamn
-  const fn = p.fornamn || "";
-  const en = p.efternamn || "";
-  return (fn || en || String(nr)).trim();
+  if (sortMode === "efternamn") return [p.efternamn, p.fornamn].filter(Boolean).join(" ") || String(nr);
+  return [p.fornamn, p.efternamn].filter(Boolean).join(" ") || String(nr);
 }
+function getPlayerFornamn(nr)  { return (players[nr]?.fornamn  || "").trim() || String(nr); }
+function getPlayerEfternamn(nr){ return (players[nr]?.efternamn || "").trim(); }
 
-function getPlayerFornamn(nr) {
-  return (players[nr]?.fornamn || "").trim() || String(nr);
-}
-
-function getPlayerEfternamn(nr) {
-  return (players[nr]?.efternamn || "").trim();
-}
-
-// ===== REDIGERING =====
+// ===== REDIGERA MODAL =====
 
 function openEditModal() {
-  const modal = document.getElementById("editModal");
   const grid = document.getElementById("editGrid");
   grid.innerHTML = "";
 
-  // Skapa header-rad
-  const header = document.createElement("div");
-  header.className = "edit-row";
-  header.style.background = "#1e3a8a";
-  header.style.color = "white";
-  header.style.fontWeight = "bold";
-  header.style.marginBottom = "4px";
-  header.innerHTML = `
-    <div style="text-align:center;">Nr</div>
-    <div>Förnamn</div>
-    <div>Efternamn</div>
-    <div style="text-align:center;">N</div>
-    <div style="text-align:center;">O1</div>
-    <div style="text-align:center;">O2</div>
-    <div style="text-align:center;">O3</div>
-    <div style="text-align:center;">O4</div>
-    <div style="text-align:center;">O5</div>
-    <div style="text-align:center;">O6</div>
-    <div style="text-align:center;">Sum</div>
-  `;
-  grid.appendChild(header);
+  // Header
+  const hdr = document.createElement("div");
+  hdr.className = "edit-row";
+  hdr.style.cssText = "background:#1e3a8a;color:white;font-weight:bold;";
+  hdr.innerHTML = "<div>Nr</div><div>Förnamn</div><div>Efternamn</div><div style='text-align:center;'>N</div>";
+  grid.appendChild(hdr);
 
-  // Skapa 32 redigeringsrader
-  for (let nr = 1; nr <= 32; nr++) {
-    const p = players[nr] || { fornamn: "", efternamn: "", narvaro: "", omg1: "", omg2: "", omg3: "", omg4: "", omg5: "", omg6: "" };
-    const summa = (parseInt(p.omg1||0) || 0) + (parseInt(p.omg2||0) || 0) + (parseInt(p.omg3||0) || 0) + (parseInt(p.omg4||0) || 0) + (parseInt(p.omg5||0) || 0) + (parseInt(p.omg6||0) || 0);
-    
+  const playerNrs = Object.keys(players).map(Number).sort((a, b) => a - b);
+  for (const nr of playerNrs) {
+    const p = players[nr];
     const row = document.createElement("div");
     row.className = "edit-row";
     row.innerHTML = `
-      <div class="edit-nr" style="text-align:center;">${nr}</div>
-      <input type="text" placeholder="Förnamn" value="${p.fornamn}" data-nr="${nr}" class="edit-fornamn">
+      <div class="edit-nr">${nr}</div>
+      <input type="text" placeholder="Förnamn"   value="${p.fornamn}"  data-nr="${nr}" class="edit-fornamn">
       <input type="text" placeholder="Efternamn" value="${p.efternamn}" data-nr="${nr}" class="edit-efternamn">
-      <select data-nr="${nr}" class="edit-narvaro">
-        <option value="">-</option>
-        <option value="+" ${p.narvaro === '+' ? 'selected' : ''}>+</option>
-        <option value="-" ${p.narvaro === '-' ? 'selected' : ''}>-</option>
-      </select>
-      <input type="number" min="0" value="${p.omg1 || ''}" data-nr="${nr}" class="edit-omg edit-omg1" placeholder="0">
-      <input type="number" min="0" value="${p.omg2 || ''}" data-nr="${nr}" class="edit-omg edit-omg2" placeholder="0">
-      <input type="number" min="0" value="${p.omg3 || ''}" data-nr="${nr}" class="edit-omg edit-omg3" placeholder="0">
-      <input type="number" min="0" value="${p.omg4 || ''}" data-nr="${nr}" class="edit-omg edit-omg4" placeholder="0">
-      <input type="number" min="0" value="${p.omg5 || ''}" data-nr="${nr}" class="edit-omg edit-omg5" placeholder="0">
-      <input type="number" min="0" value="${p.omg6 || ''}" data-nr="${nr}" class="edit-omg edit-omg6" placeholder="0">
-      <div class="edit-summa" data-nr="${nr}">${summa}</div>
+      <input type="text" maxlength="1"            value="${p.narvaro}"  data-nr="${nr}" class="edit-narvaro" placeholder="+/-">
     `;
     grid.appendChild(row);
+    row.querySelector(".edit-narvaro").addEventListener("input", e => {
+      if (!["+", "-", ""].includes(e.target.value)) e.target.value = "";
+    });
+  }
 
-    // Lägg till event-listener för att uppdatera summa när omkgång-värden ändras
-    const omgInputs = row.querySelectorAll(".edit-omg");
-    const summaDiv = row.querySelector(".edit-summa");
-    omgInputs.forEach(input => {
-      input.addEventListener("input", () => {
-        const s = Array.from(omgInputs).reduce((acc, inp) => acc + (parseInt(inp.value) || 0), 0);
-        summaDiv.textContent = s;
+  // Piltangentsnavigering
+  const inputMap = {};
+  for (const nr of playerNrs) {
+    inputMap[nr] = [
+      grid.querySelector(`.edit-fornamn[data-nr="${nr}"]`),
+      grid.querySelector(`.edit-efternamn[data-nr="${nr}"]`),
+      grid.querySelector(`.edit-narvaro[data-nr="${nr}"]`),
+    ];
+  }
+  for (let i = 0; i < playerNrs.length; i++) {
+    const nr = playerNrs[i];
+    inputMap[nr].forEach((el, col) => {
+      if (!el) return;
+      el.addEventListener("focus", () => el.select?.());
+      el.addEventListener("keydown", e => {
+        let tNr = nr, tCol = col;
+        if      (e.key === "ArrowUp")    tNr = playerNrs[Math.max(0, i - 1)];
+        else if (e.key === "ArrowDown")  tNr = playerNrs[Math.min(playerNrs.length - 1, i + 1)];
+        else if (e.key === "ArrowLeft")  tCol = Math.max(0, col - 1);
+        else if (e.key === "ArrowRight") tCol = Math.min(2, col + 1);
+        else return;
+        e.preventDefault();
+        inputMap[tNr]?.[tCol]?.focus();
       });
     });
   }
 
-  modal.classList.add("open");
+  document.getElementById("editModal").classList.add("open");
 }
 
-function closeEditModal() {
-  const modal = document.getElementById("editModal");
-  modal.classList.remove("open");
-}
+function closeEditModal() { document.getElementById("editModal").classList.remove("open"); }
 
 function saveEditedData() {
-  // Bygga textrepresentation från input-fälten (format: Nr;Förnamn;Efternamn;Närvaro;OMG1;OMG2;OMG3;OMG4;OMG5;OMG6)
-  let textData = "";
-  for (let nr = 1; nr <= 32; nr++) {
-    const fornamn = document.querySelector(`.edit-fornamn[data-nr="${nr}"]`)?.value.trim() || "";
-    const efternamn = document.querySelector(`.edit-efternamn[data-nr="${nr}"]`)?.value.trim() || "";
-    const narvaro = document.querySelector(`.edit-narvaro[data-nr="${nr}"]`)?.value || "";
-    const omg1 = document.querySelector(`.edit-omg1[data-nr="${nr}"]`)?.value.trim() || "";
-    const omg2 = document.querySelector(`.edit-omg2[data-nr="${nr}"]`)?.value.trim() || "";
-    const omg3 = document.querySelector(`.edit-omg3[data-nr="${nr}"]`)?.value.trim() || "";
-    const omg4 = document.querySelector(`.edit-omg4[data-nr="${nr}"]`)?.value.trim() || "";
-    const omg5 = document.querySelector(`.edit-omg5[data-nr="${nr}"]`)?.value.trim() || "";
-    const omg6 = document.querySelector(`.edit-omg6[data-nr="${nr}"]`)?.value.trim() || "";
-    
-    if (fornamn || efternamn || narvaro || omg1 || omg2 || omg3 || omg4 || omg5 || omg6) {
-      textData += nr + ";" + fornamn + ";" + efternamn + ";" + narvaro + ";" + omg1 + ";" + omg2 + ";" + omg3 + ";" + omg4 + ";" + omg5 + ";" + omg6 + "\n";
-    }
-  }
-
-  // Parsa genom SAMMA logik som loadFile() - säkerställer samma åtgärd
-  const lines = textData.split(/\r?\n/).filter(l => l.trim());
+  const playerNrs = Object.keys(players).map(Number).sort((a, b) => a - b);
   const newPlayers = {};
-  let errors = 0;
-  
-  for (const line of lines) {
-    const sep = line.includes(";") ? ";" : (line.includes("\t") ? "\t" : ",");
-    const parts = line.split(sep).map(p => p.trim());
-    
-    if (parts.length >= 3) {
-      const nr = parseInt(parts[0]);
-      const fornamn = parts[1];
-      const efternamn = parts[2];
-      const narvaro = parts[3] || "";
-      const omg1 = parts[4] || "";
-      const omg2 = parts[5] || "";
-      const omg3 = parts[6] || "";
-      const omg4 = parts[7] || "";
-      const omg5 = parts[8] || "";
-      const omg6 = parts[9] || "";
-      
-      if (!isNaN(nr) && nr > 0 && fornamn && efternamn) {
-        newPlayers[nr] = { fornamn, efternamn, narvaro, omg1, omg2, omg3, omg4, omg5, omg6 };
-      } else {
-        errors++;
-      }
-    } else {
-      errors++;
+  for (const nr of playerNrs) {
+    const fornamn   = document.querySelector(`.edit-fornamn[data-nr="${nr}"]`)?.value.trim()  || "";
+    const efternamn = document.querySelector(`.edit-efternamn[data-nr="${nr}"]`)?.value.trim() || "";
+    const narvaro   = document.querySelector(`.edit-narvaro[data-nr="${nr}"]`)?.value.trim()  || "";
+    const ex = players[nr] || {};
+    newPlayers[nr] = {
+      fornamn, efternamn, narvaro,
+      omg1: ex.omg1 || "", omg2: ex.omg2 || "", omg3: ex.omg3 || "",
+      omg4: ex.omg4 || "", omg5: ex.omg5 || "", omg6: ex.omg6 || "",
+    };
+  }
+  players = newPlayers;
+  localStorage.setItem("vira_players", JSON.stringify(players));
+  autoSaveToFile();
+  updateMainTitle();
+  if (lastResult) render(lastResult, false);
+  closeEditModal();
+}
+
+// ===== RESULTAT MODAL =====
+
+function openResultsModal() {
+  const grid = document.getElementById("resultsGrid");
+  grid.innerHTML = "";
+
+  const hdr = document.createElement("div");
+  hdr.className = "results-row";
+  hdr.style.cssText = "background:#1e3a8a;color:white;font-weight:bold;font-size:0.7rem;";
+  hdr.innerHTML = "<div>Nr</div><div>Namn</div><div>O1</div><div>O2</div><div>O3</div><div>O4</div><div>O5</div><div>O6</div><div>Sum</div>";
+  grid.appendChild(hdr);
+
+  const activePlayers = getActivePlayers();
+  const inputMap = {};
+
+  for (let ri = 0; ri < activePlayers.length; ri++) {
+    const nr = activePlayers[ri];
+    const p  = players[nr] || {};
+    const sumVal = calculateSum(nr);
+    const row = document.createElement("div");
+    row.className = "results-row";
+    row.innerHTML = `
+      <div style="font-weight:700;color:#1e40af;text-align:right;">${nr}</div>
+      <div style="font-size:0.68rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${getPlayerName(nr)}">${getPlayerName(nr)}</div>
+      <input type="text" value="${formatSvenska(p.omg1)}" data-nr="${nr}" data-col="1" class="res-omg" placeholder="0,00">
+      <input type="text" value="${formatSvenska(p.omg2)}" data-nr="${nr}" data-col="2" class="res-omg" placeholder="0,00">
+      <input type="text" value="${formatSvenska(p.omg3)}" data-nr="${nr}" data-col="3" class="res-omg" placeholder="0,00">
+      <input type="text" value="${formatSvenska(p.omg4)}" data-nr="${nr}" data-col="4" class="res-omg" placeholder="0,00">
+      <input type="text" value="${formatSvenska(p.omg5)}" data-nr="${nr}" data-col="5" class="res-omg" placeholder="0,00">
+      <input type="text" value="${formatSvenska(p.omg6)}" data-nr="${nr}" data-col="6" class="res-omg" placeholder="0,00">
+      <div class="results-summa" data-nr="${nr}">${sumVal > 0 ? formatSvenska(sumVal.toFixed(2)) : ""}</div>
+    `;
+    grid.appendChild(row);
+
+    inputMap[nr] = Array.from({ length: 6 }, (_, i) =>
+      row.querySelector(`.res-omg[data-col="${i + 1}"]`)
+    );
+
+    const summaDiv = row.querySelector(`.results-summa[data-nr="${nr}"]`);
+    const updateSum = () => {
+      const s = inputMap[nr].map(inp => parseFloat(parseSvenska(inp.value)) || 0).reduce((a, b) => a + b, 0);
+      summaDiv.textContent = s > 0 ? formatSvenska(s.toFixed(2)) : "";
+    };
+
+    inputMap[nr].forEach((inp, col) => {
+      inp.addEventListener("focus",  () => inp.select());
+      inp.addEventListener("input",  updateSum);
+      inp.addEventListener("keydown", e => {
+        // Tillåt komma som decimaltecken
+        if (e.key === ",") { e.preventDefault(); inp.value += ","; }
+        // Piltangentsnavigering
+        let tNr = nr, tCol = col;
+        if      (e.key === "ArrowUp")    tNr = activePlayers[Math.max(0, ri - 1)];
+        else if (e.key === "ArrowDown")  tNr = activePlayers[Math.min(activePlayers.length - 1, ri + 1)];
+        else if (e.key === "ArrowLeft")  tCol = Math.max(0, col - 1);
+        else if (e.key === "ArrowRight") tCol = Math.min(5, col + 1);
+        else return;
+        if (e.key !== ",") {
+          e.preventDefault();
+          inputMap[tNr]?.[tCol]?.focus();
+        }
+      });
+      inp.addEventListener("blur", () => {
+        const v   = parseSvenska(inp.value);
+        const num = parseFloat(v);
+        inp.value = (!isNaN(num) && num >= 0) ? formatSvenska(num.toFixed(2)) : "";
+        updateSum();
+      });
+    });
+  }
+
+  document.getElementById("resultsModal").classList.add("open");
+}
+
+function closeResultsModal() { document.getElementById("resultsModal").classList.remove("open"); }
+
+function saveResults() {
+  const activePlayers = getActivePlayers();
+  for (const nr of activePlayers) {
+    if (!players[nr]) continue;
+    for (let col = 1; col <= 6; col++) {
+      const inp = document.querySelector(`.res-omg[data-nr="${nr}"][data-col="${col}"]`);
+      if (inp) players[nr]["omg" + col] = parseSvenska(inp.value);
     }
   }
-
-  const count = Object.keys(newPlayers).length;
-  if (count === 0) {
-    alert("Inget att spara – inga namn ifyllda");
-    return;
-  }
-
-  // Fråga efter filnamn - föreslå originalnamnet
-  const filename = prompt("Filnamn för listan:", lastOpenedFilename);
-  if (!filename) {
-    return; // User cancelled
-  }
-  lastOpenedFilename = filename; // Uppdatera för nästa gång
-
-  // Uppdatera players-objektet med validerad data
-  players = newPlayers;
-
-  // Spara till localStorage med filväg
-  const filepath = "Vira\\" + filename;
   localStorage.setItem("vira_players", JSON.stringify(players));
-  localStorage.setItem("vira_players_file", filepath);
+  autoSaveToFile();
+  document.getElementById("btnFinal").disabled = false;
+  closeResultsModal();
+  const st = document.getElementById("status");
+  st.className = "ok"; st.textContent = "✅ Resultat sparat";
+}
 
-  // Uppdatera UI
-  document.getElementById("fileInfo").textContent = filepath;
-  document.getElementById("sortGroup").style.display = "flex";
-  
-  // Återställ sortering
-  sortMode = "nummer";
-  updateSortButtons();
+// ===== FINAL SCHEMA =====
 
-  // Uppdatera rendering om schema finns
-  if (lastResult) render(lastResult, false);
+function generateFinal() {
+  const active = getActivePlayers();
+  if (active.length < 4) { alert("För få aktiva spelare för en final."); return; }
 
-  // Stäng modal
-  closeEditModal();
+  const withSums = active.map(nr => ({ nr, sum: calculateSum(nr) }));
+  withSums.sort((a, b) => b.sum !== a.sum ? b.sum - a.sum : a.nr - b.nr);
 
-  // Bekräftelse
-  alert("✅ Sparad! " + count + " deltagare uppdaterad.\nFilväg: " + filepath);
+  const finalTable = withSums.slice(0, PPT).map(x => x.nr);
+  const rest       = shuffle(withSums.slice(PPT).map(x => x.nr));
+  const sumMap     = {};
+  withSums.forEach(x => sumMap[x.nr] = x.sum);
+
+  let html = '<table style="border-collapse:collapse;width:100%;">';
+  html += '<thead><tr>';
+  html += '<th style="background:#b45309;color:white;padding:8px;text-align:center;width:110px;">Bord</th>';
+  html += '<th style="background:#b45309;color:white;padding:8px;text-align:left;">Spelare</th>';
+  html += '</tr></thead><tbody>';
+
+  // Bord 1 – FINAL
+  html += '<tr style="background:#fef3c7;">';
+  html += '<td style="font-weight:700;color:#b45309;text-align:center;padding:8px;border:1px solid #fcd34d;">🏆 Bord 1<br><small>FINAL</small></td>';
+  html += '<td style="padding:6px;border:1px solid #fcd34d;">';
+  finalTable.forEach((nr, i) => {
+    const sum = sumMap[nr] || 0;
+    html += `<div style="display:flex;align-items:center;gap:6px;padding:2px 0;">`;
+    html += `<span style="font-weight:700;color:#b45309;width:18px;">${i + 1}.</span>`;
+    html += chip(nr, false);
+    html += `<span style="font-weight:600;">${getPlayerName(nr)}</span>`;
+    html += `<span style="color:#64748b;font-size:0.8rem;margin-left:auto;">${formatSvenska(sum.toFixed(2))} p</span>`;
+    html += "</div>";
+  });
+  html += "</td></tr>";
+
+  // Övriga bord
+  for (let t = 0; t < Math.ceil(rest.length / PPT); t++) {
+    const tbl = rest.slice(t * PPT, (t + 1) * PPT);
+    html += '<tr>';
+    html += `<td style="font-weight:700;color:#1e40af;text-align:center;padding:8px;border:1px solid #dbeafe;">Bord ${t + 2}</td>`;
+    html += '<td style="padding:6px;border:1px solid #dbeafe;">';
+    tbl.forEach(nr => {
+      html += `<div style="display:flex;align-items:center;gap:6px;padding:2px 0;">${chip(nr, false)}<span>${getPlayerName(nr)}</span></div>`;
+    });
+    html += "</td></tr>";
+  }
+  html += "</tbody></table>";
+
+  document.getElementById("tableWrap").innerHTML = html;
+  document.getElementById("clickHint").style.display = "none";
+  document.getElementById("btnLayout").disabled = true;
+  document.getElementById("signature").textContent =
+    "by Gaxor  ·  " + new Date().toLocaleString("sv-SE") + "  ·  " + VERSION + " · 🏆 FINAL";
 }
 
 // ===== MARKERING =====
-let selectedPlayer = null;
-let layoutMode = "bord"; // "bord" | "spelare"
-let lastResult = null;
 
 function selectPlayer(p) {
   selectedPlayer = (selectedPlayer === p) ? null : p;
-  document.querySelectorAll(".chip").forEach(chip => {
-    chip.classList.toggle("selected", parseInt(chip.dataset.player) === selectedPlayer);
+  document.querySelectorAll(".chip").forEach(c => {
+    c.classList.toggle("selected", parseInt(c.dataset.player) === selectedPlayer);
   });
 }
 
 function printBord(orientation) {
-  if (orientation === 'landscape') {
-    document.body.classList.add('print-landscape');
-    document.body.classList.remove('print-portrait');
-  } else {
-    document.body.classList.add('print-portrait');
-    document.body.classList.remove('print-landscape');
-  }
-  setTimeout(() => {
-    window.print();
-  }, 50);
-  setTimeout(() => {
-    document.body.classList.remove('print-landscape', 'print-portrait');
-  }, 100);
+  document.body.classList.toggle("print-landscape", orientation === "landscape");
+  document.body.classList.toggle("print-portrait",  orientation === "portrait");
+  setTimeout(() => window.print(), 50);
+  setTimeout(() => document.body.classList.remove("print-landscape", "print-portrait"), 100);
 }
 
 function toggleLayout() {
@@ -855,18 +751,6 @@ function toggleLayout() {
     layoutMode === "bord" ? "👤 Visa per spelare" : "🃏 Visa per bord";
   if (lastResult) render(lastResult, false);
 }
-
-// ===== KONSTANTER =====
-const ROUNDS = 6, TABLES = 8, PPT = 4, N = 32;
-const POSITIONS = ["NORD", "OST", "SYD", "VÄST"];
-
-// Alla 24 permutationer av [0,1,2,3]
-const PERMS4 = [
-  [0,1,2,3],[0,1,3,2],[0,2,1,3],[0,2,3,1],[0,3,1,2],[0,3,2,1],
-  [1,0,2,3],[1,0,3,2],[1,2,0,3],[1,2,3,0],[1,3,0,2],[1,3,2,0],
-  [2,0,1,3],[2,0,3,1],[2,1,0,3],[2,1,3,0],[2,3,0,1],[2,3,1,0],
-  [3,0,1,2],[3,0,2,1],[3,1,0,2],[3,1,2,0],[3,2,0,1],[3,2,1,0],
-];
 
 // ===== ALGORITM =====
 
@@ -881,14 +765,10 @@ function shuffle(arr) {
 
 function generate() {
   const btnGen = document.getElementById("btnGenerate");
-  const btnPrtPortrait  = document.getElementById("btnPrintPortrait");
-  const btnPrtLandscape = document.getElementById("btnPrintLandscape");
-  const status = document.getElementById("status");
-
-  btnGen.disabled = true;
+  const st     = document.getElementById("status");
+  btnGen.disabled  = true;
   btnGen.textContent = "⏳ Genererar...";
-  status.className = "";
-  status.textContent = "Räknar...";
+  st.className = ""; st.textContent = "Räknar...";
 
   setTimeout(() => {
     try {
@@ -899,13 +779,15 @@ function generate() {
       const msg = result.totalConflicts === 0
         ? "✅ Inga konflikter – alla par är unika!"
         : "⚠️ " + result.totalConflicts + " konflikt" + (result.totalConflicts > 1 ? "er" : "") + " (röd ring = upprepat par)";
-      status.className = result.totalConflicts === 0 ? "ok" : "warn";
-      status.textContent = msg;
-      btnPrtPortrait.disabled = false;
-      btnPrtLandscape.disabled = false;
+      st.className = result.totalConflicts === 0 ? "ok" : "warn";
+      st.textContent = msg;
+      document.getElementById("btnPrintPortrait").disabled  = false;
+      document.getElementById("btnPrintLandscape").disabled = false;
+      document.getElementById("btnLayout").disabled  = false;
+      document.getElementById("btnResults").disabled = false;
+      updateMainTitle();
     } catch(e) {
-      status.className = "warn";
-      status.textContent = "Fel: " + e.message;
+      st.className = "warn"; st.textContent = "Fel: " + e.message;
     }
     btnGen.disabled = false;
     btnGen.textContent = "🔀 Generera nytt";
@@ -913,12 +795,25 @@ function generate() {
 }
 
 function buildSchedule() {
-  // Uint8Array för O(1) par-lookup
-  const met = new Uint8Array(33 * 33);
-  const hasMet = (a, b) => met[a * 33 + b] === 1;
-  const setMet = (a, b) => { met[a * 33 + b] = 1; met[b * 33 + a] = 1; };
+  const activePlayers = getActivePlayers();
+  const N_local = activePlayers.length;
+  if (N_local < 4) throw new Error("För få aktiva spelare (" + N_local + "). Minst 4 krävs.");
 
-  const countConf = (round) => {
+  const requested = parseInt(document.getElementById("numTablesInput")?.value) || Math.ceil(N_local / 4);
+  TABLES = Math.max(1, requested);
+  while (TABLES * 4 > N_local && TABLES > 1) TABLES--;
+  PPT    = 4;
+  ROUNDS = 6;
+  N      = TABLES * PPT;
+  const scheduled = activePlayers.slice(0, N);
+
+  // Uint8Array stöder spelarnummer upp till 999
+  const MAX_P = 1000;
+  const met    = new Uint8Array(MAX_P * MAX_P);
+  const hasMet = (a, b) => met[a * MAX_P + b] === 1;
+  const setMet = (a, b) => { met[a * MAX_P + b] = 1; met[b * MAX_P + a] = 1; };
+
+  const countConf = round => {
     let c = 0;
     for (const tbl of round)
       for (let i = 0; i < tbl.length; i++)
@@ -944,8 +839,7 @@ function buildSchedule() {
     return conf;
   };
 
-  const rounds = [];
-  const conflictPlayers = []; // conflictPlayers[r][t] = Set of player numbers
+  const rounds = [], conflictPlayers = [];
   let totalConflicts = 0;
 
   for (let r = 0; r < ROUNDS; r++) {
@@ -954,21 +848,17 @@ function buildSchedule() {
     let bestRound = [], bestConf = Infinity;
 
     for (let rs = 0; rs < restarts && bestConf > 0; rs++) {
-      const players_arr = shuffle(Array.from({ length: N }, (_, i) => i + 1));
-      const round = Array.from({ length: TABLES }, (_, t) => players_arr.slice(t * PPT, (t + 1) * PPT));
-      const conf = localSearch(round, iters);
+      const arr   = shuffle([...scheduled]);
+      const round = Array.from({ length: TABLES }, (_, t) => arr.slice(t * PPT, (t + 1) * PPT));
+      const conf  = localSearch(round, iters);
       if (conf < bestConf) { bestConf = conf; bestRound = round.map(t => [...t]); }
     }
 
-    // Markera konflikterande spelare
     const cp = Array.from({ length: TABLES }, () => new Set());
     for (let t = 0; t < TABLES; t++)
       for (let i = 0; i < PPT; i++)
         for (let j = i + 1; j < PPT; j++)
-          if (hasMet(bestRound[t][i], bestRound[t][j])) {
-            cp[t].add(bestRound[t][i]);
-            cp[t].add(bestRound[t][j]);
-          }
+          if (hasMet(bestRound[t][i], bestRound[t][j])) { cp[t].add(bestRound[t][i]); cp[t].add(bestRound[t][j]); }
 
     totalConflicts += bestConf === Infinity ? 0 : bestConf;
     for (const tbl of bestRound)
@@ -980,25 +870,21 @@ function buildSchedule() {
     conflictPlayers.push(cp);
   }
 
-  // ===== SITTPLATSFÖRDELNING (NORD/OST/SYD/VÄST) =====
-  // posCount[spelare][position] = antal gånger spelaren suttit på den platsen
-  const posCount = Array.from({ length: 33 }, () => [0, 0, 0, 0]);
-  const seats = []; // seats[r][t][position] = spelarnummer
+  // Sittplatsfördelning (NORD/OST/SYD/VÄST)
+  const posCount = {};
+  scheduled.forEach(p => posCount[p] = [0, 0, 0, 0]);
+  const seats = [];
 
   for (const round of rounds) {
     const roundSeats = [];
     for (const table of round) {
-      // Välj permutation som minimerar upprepade positioner
       let bestPerm = PERMS4[0], bestScore = Infinity;
       for (const perm of PERMS4) {
         const score = table.reduce((s, p, i) => s + posCount[p][perm[i]], 0);
         if (score < bestScore) { bestScore = score; bestPerm = perm; }
       }
       const seatArr = new Array(4);
-      table.forEach((p, i) => {
-        seatArr[bestPerm[i]] = p;
-        posCount[p][bestPerm[i]]++;
-      });
+      table.forEach((p, i) => { seatArr[bestPerm[i]] = p; posCount[p][bestPerm[i]]++; });
       roundSeats.push(seatArr);
     }
     seats.push(roundSeats);
@@ -1011,117 +897,112 @@ function buildSchedule() {
 
 function render(result, updateSignature) {
   lastResult = result;
-  if (updateSignature !== false) {
-    const now = new Date().toLocaleString("sv-SE");
-    document.getElementById("signature").textContent = "by Gaxor  ·  " + now + "  ·  " + VERSION;
-  }
+  if (updateSignature !== false)
+    document.getElementById("signature").textContent =
+      "by Gaxor  ·  " + new Date().toLocaleString("sv-SE") + "  ·  " + VERSION;
   selectedPlayer = null;
-  // Visa clickHint bara i "vis per bord" vyn
-  document.getElementById("clickHint").style.display = (layoutMode === "bord") ? "block" : "none";
+  document.getElementById("clickHint").style.display = layoutMode === "bord" ? "block" : "none";
   document.getElementById("btnLayout").disabled = false;
-
   if (layoutMode === "bord") renderBordView(result);
   else renderSpelarView(result);
 }
 
 function chip(p, conflict) {
-  return '<span class="chip' + (conflict ? ' conflict' : '') +
-    '" data-player="' + p + '" onclick="selectPlayer(' + p + ')">' + p + '</span>';
+  return '<span class="chip' + (conflict ? " conflict" : "") +
+    '" data-player="' + p + '" onclick="selectPlayer(' + p + ')">' + p + "</span>";
 }
 
 function renderBordView({ rounds, seats, conflictPlayers }) {
-  let html = '<table><thead><tr>';
+  const hasNames = Object.keys(players).length > 0;
+  let html = "<table><thead><tr>";
   html += '<th style="text-align:left;padding-left:4px;width:35px;"></th>';
-  for (let i = 1; i <= TABLES; i++) {
-    html += '<th>Bord ' + i + '</th>';
-  }
-  html += '</tr></thead><tbody>';
+  for (let i = 1; i <= TABLES; i++) html += "<th>Bord " + i + "</th>";
+  html += "</tr></thead><tbody>";
 
   for (let ri = 0; ri < rounds.length; ri++) {
-    const bottomBorder = ri < rounds.length - 1 ? 'border-bottom:3px solid #1e3a8a;' : '';
-    html += '<tr style="' + bottomBorder + '"><td style="vertical-align:middle;white-space:nowrap;border-right:3px solid #1e3a8a;font-size:2rem;font-weight:700;padding:4px 6px;">' + (ri + 1) + '</td>';
+    const bb = ri < rounds.length - 1 ? "border-bottom:3px solid #1e3a8a;" : "";
+    html += '<tr style="' + bb + '"><td style="vertical-align:middle;white-space:nowrap;border-right:3px solid #1e3a8a;font-size:2rem;font-weight:700;padding:4px 6px;">' + (ri + 1) + "</td>";
     for (let ti = 0; ti < TABLES; ti++) {
       html += '<td style="border-right:3px solid #1e3a8a;padding:2px;">';
       for (let pi = 0; pi < 4; pi++) {
-        const p = seats[ri][ti][pi];
+        const p       = seats[ri][ti][pi];
         const conflict = conflictPlayers[ri][ti].has(p);
-        html += '<div class="seat-row" style="display:flex;gap:3px;align-items:center;font-size:0.9rem;">';
+        html += '<div class="seat-row">';
         html += chip(p, conflict);
-        html += '<span class="seat-label" style="font-weight:600;color:#1e3a8a;min-width:45px;">' + POSITIONS[pi] + '</span>';
-        html += '</div>';
+        html += '<span class="seat-label">' + POSITIONS[pi] + "</span>";
+        if (hasNames) html += '<span class="seat-name">' + getPlayerName(p) + "</span>";
+        html += "</div>";
       }
-      html += '</td>';
+      html += "</td>";
     }
-    html += '</tr>';
+    html += "</tr>";
   }
-  html += '</tbody></table>';
+  html += "</tbody></table>";
   document.getElementById("tableWrap").innerHTML = html;
 }
 
 function renderSpelarView({ seats, conflictPlayers }) {
   const info = {};
-  for (let ri = 0; ri < seats.length; ri++) {
-    for (let ti = 0; ti < seats[ri].length; ti++) {
+  for (let ri = 0; ri < seats.length; ri++)
+    for (let ti = 0; ti < seats[ri].length; ti++)
       for (let pi = 0; pi < 4; pi++) {
         const p = seats[ri][ti][pi];
         if (!info[p]) info[p] = {};
         info[p][ri] = { table: ti + 1, pos: POSITIONS[pi], conflict: conflictPlayers[ri][ti].has(p) };
       }
-    }
-  }
 
-  // Beräkna längsta namn för kolumnbredd
+  const allNrs = Object.keys(players).length > 0
+    ? Object.keys(players).map(Number)
+    : Array.from({ length: N }, (_, i) => i + 1);
+
+  const playerNrs = [...allNrs];
+  if (sortMode === "fornamn")
+    playerNrs.sort((a, b) => getPlayerFornamn(a).localeCompare(getPlayerFornamn(b), "sv"));
+  else if (sortMode === "efternamn")
+    playerNrs.sort((a, b) => {
+      const c = getPlayerEfternamn(a).localeCompare(getPlayerEfternamn(b), "sv");
+      return c !== 0 ? c : getPlayerFornamn(a).localeCompare(getPlayerFornamn(b), "sv");
+    });
+  else playerNrs.sort((a, b) => a - b);
+
   let maxNameLen = 10;
-  for (let p = 1; p <= N; p++) {
-    const name = getPlayerName(p);
-    if (name && name.length > 0) {
-      maxNameLen = Math.max(maxNameLen, name.length);
-    }
-  }
-  const nameColWidth = Math.ceil(maxNameLen * 6.3) + 42; // ~6.3px per tecken vid 0.9rem + siffra + chip
+  for (const p of playerNrs) maxNameLen = Math.max(maxNameLen, getPlayerName(p).length);
+  const nameColWidth = Math.ceil(maxNameLen * 6.3) + 42;
 
-  // Sortering
-  const playerNrs = Array.from({ length: N }, (_, i) => i + 1);
-  if (Object.keys(players).length > 0) {
-    if (sortMode === "fornamn") {
-      playerNrs.sort((a, b) => getPlayerFornamn(a).localeCompare(getPlayerFornamn(b), "sv"));
-    } else if (sortMode === "efternamn") {
-      playerNrs.sort((a, b) => {
-        const cmp = getPlayerEfternamn(a).localeCompare(getPlayerEfternamn(b), "sv");
-        return cmp !== 0 ? cmp : getPlayerFornamn(a).localeCompare(getPlayerFornamn(b), "sv");
-      });
-    }
-  }
-
-  let html = '<table style="table-layout:fixed;width:100%;font-size:0.9rem;border-collapse:collapse;"><thead><tr>';
-  html += '<th style="text-align:left;padding:0 1px;width:' + nameColWidth + 'px;font-size:0.9rem;font-weight:600;">Spelare</th>';
-  for (let ri = 0; ri < ROUNDS; ri++) html += '<th style="text-align:left;width:55px;padding:0 1px;font-size:0.85rem;font-weight:600;">Omg' + (ri + 1) + '</th>';
+  let html = `<table style="table-layout:fixed;width:100%;font-size:0.9rem;border-collapse:collapse;"><thead><tr>`;
+  html += `<th style="text-align:left;padding:0 1px;width:${nameColWidth}px;font-size:0.9rem;font-weight:600;">Spelare</th>`;
+  for (let ri = 0; ri < ROUNDS; ri++)
+    html += `<th style="text-align:left;width:55px;padding:0 1px;font-size:0.85rem;font-weight:600;">Omg${ri + 1}</th>`;
   html += '</tr><tr style="background:#f0f4ff;border-bottom:2px solid #cbd5e1;">';
-  html += '<th style="text-align:left;padding:0 1px;width:' + nameColWidth + 'px;font-size:0.75rem;font-weight:500;color:#64748b;"></th>';
-  for (let ri = 0; ri < ROUNDS; ri++) html += '<th style="text-align:left;width:55px;padding:2px 1px;font-size:0.75rem;font-weight:500;color:#64748b;">Bord/Plac</th>';
-  html += '</tr></thead><tbody>';
+  html += `<th style="padding:0 1px;font-size:0.75rem;color:#64748b;"></th>`;
+  for (let ri = 0; ri < ROUNDS; ri++)
+    html += `<th style="text-align:left;width:55px;padding:2px 1px;font-size:0.75rem;color:#64748b;">Bord/Plac</th>`;
+  html += "</tr></thead><tbody>";
 
   for (const p of playerNrs) {
-    html += '<tr>';
-    html += '<td style="text-align:left;vertical-align:top;padding:0 1px;border-right:1px solid #cbd5e1;">';
-    html += '<span class="chip" style="cursor:default;width:18px;height:18px;font-size:0.75rem;display:inline-block;margin-right:2px;vertical-align:middle;">' + p + '</span>';
-    html += '<span style="font-size:0.9rem;color:#1e293b;font-weight:500;">' + getPlayerName(p) + '</span>';
-    html += '</td>';
+    const isActive   = !players[p] || players[p].narvaro === "+";
+    const isInactive = players[p]?.narvaro === "-";
+    html += `<tr style="${isInactive ? "opacity:0.5;" : ""}">`;
+    html += `<td style="text-align:left;vertical-align:top;padding:0 1px;border-right:1px solid #cbd5e1;">`;
+    html += `<span class="chip" style="cursor:default;width:18px;height:18px;font-size:0.75rem;display:inline-flex;margin-right:2px;vertical-align:middle;">${p}</span>`;
+    html += `<span style="font-size:0.9rem;font-weight:500;">${getPlayerName(p)}</span>`;
+    if (isInactive) html += `<span style="font-size:0.7rem;color:#94a3b8;margin-left:4px;">(Ej deltagande)</span>`;
+    html += "</td>";
+
     for (let ri = 0; ri < ROUNDS; ri++) {
-      const d = info[p] && info[p][ri];
-      const conflict = d && d.conflict;
-      const bg = conflict ? 'background:#fff1f2;' : '';
-      html += '<td style="text-align:left;vertical-align:middle;padding:0 1px;font-size:0.85rem;' + bg + '">';
-      if (d) {
-        html += '<span style="font-weight:700;color:#1e40af;">' + d.table + '</span>';
-        html += '<span style="color:#64748b;margin-left:2px;">' + d.pos + '</span>';
-        if (conflict) html += '<span style="font-size:0.5rem;color:#dc2626;display:block;line-height:0.8;">⚠</span>';
+      const d = info[p]?.[ri];
+      const conflict = d?.conflict;
+      html += `<td style="text-align:left;vertical-align:middle;padding:0 1px;font-size:0.85rem;${conflict ? "background:#fff1f2;" : ""}">`;
+      if (d && isActive) {
+        html += `<span style="font-weight:700;color:#1e40af;">${d.table}</span>`;
+        html += `<span style="color:#64748b;margin-left:2px;">${d.pos}</span>`;
+        if (conflict) html += `<span style="font-size:0.5rem;color:#dc2626;display:block;line-height:0.8;">⚠</span>`;
       }
-      html += '</td>';
+      html += "</td>";
     }
-    html += '</tr>';
+    html += "</tr>";
   }
-  html += '</tbody></table>';
+  html += "</tbody></table>";
   document.getElementById("tableWrap").innerHTML = html;
 }
 </script>
