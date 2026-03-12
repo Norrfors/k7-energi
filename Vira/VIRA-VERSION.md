@@ -1,5 +1,30 @@
 # VIRA - Versionshistorik
 
+## **v1.47** ✅ (2026-03-12 - Överblivna spelare vid eget bord)
+- ✨ **Överblivna spelare** (active % 4) placeras automatiskt vid Bord TABLES+1 för alla 6 omgångar
+- 🔴 Överblivna visas med röd chip och röd bordsrubrik "Bord X ⚠️"
+- 📊 Rubriken visar "6 bord + 3 överblivna" när det finns överblivna
+- 👤 Visa per spelare: överblivnas bordsnummer visas i rött
+
+## **v1.46** ✅ (2026-03-12 - Resultatsortering & +-räkning)
+- 🐛 **Namn visas korrekt i resultatmodal vid sortering på Efternamn** (format: "Efternamn, Förnamn")
+- ✨ **Sorteringsknapparna i Registrera resultat** fick label "Sortering:" och fyra val: Resultat / Nr / Förnamn / Efternamn
+- 📊 **Statusrad vid inläsning** visar nu: antal aktiva (+), antal bord (floor, inte ceil), överblivna spelare (active % 4), inaktiva (-)
+- 📂 **Namnfil utan nr** – alla spelare får nu "+" (tidigare fick spelare efter nr 32 "-")
+
+## **v1.45** ✅ (2026-03-12 - Sortering i resultatmodal)
+- ✨ **Sorteringsknappar i Registrera resultat**: Resultat, Nr, Förnamn, Efternamn med label "Sortering:"
+
+## **v1.44** ✅ (2026-03-12 - Final-layout)
+- ✨ **Final-knappen** genererar nu samma bordslayout som vanligt schema (NORD/OST/SYD/VÄST), bord 1 i guld
+
+## **v1.43** ✅ (2026-03-12 - Sortering resultat)
+- ✨ **Registrera resultat** fick knapp för sortering på Resultat/Nr
+
+## **v1.42** ✅ (2026-03-12 - Spara som)
+- ✨ **Spara som...** knapp med Windows fildialogruta (showSaveFilePicker + fallback)
+- 🗑️ **Stående/liggande print-knappar borttagna** – Windows/Edge hanterar orientering
+
 ## **v1.41** ✅ (2026-03-12 - Rubrikfix & File System API Fallback)
 **Fixad rubrik och fallback för äldre/saknade File System Access API**
 

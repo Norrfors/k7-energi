@@ -112,6 +112,8 @@
     text-align: center; width: 100%;
   }
   .results-row input:focus { outline: none; border-color: #2563eb; background: #f0f9ff; }
+  .results-row input.has-value { background: #15803d; color: white; font-weight: bold; border-color: #166534; }
+  .results-row input.has-value:focus { background: #166534; }
   .results-summa {
     background: #e0f2fe; font-weight: bold; text-align: center;
     border: 1px solid #0ea5e9; border-radius: 2px; padding: 3px; font-size: 0.7rem;
@@ -156,6 +158,7 @@
   }
   .chip.conflict { background: #fee2e2; color: #b91c1c; outline: 2px solid #ef4444; outline-offset: 1px; }
   .chip.selected { background: #dc2626 !important; color: white !important; outline: none !important; animation: blink 0.7s ease-in-out infinite; }
+  .chip.conflict-partner { background: #1e3a8a !important; color: white !important; outline: 2px solid #1e40af !important; outline-offset: 1px; animation: blink 0.7s ease-in-out infinite; }
 
   #signature { margin-top: 18px; font-size: 0.78rem; color: #9ca3af; text-align: right; }
 
@@ -182,7 +185,7 @@
 </head>
 <body>
 
-<h1 id="mainTitle">🃏 Vira v1.44 · Ingen fil vald</h1>
+<h1 id="mainTitle">🃏 Vira v1.56 · Ingen fil vald</h1>
 
 <!-- RAD 1: Fil + sortering -->
 <div class="btn-row">
@@ -227,15 +230,21 @@
   <div class="modal-content wide">
     <div class="modal-header" style="display:flex;align-items:center;justify-content:space-between;">
       <span>📊 Registrera resultat</span>
-      <span style="display:flex;gap:4px;">
-        <button class="sort-btn active" id="resSortNr"  onclick="sortResults('nummer')">🔢 Nr</button>
-        <button class="sort-btn"        id="resSortSum" onclick="sortResults('summa')">📊 Resultat</button>
+      <span style="display:flex;gap:4px;align-items:center;">
+        <span class="sort-label">Sortering:</span>
+        <button class="sort-btn"        id="resSortSum" onclick="sortResults('summa')">Resultat</button>
+        <button class="sort-btn active" id="resSortNr"  onclick="sortResults('nummer')">Nr</button>
+        <button class="sort-btn"        id="resSortFn"  onclick="sortResults('fornamn')">Förnamn</button>
+        <button class="sort-btn"        id="resSortEn"  onclick="sortResults('efternamn')">Efternamn</button>
       </span>
     </div>
     <div class="results-grid" id="resultsGrid"></div>
-    <div class="modal-buttons">
-      <button class="btn-cancel" onclick="closeResultsModal()">Stäng</button>
-      <button class="btn-save"   onclick="saveResults()">💾 Spara resultat</button>
+    <div class="modal-buttons" style="justify-content:space-between;">
+      <button class="btn-cancel" onclick="clearResults()">🗑️ Nollställ</button>
+      <span style="display:flex;gap:6px;">
+        <button class="btn-cancel" onclick="closeResultsModal()">Stäng</button>
+        <button class="btn-save"   onclick="saveResults()">💾 Spara resultat</button>
+      </span>
     </div>
   </div>
 </div>
@@ -250,7 +259,7 @@
 <script>
 "use strict";
 
-const VERSION = "v1.44";
+const VERSION = "v1.56";
 
 // ===== STATE =====
 let players  = {};
@@ -304,10 +313,15 @@ function updateMainTitle() {
   let title;
   if (total === 0) {
     title = `🃏 Vira ${VERSION} · Ingen fil vald`;
-  } else if (active > 0 && active < total) {
-    title = `🃏 Vira ${VERSION} · ${total} deltagare (${active} aktiva) · ${TABLES} bord · 6 omgångar`;
   } else {
-    title = `🃏 Vira ${VERSION} · ${total} deltagare · ${TABLES} bord · 6 omgångar`;
+    const leftover = active > 0 ? active % 4 : 0;
+    const fullTables = active > 0 ? Math.floor(active / 4) : TABLES;
+    let bordStr = fullTables + " bord";
+    if (leftover > 0) bordStr += ` + ${leftover} överblivet`;
+    if (active > 0 && active < total)
+      title = `🃏 Vira ${VERSION} · ${total} deltagare (${active} aktiva) · ${bordStr} · 6 omgångar`;
+    else
+      title = `🃏 Vira ${VERSION} · ${total} deltagare · ${bordStr} · 6 omgångar`;
   }
   document.getElementById("mainTitle").textContent = title;
 }
@@ -357,9 +371,11 @@ function loadFileContent(content, filename) {
 
   players = newPlayers;
   const active   = Object.values(players).filter(p => p.narvaro === "+").length;
-  const inactive = total - active;
-
-  const autoTables = Math.max(1, Math.ceil(active / 4) || 8);
+  const inactive = Object.values(players).filter(p => p.narvaro === "-").length;
+  const xCount   = Object.values(players).filter(p => p.narvaro === "X").length;
+  const okanda   = total - active - inactive - xCount;
+  const leftover = Math.min(active, 32) % 4;
+  const autoTables = Math.min(8, Math.max(1, Math.floor(Math.min(active, 32) / 4)));
   document.getElementById("numTablesInput").value = autoTables;
   TABLES = autoTables;
 
@@ -372,8 +388,11 @@ function loadFileContent(content, filename) {
   updateSortButtons();
   updateMainTitle();
 
-  let msg = "✅ Importerad: " + total + " spelare";
-  if (inactive > 0) msg += " | 🟢 Aktiva: " + active + " | 🔴 Inaktiva: " + inactive;
+  let msg = `✅ ${total} spelare inlästa · 🟢 ${active} aktiva (+) → ${autoTables} bord`;
+  if (leftover > 0) msg += ` · ⚠️ ${leftover} överblivet`;
+  if (inactive > 0) msg += ` · 🔴 ${inactive} inaktiva (-)`;
+  if (xCount > 0)   msg += ` · ❌ ${xCount} övertaliga (X)`;
+  if (okanda > 0)   msg += ` · ❓ ${okanda} utan närvaro`;
   const st = document.getElementById("status");
   st.className = "ok"; st.textContent = msg;
 }
@@ -419,7 +438,7 @@ function parseNameOnlyFile(lines) {
     const efternamn = parts.slice(1).join(" ") || "";
     result[nr] = {
       fornamn, efternamn,
-      narvaro: nr <= 32 ? "+" : "-",
+      narvaro: "+",
       omg1: "", omg2: "", omg3: "", omg4: "", omg5: "", omg6: "",
     };
     nr++;
@@ -530,7 +549,8 @@ function openEditModal() {
     `;
     grid.appendChild(row);
     row.querySelector(".edit-narvaro").addEventListener("input", e => {
-      if (!["+", "-", ""].includes(e.target.value)) e.target.value = "";
+      if (!["+", "-", "X", "x", ""].includes(e.target.value)) e.target.value = "";
+      if (e.target.value === "x") e.target.value = "X";
     });
   }
 
@@ -582,10 +602,17 @@ function saveEditedData() {
   }
   players = newPlayers;
   localStorage.setItem("vira_players", JSON.stringify(players));
-  autoSaveToFile();
+  // Räkna om antalet bord baserat på nuvarande aktiva spelare
+  const activeCount = Object.values(players).filter(p => p.narvaro === "+").length;
+  if (activeCount > 0) {
+    const newTables = Math.min(8, Math.max(1, Math.floor(activeCount / 4)));
+    document.getElementById("numTablesInput").value = newTables;
+    TABLES = newTables;
+  }
   updateMainTitle();
   if (lastResult) render(lastResult, false);
   closeEditModal();
+  saveAs();
 }
 
 // ===== RESULTAT MODAL =====
@@ -603,6 +630,8 @@ function sortResults(mode) {
   resultsSortMode = mode;
   document.getElementById("resSortNr").classList.toggle("active",  mode === "nummer");
   document.getElementById("resSortSum").classList.toggle("active", mode === "summa");
+  document.getElementById("resSortFn").classList.toggle("active",  mode === "fornamn");
+  document.getElementById("resSortEn").classList.toggle("active",  mode === "efternamn");
   buildResultsRows();
 }
 
@@ -610,6 +639,8 @@ function openResultsModal() {
   resultsSortMode = "nummer";
   document.getElementById("resSortNr").classList.add("active");
   document.getElementById("resSortSum").classList.remove("active");
+  document.getElementById("resSortFn").classList.remove("active");
+  document.getElementById("resSortEn").classList.remove("active");
   buildResultsRows();
   document.getElementById("resultsModal").classList.add("open");
 }
@@ -630,6 +661,17 @@ function buildResultsRows() {
       const diff = calculateSum(b) - calculateSum(a);
       return diff !== 0 ? diff : a - b;
     });
+  } else if (resultsSortMode === "fornamn") {
+    activePlayers = [...activePlayers].sort((a, b) => {
+      const pa = players[a] || {}, pb = players[b] || {};
+      return (pa.fornamn || "").localeCompare(pb.fornamn || "", "sv");
+    });
+  } else if (resultsSortMode === "efternamn") {
+    activePlayers = [...activePlayers].sort((a, b) => {
+      const pa = players[a] || {}, pb = players[b] || {};
+      const en = (pa.efternamn || "").localeCompare(pb.efternamn || "", "sv");
+      return en !== 0 ? en : (pa.fornamn || "").localeCompare(pb.fornamn || "", "sv");
+    });
   }
   const inputMap = {};
 
@@ -639,9 +681,14 @@ function buildResultsRows() {
     const sumVal = calculateSum(nr);
     const row = document.createElement("div");
     row.className = "results-row";
+    const resName = (() => {
+      const q = players[nr] || {};
+      if (resultsSortMode === "efternamn") return [q.efternamn, q.fornamn].filter(Boolean).join(", ") || String(nr);
+      return [q.fornamn, q.efternamn].filter(Boolean).join(" ") || String(nr);
+    })();
     row.innerHTML = `
       <div style="font-weight:700;color:#1e40af;text-align:right;">${nr}</div>
-      <div style="font-size:0.68rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${getPlayerName(nr)}">${getPlayerName(nr)}</div>
+      <div style="font-size:0.68rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${resName}">${resName}</div>
       <input type="text" value="${formatSvenska(p.omg1)}" data-nr="${nr}" data-col="1" class="res-omg" placeholder="0,00">
       <input type="text" value="${formatSvenska(p.omg2)}" data-nr="${nr}" data-col="2" class="res-omg" placeholder="0,00">
       <input type="text" value="${formatSvenska(p.omg3)}" data-nr="${nr}" data-col="3" class="res-omg" placeholder="0,00">
@@ -657,14 +704,19 @@ function buildResultsRows() {
     );
 
     const summaDiv = row.querySelector(`.results-summa[data-nr="${nr}"]`);
+    const updateCell = inp => {
+      inp.classList.toggle("has-value", parseSvenska(inp.value) !== "" && parseFloat(parseSvenska(inp.value)) !== 0);
+    };
     const updateSum = () => {
       const s = inputMap[nr].map(inp => parseFloat(parseSvenska(inp.value)) || 0).reduce((a, b) => a + b, 0);
       summaDiv.textContent = s > 0 ? formatSvenska(s.toFixed(2)) : "";
     };
 
+    inputMap[nr].forEach(inp => updateCell(inp)); // sätt färg vid rendering
+
     inputMap[nr].forEach((inp, col) => {
       inp.addEventListener("focus",  () => inp.select());
-      inp.addEventListener("input",  updateSum);
+      inp.addEventListener("input",  () => { updateCell(inp); updateSum(); });
       inp.addEventListener("keydown", e => {
         // Tillåt komma som decimaltecken
         if (e.key === ",") { e.preventDefault(); inp.value += ","; }
@@ -692,6 +744,17 @@ function buildResultsRows() {
 }
 
 function closeResultsModal() { document.getElementById("resultsModal").classList.remove("open"); }
+
+function clearResults() {
+  if (!confirm("Nollställ alla resultat?")) return;
+  const activePlayers = getActivePlayers();
+  for (const nr of activePlayers) {
+    if (!players[nr]) continue;
+    for (let col = 1; col <= 6; col++) players[nr]["omg" + col] = "";
+  }
+  localStorage.setItem("vira_players", JSON.stringify(players));
+  buildResultsRows();
+}
 
 function saveResults() {
   const activePlayers = getActivePlayers();
@@ -793,10 +856,40 @@ function generateFinal() {
 
 // ===== MARKERING =====
 
+// Returnerar Map<partnerNr, Set<roundIndex>> för de omgångar där partner sitter vid samma bord som p och det är en konflikt (dvs de mötts förut)
+function getConflictRounds(p, rounds) {
+  const met = {}; // partner -> [roundIndices de suttit ihop]
+  for (let ri = 0; ri < rounds.length; ri++) {
+    for (const table of rounds[ri]) {
+      if (!table.includes(p)) continue;
+      for (const q of table) {
+        if (q !== p) {
+          if (!met[q]) met[q] = [];
+          met[q].push(ri);
+        }
+      }
+    }
+  }
+  // Konflikt = suttit ihop vid mer än ett tillfälle
+  const result = new Map();
+  for (const [q, roundList] of Object.entries(met)) {
+    if (roundList.length > 1)
+      result.set(parseInt(q), new Set(roundList));
+  }
+  return result;
+}
+
 function selectPlayer(p) {
   selectedPlayer = (selectedPlayer === p) ? null : p;
+  const conflictRounds = (selectedPlayer !== null && lastResult)
+    ? getConflictRounds(selectedPlayer, lastResult.rounds)
+    : new Map();
   document.querySelectorAll(".chip").forEach(c => {
-    c.classList.toggle("selected", parseInt(c.dataset.player) === selectedPlayer);
+    const cp = parseInt(c.dataset.player);
+    const ri = parseInt(c.dataset.round);
+    c.classList.toggle("selected", cp === selectedPlayer);
+    const rounds = conflictRounds.get(cp);
+    c.classList.toggle("conflict-partner", !!rounds && rounds.has(ri));
   });
 }
 
@@ -857,6 +950,18 @@ function generate() {
 
   setTimeout(() => {
     try {
+      // Max 8 bord = 32 spelare. Slumpa bort överskott → markera "X" och auto-spara
+      const MAX_PLAYERS = 32;
+      const plusPlayers = Object.keys(players).map(Number).filter(nr => players[nr]?.narvaro === "+");
+      if (plusPlayers.length > MAX_PLAYERS) {
+        const surplus = shuffle([...plusPlayers]).slice(MAX_PLAYERS);
+        for (const nr of surplus) players[nr].narvaro = "X";
+        localStorage.setItem("vira_players", JSON.stringify(players));
+        autoSaveToFile();
+        updateMainTitle();
+        st.textContent = "⚠️ " + surplus.length + " övertaliga markerade X och sparade. Räknar...";
+      }
+
       layoutMode = "bord";
       document.getElementById("btnLayout").textContent = "👤 Visa per spelare";
       const result = buildSchedule();
@@ -885,12 +990,13 @@ function buildSchedule() {
   if (N_local < 4) throw new Error("För få aktiva spelare (" + N_local + "). Minst 4 krävs.");
 
   const requested = parseInt(document.getElementById("numTablesInput")?.value) || Math.ceil(N_local / 4);
-  TABLES = Math.max(1, requested);
+  TABLES = Math.min(8, Math.max(1, requested));
   while (TABLES * 4 > N_local && TABLES > 1) TABLES--;
   PPT    = 4;
   ROUNDS = 6;
   N      = TABLES * PPT;
-  const scheduled = activePlayers.slice(0, N);
+  const shuffledAll = shuffle([...activePlayers]);
+  const scheduled   = shuffledAll.slice(0, N);
 
   // Uint8Array stöder spelarnummer upp till 999
   const MAX_P = 1000;
@@ -975,7 +1081,25 @@ function buildSchedule() {
     seats.push(roundSeats);
   }
 
-  return { rounds, seats, conflictPlayers, totalConflicts };
+  // Överblivna spelare – sitter fast vid bord TABLES+1 alla omgångar
+  const leftoverPlayers = shuffledAll.slice(N);
+  const leftoverSeats   = [];
+  if (leftoverPlayers.length > 0) {
+    const lPos = {};
+    leftoverPlayers.forEach(p => lPos[p] = [0, 0, 0, 0]);
+    for (let r = 0; r < ROUNDS; r++) {
+      let bestPerm = PERMS4[0], bestScore = Infinity;
+      for (const perm of PERMS4) {
+        const score = leftoverPlayers.reduce((s, p, i) => s + lPos[p][perm[i]], 0);
+        if (score < bestScore) { bestScore = score; bestPerm = perm; }
+      }
+      const seatArr = [null, null, null, null];
+      leftoverPlayers.forEach((p, i) => { seatArr[bestPerm[i]] = p; lPos[p][bestPerm[i]]++; });
+      leftoverSeats.push(seatArr);
+    }
+  }
+
+  return { rounds, seats, conflictPlayers, totalConflicts, leftoverPlayers, leftoverSeats };
 }
 
 // ===== RENDERING =====
@@ -992,16 +1116,18 @@ function render(result, updateSignature) {
   else renderSpelarView(result);
 }
 
-function chip(p, conflict) {
+function chip(p, conflict, round) {
   return '<span class="chip' + (conflict ? " conflict" : "") +
-    '" data-player="' + p + '" onclick="selectPlayer(' + p + ')">' + p + "</span>";
+    '" data-player="' + p + '" data-round="' + (round ?? -1) + '" onclick="selectPlayer(' + p + ')">' + p + "</span>";
 }
 
-function renderBordView({ rounds, seats, conflictPlayers }) {
-  const hasNames = Object.keys(players).length > 0;
+function renderBordView({ rounds, seats, conflictPlayers, leftoverPlayers, leftoverSeats }) {
+  const hasNames    = Object.keys(players).length > 0;
+  const hasLeftover = leftoverPlayers && leftoverPlayers.length > 0;
   let html = "<table><thead><tr>";
   html += '<th style="text-align:left;padding-left:4px;width:35px;"></th>';
   for (let i = 1; i <= TABLES; i++) html += "<th>Bord " + i + "</th>";
+  if (hasLeftover) html += '<th style="color:#dc2626;background:#fff5f5;">Bord ' + (TABLES + 1) + ' ⚠️</th>';
   html += "</tr></thead><tbody>";
 
   for (let ri = 0; ri < rounds.length; ri++) {
@@ -1013,7 +1139,20 @@ function renderBordView({ rounds, seats, conflictPlayers }) {
         const p       = seats[ri][ti][pi];
         const conflict = conflictPlayers[ri][ti].has(p);
         html += '<div class="seat-row">';
-        html += chip(p, conflict);
+        html += chip(p, conflict, ri);
+        html += '<span class="seat-label">' + POSITIONS[pi] + "</span>";
+        if (hasNames) html += '<span class="seat-name">' + getPlayerName(p) + "</span>";
+        html += "</div>";
+      }
+      html += "</td>";
+    }
+    if (hasLeftover) {
+      html += '<td style="border-right:3px solid #dc2626;padding:2px;background:#fff5f5;">';
+      for (let pi = 0; pi < 4; pi++) {
+        const p = leftoverSeats[ri][pi];
+        if (p === null) continue;
+        html += '<div class="seat-row">';
+        html += '<span class="chip" style="background:#fca5a5;color:#7f1d1d;outline:2px solid #dc2626;" data-player="' + p + '" data-round="' + ri + '" onclick="selectPlayer(' + p + ')">' + p + '</span>';
         html += '<span class="seat-label">' + POSITIONS[pi] + "</span>";
         if (hasNames) html += '<span class="seat-name">' + getPlayerName(p) + "</span>";
         html += "</div>";
@@ -1026,7 +1165,7 @@ function renderBordView({ rounds, seats, conflictPlayers }) {
   document.getElementById("tableWrap").innerHTML = html;
 }
 
-function renderSpelarView({ seats, conflictPlayers }) {
+function renderSpelarView({ seats, conflictPlayers, leftoverPlayers, leftoverSeats }) {
   const info = {};
   for (let ri = 0; ri < seats.length; ri++)
     for (let ti = 0; ti < seats[ri].length; ti++)
@@ -1035,20 +1174,33 @@ function renderSpelarView({ seats, conflictPlayers }) {
         if (!info[p]) info[p] = {};
         info[p][ri] = { table: ti + 1, pos: POSITIONS[pi], conflict: conflictPlayers[ri][ti].has(p) };
       }
+  // Lägg till överblivna i info
+  if (leftoverPlayers && leftoverPlayers.length > 0) {
+    const leftoverTableNr = TABLES + 1;
+    for (let ri = 0; ri < (leftoverSeats?.length || 0); ri++)
+      for (let pi = 0; pi < 4; pi++) {
+        const p = leftoverSeats[ri][pi];
+        if (p === null) continue;
+        if (!info[p]) info[p] = {};
+        info[p][ri] = { table: leftoverTableNr, pos: POSITIONS[pi], conflict: false, leftover: true };
+      }
+  }
 
   const allNrs = Object.keys(players).length > 0
     ? Object.keys(players).map(Number)
     : Array.from({ length: N }, (_, i) => i + 1);
 
+  const inactive = nr => players[nr]?.narvaro === "-" ? 1 : 0;
   const playerNrs = [...allNrs];
   if (sortMode === "fornamn")
-    playerNrs.sort((a, b) => getPlayerFornamn(a).localeCompare(getPlayerFornamn(b), "sv"));
+    playerNrs.sort((a, b) => inactive(a) - inactive(b) || getPlayerFornamn(a).localeCompare(getPlayerFornamn(b), "sv"));
   else if (sortMode === "efternamn")
     playerNrs.sort((a, b) => {
+      if (inactive(a) !== inactive(b)) return inactive(a) - inactive(b);
       const c = getPlayerEfternamn(a).localeCompare(getPlayerEfternamn(b), "sv");
       return c !== 0 ? c : getPlayerFornamn(a).localeCompare(getPlayerFornamn(b), "sv");
     });
-  else playerNrs.sort((a, b) => a - b);
+  else playerNrs.sort((a, b) => inactive(a) - inactive(b) || a - b);
 
   let maxNameLen = 10;
   for (const p of playerNrs) maxNameLen = Math.max(maxNameLen, getPlayerName(p).length);
@@ -1079,7 +1231,8 @@ function renderSpelarView({ seats, conflictPlayers }) {
       const conflict = d?.conflict;
       html += `<td style="text-align:left;vertical-align:middle;padding:0 1px;font-size:0.85rem;${conflict ? "background:#fff1f2;" : ""}">`;
       if (d && isActive) {
-        html += `<span style="font-weight:700;color:#1e40af;">${d.table}</span>`;
+        const color = d.leftover ? "#dc2626" : "#1e40af";
+        html += `<span style="font-weight:700;color:${color};">${d.table}</span>`;
         html += `<span style="color:#64748b;margin-left:2px;">${d.pos}</span>`;
         if (conflict) html += `<span style="font-size:0.5rem;color:#dc2626;display:block;line-height:0.8;">⚠</span>`;
       }
