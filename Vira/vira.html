@@ -185,7 +185,7 @@
 </head>
 <body>
 
-<h1 id="mainTitle">🃏 Vira v1.57 · Ingen fil vald</h1>
+<h1 id="mainTitle">🃏 Vira v1.58 · Ingen fil vald</h1>
 
 <!-- RAD 1: Fil + sortering -->
 <div class="btn-row">
@@ -207,7 +207,8 @@
   <input type="number" id="numTablesInput" class="tables-input" min="1" max="32" value="8">
   <button class="btn-generate" id="btnGenerate" onclick="generate()">🎲 Generera schema</button>
   <button class="btn-results" id="btnResults" onclick="openResultsModal()" disabled>📊 Resultat</button>
-  <button class="btn-final"   id="btnFinal"   onclick="generateFinal()"   disabled>🏆 Final</button>
+  <button class="btn-final"   id="btnFinal"    onclick="generateFinal()"        disabled>🏆 Final</button>
+  <button class="btn-final"   id="btnFinalRes" onclick="openFinalResultsModal()" disabled style="background:#92400e;">🏆 Finalresultat</button>
   <button class="btn-layout"  id="btnLayout"  onclick="toggleLayout()"    disabled>👤 Visa per spelare</button>
   <button class="btn-print"   id="btnPrint"   onclick="window.print()"    disabled>🖨️ Skriv ut</button>
   <button class="btn-saveas"  id="btnSaveAs"  onclick="saveAs()" disabled>💾 Spara som...</button>
@@ -249,6 +250,22 @@
   </div>
 </div>
 
+<!-- FINAL RESULTAT MODAL -->
+<div class="modal-overlay" id="finalResultsModal">
+  <div class="modal-content wide">
+    <div class="modal-header" style="display:flex;align-items:center;justify-content:space-between;background:#92400e;">
+      <span>🏆 Finalresultat</span>
+    </div>
+    <div class="results-grid" id="finalResultsGrid"></div>
+    <div class="modal-buttons" style="justify-content:flex-end;">
+      <span style="display:flex;gap:6px;">
+        <button class="btn-cancel" onclick="closeFinalResultsModal()">Stäng</button>
+        <button class="btn-save"   onclick="saveFinalResults()">💾 Spara finalresultat</button>
+      </span>
+    </div>
+  </div>
+</div>
+
 <div id="status">Klicka på "Generera schema" för att slumpa bordslottning.</div>
 <p id="clickHint" style="display:none;font-size:0.78rem;color:#64748b;margin-bottom:8px;font-style:italic;">
   Klicka på en siffra nedan för att visa personens placering. Klicka igen för att stänga.
@@ -259,7 +276,7 @@
 <script>
 "use strict";
 
-const VERSION = "v1.57";
+const VERSION = "v1.58";
 
 // ===== STATE =====
 let players  = {};
@@ -269,6 +286,8 @@ let fileHandle  = null;
 let lastResult  = null;
 let layoutMode  = "bord";
 let selectedPlayer = null;
+let finalPlayers = [];   // De 4 finalisterna (spelarnum)
+let finalResults = {};   // nr -> { omg1..omg6 }
 
 // ===== KONSTANTER (let = kan ändras dynamiskt) =====
 let ROUNDS = 6, TABLES = 8, PPT = 4, N = 32;
@@ -363,9 +382,28 @@ function handleFileFallback(event) {
 }
 
 function loadFileContent(content, filename) {
-  const lines = content.split(/\r?\n/).filter(l => l.trim());
+  const allLines  = content.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const finalIdx  = allLines.findIndex(l => l === "FINAL");
+  const lines     = finalIdx !== -1 ? allLines.slice(0, finalIdx) : allLines;
+  const finalSect = finalIdx !== -1 ? allLines.slice(finalIdx + 1) : [];
+
   if (lines.length === 0) { alert("Filen är tom."); return; }
   const newPlayers = detectAndParseFile(lines);
+
+  // Parsea FINAL-sektionen
+  finalPlayers = [];
+  finalResults = {};
+  for (const line of finalSect) {
+    const sep   = line.includes(";") ? ";" : (line.includes("\t") ? "\t" : ",");
+    const parts = line.split(sep).map(p => p.trim());
+    const nr    = parseInt(parts[0]);
+    if (isNaN(nr) || nr <= 0) continue;
+    finalPlayers.push(nr);
+    finalResults[nr] = { omg1: parts[4]||"", omg2: parts[5]||"", omg3: parts[6]||"",
+                         omg4: parts[7]||"", omg5: parts[8]||"", omg6: parts[9]||"" };
+  }
+  if (finalPlayers.length > 0)
+    document.getElementById("btnFinalRes").disabled = false;
   const total = Object.keys(newPlayers).length;
   if (total === 0) { alert("Inga giltiga rader hittades."); return; }
 
@@ -452,6 +490,14 @@ function generateCSV() {
     const p = players[nr];
     csv += `${nr};${p.fornamn};${p.efternamn};${p.narvaro};${p.omg1};${p.omg2};${p.omg3};${p.omg4};${p.omg5};${p.omg6}\n`;
   });
+  if (finalPlayers.length > 0) {
+    csv += "FINAL\n";
+    for (const nr of finalPlayers) {
+      const p  = players[nr] || {};
+      const fr = finalResults[nr] || {};
+      csv += `${nr};${p.fornamn||""};${p.efternamn||""};${p.narvaro||""};${fr.omg1||""};${fr.omg2||""};${fr.omg3||""};${fr.omg4||""};${fr.omg5||""};${fr.omg6||""}\n`;
+    }
+  }
   return csv;
 }
 
@@ -773,6 +819,71 @@ function saveResults() {
   st.className = "ok"; st.textContent = "✅ Resultat sparat";
 }
 
+// ===== FINAL RESULTAT =====
+
+function openFinalResultsModal() {
+  if (finalPlayers.length === 0) { alert("Generera final först."); return; }
+  const grid = document.getElementById("finalResultsGrid");
+  grid.style.gridTemplateColumns = "30px 1fr repeat(6,55px) 60px";
+  grid.innerHTML = "";
+
+  // Header
+  const hdr = document.createElement("div");
+  hdr.className = "results-row";
+  hdr.style.cssText = "background:#92400e;color:white;font-weight:bold;font-size:0.7rem;";
+  hdr.innerHTML = "<div>Nr</div><div>Namn</div><div>O1</div><div>O2</div><div>O3</div><div>O4</div><div>O5</div><div>O6</div><div>Sum</div>";
+  grid.appendChild(hdr);
+
+  const inputMap = {};
+  for (const nr of finalPlayers) {
+    const p  = players[nr] || {};
+    const fr = finalResults[nr] || {};
+    const sumVal = [fr.omg1,fr.omg2,fr.omg3,fr.omg4,fr.omg5,fr.omg6]
+      .map(v => parseFloat(v.toString().replace(",",".")) || 0).reduce((a,b)=>a+b,0);
+    const name = [p.fornamn, p.efternamn].filter(Boolean).join(" ") || String(nr);
+    const row = document.createElement("div");
+    row.className = "results-row";
+    row.innerHTML = `
+      <div style="font-weight:700;color:#92400e;text-align:right;">${nr}</div>
+      <div style="font-size:0.68rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${name}">${name}</div>
+      <input type="text" value="${formatSvenska(fr.omg1)}" data-nr="${nr}" data-col="1" class="res-omg final-omg" placeholder="0,00">
+      <input type="text" value="${formatSvenska(fr.omg2)}" data-nr="${nr}" data-col="2" class="res-omg final-omg" placeholder="0,00">
+      <input type="text" value="${formatSvenska(fr.omg3)}" data-nr="${nr}" data-col="3" class="res-omg final-omg" placeholder="0,00">
+      <input type="text" value="${formatSvenska(fr.omg4)}" data-nr="${nr}" data-col="4" class="res-omg final-omg" placeholder="0,00">
+      <input type="text" value="${formatSvenska(fr.omg5)}" data-nr="${nr}" data-col="5" class="res-omg final-omg" placeholder="0,00">
+      <input type="text" value="${formatSvenska(fr.omg6)}" data-nr="${nr}" data-col="6" class="res-omg final-omg" placeholder="0,00">
+      <div class="results-summa" data-nr="${nr}" style="border-color:#92400e;">${sumVal > 0 ? formatSvenska(sumVal.toFixed(2)) : ""}</div>
+    `;
+    grid.appendChild(row);
+
+    inputMap[nr] = Array.from({length:6}, (_,i) => row.querySelector(`.final-omg[data-col="${i+1}"]`));
+    const sumDiv = row.querySelector(`.results-summa[data-nr="${nr}"]`);
+    const updateCell = inp => inp.classList.toggle("has-value", parseSvenska(inp.value) !== "" && parseFloat(parseSvenska(inp.value)) !== 0);
+    const updateSum  = () => {
+      const s = inputMap[nr].map(i => parseFloat(parseSvenska(i.value))||0).reduce((a,b)=>a+b,0);
+      sumDiv.textContent = s > 0 ? formatSvenska(s.toFixed(2)) : "";
+    };
+    inputMap[nr].forEach(inp => { updateCell(inp); inp.addEventListener("focus", () => inp.select()); inp.addEventListener("input", () => { updateCell(inp); updateSum(); }); inp.addEventListener("keydown", e => { if (e.key === ",") { e.preventDefault(); inp.value += ","; } }); });
+  }
+  document.getElementById("finalResultsModal").classList.add("open");
+}
+
+function closeFinalResultsModal() { document.getElementById("finalResultsModal").classList.remove("open"); }
+
+function saveFinalResults() {
+  for (const nr of finalPlayers) {
+    finalResults[nr] = {};
+    for (let col = 1; col <= 6; col++) {
+      const inp = document.querySelector(`.final-omg[data-nr="${nr}"][data-col="${col}"]`);
+      if (inp) finalResults[nr]["omg" + col] = parseSvenska(inp.value);
+    }
+  }
+  autoSaveToFile();
+  closeFinalResultsModal();
+  const st = document.getElementById("status");
+  st.className = "ok"; st.textContent = "✅ Finalresultat sparat";
+}
+
 // ===== FINAL SCHEMA =====
 
 function generateFinal() {
@@ -788,6 +899,13 @@ function generateFinal() {
   // Bord 1 = topp 4, resten slumpas
   const table1 = sorted.slice(0, PPT);
   const rest   = shuffle(sorted.slice(PPT));
+
+  // Spara finalisterna, nollställ bara om det är nya finalister
+  if (JSON.stringify(table1) !== JSON.stringify(finalPlayers)) {
+    finalPlayers = [...table1];
+    finalResults = {};
+  }
+  document.getElementById("btnFinalRes").disabled = false;
 
   // Bygg bord-array (samma antal bord som TABLES)
   const numTables = Math.max(1, Math.ceil(active.length / PPT));
