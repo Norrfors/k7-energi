@@ -1,5 +1,81 @@
 # VIRA - Versionshistorik
 
+## **v1.62** ✅ (2026-03-13 - STABIL GRUND - Full dokumentation)
+**Denna version är stabilt testad. Alla features dokumenterade och uppdaterade.**
+- ✅ Finalsystem för topp 4 spelare
+- ✅ Dynamiska tabeller/rundor
+- ✅ Dual layout (per bord / per spelare)
+- ✅ Full resultatregistrering (6 omgångar)
+- ✅ Edit-modal med piltangenter
+- ✅ LocalStorage persistering
+- ✅ File System API auto-sparning
+- ✅ Alla dokumentation uppdaterad
+
+---
+
+## **v1.61** ✅ (2026-03-13 - Finalkonfiguration)
+- ✨ **Dynamiska konstanter** – ROUNDS, TABLES, PPT kan ändras baserat på antal spelare
+- 🐛 **Auto-beräkning av bord** – baserat på aktiva spelare (N/4)
+- ✨ **Finalsystem** – sparar finalresultat separat
+
+## **v1.60** ✅ (2026-03-13 - Spela per spelare-vy)
+- ✨ **Dual layout-mode** – toggle mellan "Visa per bord" och "Visa per spelare"
+- ✨ **Nya ikoner** – göra den visuella switchen tydligare
+
+## **v1.59** ✅ (2026-03-13 - Förbättrad resultatregistrering)
+- ✨ **Resultat-modal uppdaterad** – visa alla 6 omgångar i separata kolumner
+- ✨ **Live summa** – beräknas när värden ändras
+- ✨ **Formatering** – svenska decimaler (komma)
+
+## **v1.58** ✅ (2026-03-13 - Edit-funktion)
+- ✨ **Redigera deltagarlista i UI** – ✏️ Redigera-knapp
+- ✨ **Edit-modal** – piltangenter för navigation
+- ✨ **Närvaro-kolumn** – ändra mellan "+", "-", "X" direkt i modal
+- ✨ **Auto-sparning** – sparas till LocalStorage
+
+## **v1.57** ✅ (2026-03-13 - LocalStorage persistering)
+- ✨ **Spelarlistan sparas mellan sessioner** – localStorage integration
+- ✨ **Auto-load vid start** – läser tidigare importerad lista
+- 🐛 **Ingen data försvinner** – mellan webbläsare-omstarter
+
+## **v1.56** ✅ (2026-03-13 - Final-system introduktion)
+- ✨ **🏆 Final-knapp** – generar finalschema från topp 4 spelare
+- ✨ **Finalresultat-modal** – separat inmatning för final
+- ✨ **Final-sektion i export** – sparar finalresultat i CSV
+
+## **v1.55** ✅ (2026-03-13 - UI-förbättringar)
+- ✨ **Sorterings-knappar** – Nummer, Förnamn, Efternamn (visuell grupp)
+- ✨ **Konflikt-markering** – röda chips för upprepade par
+- ✨ **Blink-animation** – när spelare väljs
+- ✨ **Responsiv layout** – flex-wrap för små skärmar
+
+## **v1.54** ✅ (2026-03-13 - Resultatregistrering core)
+- ✨ **Registrera resultat** – 6 omgångs-kolumner i modal
+- ✨ **Sortering i resultat** – 4 alternativ (Resultat, Nr, Förnamn, Efternamn)
+- ✨ **Summa-beräkning** – live uppdatering med formatering
+
+## **v1.53** ✅ (2026-03-13 - File System Access API uppgradering)
+- ✨ **showSaveFilePicker()** – Spara som dialog
+- ✨ **Auto-MIME type** – `.txt` och `.csv` format
+- 🐛 **Fallback för äldre webbläsare** – klassisk HTML file input
+
+## **v1.52** ✅ (2026-03-13 - CSV-export expansion)
+- ✨ **Exportera all data** – Nr, Förnamn, Efternamn, Närvaro, OMG1-6
+- ✨ **Muli-format import** – stöder `;`, `\t`, `,` som separator
+- 🐛 **Kompatibilitet** – kan fortfarande läsa namn-bara-listor
+
+## **v1.51** ✅ (2026-03-13 - Piltangenter i modaler)
+- ✨ **Keyboard navigation** – Upp/Ner/Vänster/Höger för cellnavigering
+- ✨ **Tab-navigation** – fungerar tillsammans med piltangenter
+- ✨ **Bättre UX** – Excel-liknande upplevelse
+
+## **v1.48–v1.50** ✅ (2026-03-13 - Intern stabilisering)
+- 🐛 Diverse bug-fixes efter v1.47
+- ✨ Performance-optimeringar
+- ✨ Code refactoring för framtida skalning
+
+---
+
 ## **v1.47** ✅ (2026-03-12 - Överblivna spelare vid eget bord)
 - ✨ **Överblivna spelare** (active % 4) placeras automatiskt vid Bord TABLES+1 för alla 6 omgångar
 - 🔴 Överblivna visas med röd chip och röd bordsrubrik "Bord X ⚠️"
