@@ -4,29 +4,11 @@ Den här filen innehåller instruktioner och konventioner som gäller när GitHu
 
 ---
 
-## ⭐⭐⭐ SLUTSTATUS-FORMAT ⭐⭐⭐
+## Projekt: K7 Energi (Krokgatan 7)
 
-**VID SLUTET AV VARJE ARBETE – ALLTID SKRIVA:**
+Ett smarthems-dashboard som kopplar mot **Homey Pro** via lokalt nätverk och visar realtidsdata (temperaturer, energiförbrukning) i en webbapp. Specifikt för Krokgatan 7.
 
-```
-KLART vX.XX
-```
-
-Där `X.XX` är det versionsnummer som displayas i dashboardrubrikens header.
-
-**Exempel:**
-- `KLART v0.54` ← Version 0.54 är klar och testbar
-- `KLART v0.55` ← Version 0.55 är klar och testbar
-
-**Detta är det sista raden på sista beskedet.**
-
----
-
-## Projekt: Hem Dashboard
-
-Ett smarthems-dashboard som kopplar mot **Homey Pro** via lokalt nätverk och visar realtidsdata (temperaturer, energiförbrukning) i en webbapp.
-
-**Repo:** https://github.com/Svinninge/homey
+**Repo:** https://github.com/Norrfors/k7-energi
 
 ### Teknikstack
 
